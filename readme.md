@@ -16,9 +16,9 @@ Komo is a comprehensive asset collection and vulnerability scanning tool
 
 ## Intro&&Feature
 
-🚀**Komo**是一个综合资产收集和漏洞扫描工具，通过多种方式对子域进行获取，收集域名邮箱，进行存活探测，域名指纹识别，域名反查ip，ip端口扫描，web服务链接爬取并发送给xray，对web服务进行漏洞扫描，对主机进行主机漏洞扫描。
+🚀**Komo**是一个综合资产收集和漏洞扫描工具，通过多种方式对子域进行获取，收集域名邮箱，进行存活探测，域名指纹识别，域名反查ip，ip端口扫描，web服务链接爬取并发送给xray扫描，对web服务进行POC扫描，对主机进行主机POC扫描。
 
-🚋**Komo**集成了**oneforall**，**subfinder**，**ksubdomain**，**amass**，**ctfr**，**emailall**，**httpx**，**naabu**，**ehole**，**goon3**，**crawlergo**，**rad**，**gospider**，**URLfinder**，**vscan**，**nuclei**，**afrog**，**vulmap**，**xray**等，全自动化、智能化工具。本工具依托各工具特色，进行模块化构建。
+🚋**Komo**集成了**oneforall**，**subfinder**，**ksubdomain**，**amass**，**ctfr**，**emailall**，**httpx**，**naabu**，**ehole**，**goon3**，**crawlergo**，**rad**，**gospider**，**URLfinder**，**vscan**，**nuclei**，**afrog**，**vulmap**，**xray**等**20**多款工具，全自动化、智能化工具。本工具依托各工具特色，进行模块化构建。
 
 Komo的目的为了一键化，便捷性，可移植性，便于打点和红队外围渗透工作，所以将基于模块化开发，所有工具都汇总到统一接口，以便于下一个模块调用和后续某模块新增工具。**==如果你有好的工具和改进建议，可以添加下面的公众号群聊来沟通==**。
 
@@ -30,7 +30,7 @@ Komo可以自动下载所需的所有工具，不用使用者自己下载所有�
 
 ## Project structure
 
-![image-20220927000957695](images/image-20220927000957695.png)
+![流程图](images/流程图.jpg)
 
 
 
