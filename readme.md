@@ -1,4 +1,4 @@
-# Komo
+# Komo 综合资产收集和漏洞扫描工具
 
 ```python
 Komo is a comprehensive asset collection and vulnerability scanning tool
