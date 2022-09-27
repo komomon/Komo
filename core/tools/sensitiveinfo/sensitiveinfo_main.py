@@ -19,8 +19,8 @@ import shutil
 import subprocess
 import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
-
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+# 判断是否是泛解析
 
 
 def create_logfile():
@@ -49,12 +49,13 @@ def makedir0(path):
         logger.info(f'[+] Create {path} success.')
 
 
+# 每个函数的结果都存到 result/{date}/domain_log下
+# 装饰器
 def additional(func1):
     def init2():
         logger.info(f'[+] start {func1.__qualname__}')
         func1()
         logger.info(f'[+] finish {func1.__qualname__}')
-
     return init2
 
 
@@ -76,6 +77,8 @@ def to_csv(filename, data: list, mmode='a'):
 # @logger.catch
 def checkport(port):
     if port < 1024 or 65535 < port:
+        # privileged port
+        # out of range
         return False
     if 'win32' == sys.platform:
         cmd = 'netstat -aon|findstr ":%s "' % port
@@ -91,6 +94,12 @@ def checkport(port):
             logger.error('Port %s is not open' % port)
             return False
 
+# 打印脚本跑出了几个新的子域名，并返回最新最全的子域名列表  传递两个列表，old是前面收集好的子域名，new是刚跑完的脚本收集的子域名，进行比较.
+# def printGetNewSubdomains(old_subdomains, new_subdomains):
+#     if len(old_subdomains) > 0:
+#         newSubdomains = list(set(new_subdomains) - set(old_subdomains))
+#         print('[new :{}] {}'.format(len(newSubdomains), newSubdomains))
+#     return list(set(new_subdomains + old_subdomains))
 
 # @logger.catch
 
@@ -120,17 +129,29 @@ def request0(req_json):
         pass
 
 
+# 启用子进程执行外部shell命令
 def __subprocess(cmd):
     try:
+        # 得到一个临时文件对象， 调用close后，此文件从磁盘删除
         out_temp = tempfile.TemporaryFile(mode='w+b')
+        # 获取临时文件的文件号
         fileno = out_temp.fileno()
+
+        # 执行外部shell命令， 输出结果存入临时文件中
         p = subprocess.Popen(cmd, shell=True, stdout=fileno, stderr=fileno)
         p.wait()
+
+        # 从临时文件读出shell命令的输出结果
         out_temp.seek(0)
         rt = out_temp.read()
+
+        # 以换行符拆分数据，并去掉换行符号存入列表
         rt_list = rt.strip().split('\n')
+
     except Exception as e:
         logger.error(traceback.format_exc())
+        # print(traceback.format_exc())
+
     finally:
         if out_temp:
             out_temp.close()
@@ -138,6 +159,7 @@ def __subprocess(cmd):
     return rt_list
 
 
+# 启用子进程执行外部shell命令
 @logger.catch
 def __subprocess1(cmd, timeout=None, path=None):
     '''
@@ -156,15 +178,18 @@ def __subprocess1(cmd, timeout=None, path=None):
             f'[-] cmd type error,cmd should be a string or list: {cmd}')
         return
     try:
+        # 执行外部shell命令， 输出结果存入临时文件中
+        # logger.info(f"[+] command:{' '.join(cmd)}")
         p = subprocess.Popen(cmd, shell=True, cwd=path)
         # p = subprocess.Popen(cmd, shell=True,cwd=path,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if timeout:
             p.wait(timeout=timeout)
         else:
             p.wait()
+
     except Exception as e:
         logger.error(traceback.format_exc())
-        # logger.error(f'{sys._getframe().f_code.co_name} Reach Set Time and exit')
+        #logger.error(f'{sys._getframe().f_code.co_name} Reach Set Time and exit')
     finally:
         f_name = inspect.getframeinfo(inspect.currentframe().f_back)[2]
         logger.info(f'{f_name} finished.')
@@ -182,6 +207,8 @@ def __subprocess2(cmd):
         return
     lines = []
     try:
+        # cmd = "ls -lh"
+        # logger.info(f"[+] command:{' '.join(cmd)}")
         out_temp = tempfile.SpooledTemporaryFile(
             max_size=10 * 1000, mode='w+b')
         fileno = out_temp.fileno()
@@ -198,6 +225,7 @@ def __subprocess2(cmd):
     return lines
 
 
+# 废弃 将请求发给xray
 @logger.catch
 def to_xray(urls, attackflag=None):
     if attackflag:
@@ -205,10 +233,17 @@ def to_xray(urls, attackflag=None):
             for url in urls:
                 # if url not in links_set:
                 request0({"method": "GET", "url": url,
-                          "headers": "", "data": ""})
-                # links_set.add(url)
+                         "headers": "", "data": ""})
+                #links_set.add(url)
         else:
             logger.error("xray not running on 7777! skip to xray attack!")
+    # with open("crawlergo.json", "r", encoding="utf-8") as f:
+    #     result = json.loads(f.read())
+    #     req_list = result["req_list"]
+    #     sub_domain = result["sub_domain_list"]
+    #     for req in req_list:
+    #         del req["headers"]["Spider-Name"]
+    #         request0({"method": req["method"], "url": req["url"], "headers": req["headers"], "data": req["data"]})
 
 
 @logger.catch
@@ -285,6 +320,11 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         subdomain_tuple = tldextract.extract(data1)
         output_filename_prefix = '.'.join(
             part for part in subdomain_tuple if part)
+        # cmd = [".\crawlergo.exe", "-c", ".\chrome-win\chrome.exe", "-t","20", "-f", "smart", "--fuzz-path", "--output-mode", "json", target]
+        # --fuzz-path  --robots-path --max-tab-count Number, -t Number 默认8
+        #  --push-to-proxy待接收爬虫结果的监听地址，通常是被动扫描器的监听地址。（默认值：空）
+        # --push-pool-max将爬虫结果发送到监听地址时的最大并发数。（默认：10）
+        # --max-tab-count Number, -t Number
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36"
         }
@@ -305,6 +345,9 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         rsp = subprocess.Popen(
             cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         output, error = rsp.communicate()
+        # rsp = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=int(timeout), shell=True,
+        #                      cwd=tool_path)
+        # output = str(rsp.stdout, encoding='utf-8')
         try:
             result = simplejson.loads(
                 output.decode().split("--[Mission Complete]--")[1])
@@ -315,18 +358,20 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         req_list = result["req_list"]
         sub_domain_list = result["sub_domain_list"]
 
+        # 从crawlergo结果中获取url 存储crawlergo爬取到的url method headers body, result/{date}/{domain}.links.csv,也进行了去重处理
         with open(f"result/{date}/{domain}.links.csv", "a", encoding="utf-8", newline='') as f1:
             writer = csv.writer(f1)
             for req in req_list:
                 if req['url'] not in links_set:
                     del req["headers"]["Spider-Name"]
                     writer.writerow([str(sys._getframe().f_code.co_name), req['method'],
-                                     req['url'], json.dumps(req['headers']), req['data']])
+                                    req['url'], json.dumps(req['headers']), req['data']])
                     links_set.add(req['url'])
         logger.info(f'[+] From url {target} found {len(req_list)} links')
         logger.info(
             f'[+] Links file exist:{root}/result/{date}/{domain}.links.csv')
 
+        # 存储crawlergo爬取到的子域名
         if sub_domain_list is not None:
             with open(f"{sensitiveinfo_log_folder}/{domain}.subdomains.{sys._getframe().f_code.co_name}.txt", "a",
                       encoding="utf-8") as f2:
@@ -334,6 +379,7 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
                     f2.write(i + "\n")
         logger.info(f"[+] {sys._getframe().f_code.co_name} finished: {target}")
 
+    # 爬取url的link  result/{date}/sensitiveinfo_log/{domain}.{sys._getframe().f_code.co_name}.json
     @logger.catch
     def rad(data1, attackflag=attackflag):
         '''
@@ -343,6 +389,7 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         '''
         logger.info(
             '-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
+        # 创建多个子域名结果输出文件夹
         output_folder = f'{sensitiveinfo_log_folder}/{sys._getframe().f_code.co_name}_log'
         makedir0(output_folder)
 
@@ -390,7 +437,7 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
                         # print(base64.b64decode(row["b64_body"]))
                         if 'b64_body' in row.keys():
                             data = [str(sys._getframe().f_code.co_name), row["Method"], row["URL"], json.dumps(
-                                row["Header"]), base64.b64decode(row["b64_body"]).decode()]
+                                row["Header"]),  base64.b64decode(row["b64_body"]).decode()]
                         else:
                             data = [str(sys._getframe().f_code.co_name), row["Method"], row["URL"], json.dumps(
                                 row["Header"]), ""]
@@ -465,6 +512,7 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         to_xray(urls_set_tmp, attackflag=attackflag)
 
         # 存储rad 爬取到的url method headers body
+        # with open(f"{root}/result/{date}/{domain}.links.csv", "a", encoding="utf-8") as f1:
         to_csv(f"result/{date}/{domain}.links.csv",
                urls_data_tmp_to_csv, mmode='a')
 
@@ -480,6 +528,7 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         '''
         logger.info(
             '-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
+        # 创建多个子域名结果输出文件夹
         output_folder = f'{sensitiveinfo_log_folder}/{sys._getframe().f_code.co_name}_log'
         makedir0(output_folder)
 
@@ -496,7 +545,8 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         # 结果文件名 xx_xx_xx 结果是指定文件夹 --include-other-source Also include other-source's urls (still crawl and request)
         cmdstr = f'{pwd}/gospider/gospider{suffix} -s {target} --threads 10 --depth 2 --js --subs --sitemap --robots --other-source --include-subs --quiet --output {output_folder}'
         logger.info(f"[+] command:{cmdstr}")
-        __subprocess1(cmdstr, timeout=60 * 15,
+        #os.system(cmdstr)
+        __subprocess1(cmdstr, timeout=60*15,
                       path=f"{pwd}/{sys._getframe().f_code.co_name}")
 
         logger.info(f"[+] {sys._getframe().f_code.co_name} finished: {target}")
@@ -513,8 +563,12 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
                                 "GET", url, "", ""]
                         urls_data_tmp_to_csv.append(data)
                         urls_set_tmp.add(url)
-                        links_set.add(url)
-
+                        links_set.add(url)  # links_set 增加新的
+                        # if attackflag:
+                        #     if checkport(7777):
+                        #         request0({"method": "GET", "url": url, "headers": "", "data": ""})
+                        #     else:
+                        #         logger.error("xray not running on 7777! skip to xray attack!")
         else:
             logger.error(
                 f'[-] gospider not found {output_folder}/{output_filename}')
@@ -539,6 +593,8 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
 
         logger.info(
             '-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
+
+        # 创建多个子域名结果输出文件夹
         output_folder = f'{sensitiveinfo_log_folder}/{sys._getframe().f_code.co_name}_log'
         makedir0(output_folder)
 
@@ -550,6 +606,7 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         urls_set_tmp = set()
         # 结果文件名 xx_xx_xx 结果是指定文件夹
         cmdstr = f'{pwd}\\hakrawler\\hakrawler{suffix} -u {target} -d 4 -subs -timeout 10 -unique'
+        # cmdstr = f'{os.path.realpath(f"{pwd}/hakrawler/hakrawler{suffix}")} -u {target} -d 4 -subs -timeout 10 -unique'
         logger.info(f"[+] command:{cmdstr}")
         # cmd = cmdstr.split(' ')
         resultlist = __subprocess2(cmdstr)
@@ -565,15 +622,19 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
                 urls_data_tmp_to_csv.append(data)
                 urls_set_tmp.add(url)
                 links_set.add(url)
+                # if attackflag:
+                #     if checkport(7777):
+                #         request0({"method": "GET", "url": url, "headers": "", "data": ""})
+                #     else:
+                #         logger.error("xray not running on 7777! skip to xray attack!")
 
         # 差集发送给xray,攻击模式端口没,则只收集跳过发送给xray的攻击扫描
         to_xray(urls_set_tmp, attackflag=attackflag)
 
         # 对结果处理,新增的,不是扫描的全部结果,是剔除links_set之后的url,将结果存储到txt中
-        with open(f'{output_folder}/{subdomain}.{sys._getframe().f_code.co_name}.txt', 'w', encoding='utf-8',
-                  errors='ignore') as f:
+        with open(f'{output_folder}/{subdomain}.{sys._getframe().f_code.co_name}.txt', 'w', encoding='utf-8', errors='ignore') as f:
             for i in urls_set_tmp:
-                f.write(i + '\n')
+                f.write(i+'\n')
 
         # 存储gospider 爬取到的url method headers body
         # with open(f"{root}/result/{date}/{domain}.links.csv", "a", encoding="utf-8") as f1:
@@ -631,6 +692,54 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         to_csv(f"result/{date}/{domain}.links.csv",
                urls_data_tmp_to_csv, mmode='a')
 
+    # 暂时先不用，还未完成，带主动性为 dirsearch 200的结果给xray
+
+    @logger.catch
+    def dirsearch(data1):
+        '''
+        dirsearch v0.4.2.6
+        :param data1:
+        :return:
+        '''
+        logger.info(
+            '-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
+        target = data1
+        urls_tmp = []
+        # 将dirsearch扫出的url添加到xray去 -x 301,302,403,404,405,500,501,502,503 -r -R 3 --crawl
+        cmdstr = f'python3 {pwd}/dirsearch/dirsearch.py -x 403,404 -u {target} --full-url -t 10 --random-agent --format csv -o {sensitiveinfo_log_folder}/{domain}.{sys._getframe().f_code.co_name}.csv'
+        logger.info(f"[+] command:{cmdstr}")
+        os.system(cmdstr)
+        # cmd = cmdstr.split(' ')
+        # output = __subprocess(cmd)
+        # print("".join(output).encode())
+        print(f"[+] {target} dirsearch finished")
+        # 将200的url找出来
+        with open(f"{sensitiveinfo_log_folder}/{domain}.{sys._getframe().f_code.co_name}.csv", "r") as f:
+            reader = csv.reader(f)
+            head = next(reader)
+            for row in reader:
+                if len(row) != 0:
+                    if row[1] == "200":
+                        urls_tmp.append("GET " + row[0])
+                    elif row[1] == "301":
+                        urls_tmp.append("GET " + row[4])
+        # 将links记录到 result/{date}/{domain}.links.txt中
+        with open(f"result/{date}/{domain}.links.txt", "a", encoding="utf-8") as f1:
+            for i in urls_tmp:
+                f1.write(i+"\n")
+
+    # 废弃 将请求发给xray
+    # def to_xray():
+    #     with open("crawlergo.json", "r", encoding="utf-8") as f:
+    #         result = json.loads(f.read())
+    #         req_list = result["req_list"]
+    #         sub_domain = result["sub_domain_list"]
+    #         for req in req_list:
+    #             del req["headers"]["Spider-Name"]
+    #             request0({"method": req["method"], "url": req["url"], "headers": req["headers"], "data": req["data"]})
+
+    # 暂时先不用，没有代理池，dork文件如何处理也没写完，通过google查询某域名的敏感文件
+
     @logger.catch
     def urlcollector(data1):
         '''
@@ -656,7 +765,9 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
             part for part in subdomain_tuple if part)  # www_baidu_com
         urls_data_tmp = []
         urls_set_tmp = set()
-
+        # 结果文件名 xx_xx_xx 结果是指定文件夹
+        # url-collector.exe -e baidu -k "1111" -o 1.txt
+        # 如下都得修改
         dorkfile = f'{pwd}/dorks.txt'
         cmdstr = f'{pwd}/urlcollector/urlcollector{suffix} -i {dorkfile} -o {output_folder}/{domain}.txt --routine-count 5 --proxy "http://127.0.0.1:10809"'
         logger.info(f"[+] command:{cmdstr}")
@@ -675,7 +786,7 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
                 if attackflag:
                     if checkport(7777):
                         request0({"method": "GET", "url": url,
-                                  "headers": "", "data": ""})
+                                 "headers": "", "data": ""})
                     else:
                         logger.error(
                             "xray not running on 7777! skip to xray attack!")
@@ -699,10 +810,12 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         '''
         logger.info(
             '-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
+        # 创建多个子域名结果输出文件夹
         output_folder = f'{sensitiveinfo_log_folder}/{sys._getframe().f_code.co_name}_log'
         makedir0(output_folder)
 
         subdomain_tuple = tldextract.extract(data1)
+        # subdomain = '_'.join(part for part in subdomain_tuple if part)  # www_baidu_com
         output_filename_prefix = subdomain_tuple.domain + '.' + subdomain_tuple.suffix
         cmdstr = f'python3 {pwd}/emailall/emailall.py --domain {data1} run'
         logger.info(f"[+] command:{cmdstr}")
@@ -711,7 +824,7 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
                       path=f"{pwd}/{sys._getframe().f_code.co_name}")
 
         # 移动结果文件 \sensitiveinfo\emailall\result\vulweb_com\vulweb.com_All.json
-        output_filename_tmp = f"{pwd}/{sys._getframe().f_code.co_name}/result/{output_filename_prefix.replace('.', '_')}/{output_filename_prefix}_All.json"
+        output_filename_tmp = f"{pwd}/{sys._getframe().f_code.co_name}/result/{output_filename_prefix.replace('.','_')}/{output_filename_prefix}_All.json"
         if os.path.exists(output_filename_tmp):
             try:
                 shutil.copy(output_filename_tmp, output_folder)
@@ -721,9 +834,11 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
             logger.error(
                 f'[-] {sys._getframe().f_code.co_name} not found {output_filename_tmp} ')
 
-    # if domain and url is None and urlsfile is None:
+    #if domain and url is None and urlsfile is None:
     if isdomain:
         emailall(domain)
+    # urlsfile = f"result/{date}/{domain}.subdomains.with.http.txt"
+    # print(os.getcwd())
     with open(urlsfile, "r", encoding="utf-8") as f:
         for url in f.readlines():
             url = url.strip()

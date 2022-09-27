@@ -4,6 +4,7 @@ import datetime
 from loguru import logger
 from core.tools.domain import domain_main
 from core.tools.finger import finger_main
+
 from core.tools.sensitiveinfo import sensitiveinfo_main
 from core.tools.vulscan import vulscan_main
 from core.tools.portscan import portscan_main
@@ -133,6 +134,8 @@ class Komo(object):
         dd = download_tools.Download()
         dd.run()
 
+
+    # 只进行子域扫描
     def subdomain(self):
         if self.domains_list:
             for domain in self.domains_list:
@@ -156,7 +159,7 @@ class Komo(object):
         else:
             logger.error("[-] Please check --ip or --ips")
 
-
+    # 敏感信息收集
     def sensitive(self):
         self.attackflag = False
         if self.url:
@@ -168,7 +171,8 @@ class Komo(object):
         else:
             logger.error("[-] Please check --url or --urlsfile")
 
-
+    # 对urls进行漏洞扫描
+    # def vulscan(self):
     def webattack(self):
         self.attackflag = True
         if self.url:
@@ -182,7 +186,7 @@ class Komo(object):
         else:
             logger.error("[-] Please check --url or --urlsfile")
 
-
+    # 对主机ip攻击
     def hostattack(self):
         self.attackflag = True
         if self.ip:
@@ -194,6 +198,7 @@ class Komo(object):
         else:
             logger.error("[-] Please check --ip or --ips")
 
+    # 只扫描，不攻击 提供主域名或者主域名文件，顺序执行
     def collect(self):
         '''
         python main.py --domain tiqianle.com collect
@@ -215,6 +220,7 @@ class Komo(object):
         else:
             logger.error("[-] Please check --domain or --domains")
 
+    # 扫描+攻击 all_scan
     def all(self):
         '''
         python main.py --domain tiqianle.com all
