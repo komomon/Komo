@@ -1,0 +1,5 @@
+1、使用本机chrome
+2、Chromium：https://download-chromium.appspot.com/
+3、Linux：https://storage.googleapis.com/chromium-browser-snapshots/Linux_x64/706915/chrome-linux.zip
+
+下载好解压在此文件夹内
