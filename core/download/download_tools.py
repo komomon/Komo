@@ -28,7 +28,7 @@ class Download:
     def getconfig(self):
         filename = f"{os.path.dirname(os.path.abspath(__file__))}"
         toolsyaml_path = f"{os.getcwd()}/config/tools.yaml"
-        toolsyaml_path = "tools.yaml"
+        #toolsyaml_path = "tools.yaml"
         if os.path.exists(toolsyaml_path):
             with open(toolsyaml_path, 'r', encoding='utf-8') as f:
                 msg = yaml.load(f, Loader=yaml.FullLoader)['download']
