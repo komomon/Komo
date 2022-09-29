@@ -50,6 +50,8 @@ python3 Komo.py install
 
 ![image-20220927001258352](images/image-20220927001258352.png)
 
+
+
 **Komo 支持多种模式**
 
 > collect:只资产收集，多种方式收集域名，收集域名邮箱，域名存活探测，域名反查ip，域名指纹识别，ip端口扫描，web服务链接爬取
@@ -68,7 +70,13 @@ python3 Komo.py install
 >
 > hostattack：对反查的ip列表或ip文件进行常见服务弱口令扫描和漏洞扫描
 
-**all 全扫描**
+**all 全扫描** 
+
+**注意：记得使用all模式之前先启动xray，否则webattack不能完全扫描**
+
+```
+xray.exe webscan --listen 127.0.0.1:7777 --html-output 1.html
+```
 
 ```python
 python3 Komo.py --domain example.com all
