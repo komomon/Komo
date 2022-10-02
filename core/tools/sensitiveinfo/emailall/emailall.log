@@ -1081,3 +1081,256 @@
 2022-09-25 10:50:31,841 [ERROR] MainProcess(3936):sogou             (10988) | module.get:110 - [*] request: https://seonegativo.com/
 2022-09-25 10:50:31,842 [ERROR] MainProcess(3936):sogou             (10988) | module.get:115 - HTTPSConnectionPool(host='seonegativo.com', port=443): Read timed out. (read timeout=5)
 2022-09-25 10:50:50,058 [ALERT] MainProcess(3936):MainThread        (25232) | collect.run:64 - sogou module thread timed out
+2022-09-27 23:14:21,217 [DEBUG] MainProcess(18156):MainThread        (6384 ) | emailall.run:70 - [*] Starting EmailAll @ 2022-09-27 23:14:21
+
+2022-09-27 23:14:21,217 [INFOR] MainProcess(18156):MainThread        (6384 ) | utils.get_net_env:44 - Checking network environment
+2022-09-27 23:14:21,218 [DEBUG] MainProcess(18156):MainThread        (6384 ) | utils.check_net:24 - Trying to access http://ip-api.com/json/
+2022-09-27 23:14:21,490 [ERROR] MainProcess(18156):MainThread        (6384 ) | utils.check_net:30 - (ProtocolError('Connection aborted.', ConnectionResetError(10054, '远程主机强迫关闭了一个现有的连接。', None, 10054, None)),)
+2022-09-27 23:14:21,490 [ALERT] MainProcess(18156):MainThread        (6384 ) | utils.check_net:31 - Unable to access Internet, retrying...
+2022-09-27 23:14:21,491 [DEBUG] MainProcess(18156):MainThread        (6384 ) | utils.get_net_env:48 - (ProtocolError('Connection aborted.', ConnectionResetError(10054, '远程主机强迫关闭了一个现有的连接。', None, 10054, None)),)
+2022-09-27 23:14:21,491 [ALERT] MainProcess(18156):MainThread        (6384 ) | utils.get_net_env:49 - Please check your network environment.
+2022-09-27 23:14:21,492 [DEBUG] MainProcess(18156):MainThread        (6384 ) | utils.get_domains:101 - Getting domains
+2022-09-27 23:14:21,492 [DEBUG] MainProcess(18156):MainThread        (6384 ) | utils.get_domains:109 - The obtained domains 
+['tiqianle.com']
+2022-09-27 23:14:21,492 [INFOR] MainProcess(18156):MainThread        (6384 ) | collect.run:45 - Start collecting Emails of tiqianle.com
+2022-09-27 23:14:21,792 [INFOR] MainProcess(18156):Emailf            (18224) | module.begin:57 - Start Email-Format module to collect Emaile of tiqianle.com
+2022-09-27 23:14:21,792 [INFOR] MainProcess(18156):phonebook         (9728 ) | module.begin:57 - Start PhoneBook module to collect Emaile of tiqianle.com
+2022-09-27 23:14:21,794 [INFOR] MainProcess(18156):skymem            (3604 ) | module.begin:57 - Start Skymem module to collect Emaile of tiqianle.com
+2022-09-27 23:14:21,796 [INFOR] MainProcess(18156):snov              (10708) | module.begin:57 - Start Snov module to collect Emaile of tiqianle.com
+2022-09-27 23:14:21,798 [INFOR] MainProcess(18156):veryvp            (18196) | module.begin:57 - Start Veryvp module to collect Emaile of tiqianle.com
+2022-09-27 23:14:21,800 [INFOR] MainProcess(18156):ask               (16772) | module.begin:57 - Start AskSearch module to collect Emaile of tiqianle.com
+2022-09-27 23:14:21,801 [INFOR] MainProcess(18156):baidu             (7848 ) | module.begin:57 - Start BaiduSearch module to collect Emaile of tiqianle.com
+2022-09-27 23:14:21,802 [INFOR] MainProcess(18156):bingcn            (18236) | module.begin:57 - Start BingcnSearch module to collect Emaile of tiqianle.com
+2022-09-27 23:14:21,804 [INFOR] MainProcess(18156):githubapi         (18400) | module.begin:57 - Start GithubApi module to collect Emaile of tiqianle.com
+2022-09-27 23:14:21,805 [INFOR] MainProcess(18156):google            (1272 ) | module.begin:57 - Start GoogleSearch module to collect Emaile of tiqianle.com
+2022-09-27 23:14:21,806 [INFOR] MainProcess(18156):qwant             (6836 ) | module.begin:57 - Start QwantSearch module to collect Emaile of tiqianle.com
+2022-09-27 23:14:21,807 [INFOR] MainProcess(18156):so                (16080) | module.begin:57 - Start SoSearch module to collect Emaile of tiqianle.com
+2022-09-27 23:14:21,808 [INFOR] MainProcess(18156):sogou             (16780) | module.begin:57 - Start SogouSearch module to collect Emaile of tiqianle.com
+2022-09-27 23:14:22,726 [ERROR] MainProcess(18156):phonebook         (9728 ) | module.post:145 - HTTPSConnectionPool(host='public.intelx.io', port=443): Max retries exceeded with url: /phonebook/search?k=077424c6-7a26-410e-9269-c9ac546886a4 (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x0000021567BA3B20>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+2022-09-27 23:14:22,727 [DEBUG] MainProcess(18156):phonebook         (9728 ) | module.finish:66 - Finished PhoneBook module to collect tiqianle.com's Email
+2022-09-27 23:14:22,727 [INFOR] MainProcess(18156):phonebook         (9728 ) | module.finish:68 - PhoneBook module took 0.9 seconds found 0 Email
+2022-09-27 23:14:23,743 [DEBUG] MainProcess(18156):Emailf            (18224) | module.finish:66 - Finished Email-Format module to collect tiqianle.com's Email
+2022-09-27 23:14:23,743 [INFOR] MainProcess(18156):Emailf            (18224) | module.finish:68 - Email-Format module took 2.0 seconds found 0 Email
+2022-09-27 23:14:24,268 [DEBUG] MainProcess(18156):veryvp            (18196) | module.finish:66 - Finished Veryvp module to collect tiqianle.com's Email
+2022-09-27 23:14:24,269 [INFOR] MainProcess(18156):veryvp            (18196) | module.finish:68 - Veryvp module took 2.5 seconds found 0 Email
+2022-09-27 23:14:24,432 [DEBUG] MainProcess(18156):baidu             (7848 ) | module.finish:66 - Finished BaiduSearch module to collect tiqianle.com's Email
+2022-09-27 23:14:24,432 [INFOR] MainProcess(18156):baidu             (7848 ) | module.finish:68 - BaiduSearch module took 2.6 seconds found 0 Email
+2022-09-27 23:14:25,820 [DEBUG] MainProcess(18156):so                (16080) | so.search:65 - Searching https://www.so.com/s?p&n&=&1
+2022-09-27 23:14:26,487 [DEBUG] MainProcess(18156):bingcn            (18236) | module.finish:66 - Finished BingcnSearch module to collect tiqianle.com's Email
+2022-09-27 23:14:26,487 [INFOR] MainProcess(18156):bingcn            (18236) | module.finish:68 - BingcnSearch module took 4.7 seconds found 0 Email
+2022-09-27 23:14:26,947 [ALERT] MainProcess(18156):snov              (10708) | snov.search:76 - Search Failed! you need to configure the username&password in api.py file
+2022-09-27 23:14:26,947 [DEBUG] MainProcess(18156):snov              (10708) | module.finish:66 - Finished Snov module to collect tiqianle.com's Email
+2022-09-27 23:14:26,947 [INFOR] MainProcess(18156):snov              (10708) | module.finish:68 - Snov module took 5.2 seconds found 0 Email
+2022-09-27 23:14:27,245 [DEBUG] MainProcess(18156):skymem            (3604 ) | module.finish:66 - Finished Skymem module to collect tiqianle.com's Email
+2022-09-27 23:14:27,246 [INFOR] MainProcess(18156):skymem            (3604 ) | module.finish:68 - Skymem module took 5.5 seconds found 0 Email
+2022-09-27 23:14:28,330 [ERROR] MainProcess(18156):google            (1272 ) | module.get:110 - [*] request: https://www.google.com
+2022-09-27 23:14:28,330 [ERROR] MainProcess(18156):google            (1272 ) | module.get:115 - HTTPSConnectionPool(host='www.google.com', port=443): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x0000021567BC5EB0>: Failed to establish a new connection: [WinError 10061] 由于目标计算机积极拒绝，无法连接。'))
+2022-09-27 23:14:28,331 [ERROR] MainProcess(18156):google            (1272 ) | google.search:41 - For module GoogleSearch, you need to configure the proxy in setting.py file
+2022-09-27 23:14:28,332 [DEBUG] MainProcess(18156):google            (1272 ) | module.finish:66 - Finished GoogleSearch module to collect tiqianle.com's Email
+2022-09-27 23:14:28,332 [INFOR] MainProcess(18156):google            (1272 ) | module.finish:68 - GoogleSearch module took 6.5 seconds found 0 Email
+2022-09-27 23:14:28,447 [ALERT] MainProcess(18156):githubapi         (18400) | utils.check_response:123 - GET https://api.github.com/search/code?q=tiqianle.com&per_page=100&page=1&sort=indexed&access_token= 401 - Unauthorized 90
+2022-09-27 23:14:28,447 [ALERT] MainProcess(18156):githubapi         (18400) | utils.check_response:132 - {'message': 'Bad credentials', 'documentation_url': 'https://docs.github.com/rest'}
+2022-09-27 23:14:28,450 [ALERT] MainProcess(18156):githubapi         (18400) | githubapi.search:72 - 'NoneType' object has no attribute 'json'
+2022-09-27 23:14:28,451 [DEBUG] MainProcess(18156):githubapi         (18400) | module.finish:66 - Finished GithubApi module to collect tiqianle.com's Email
+2022-09-27 23:14:28,451 [INFOR] MainProcess(18156):githubapi         (18400) | module.finish:68 - GithubApi module took 6.6 seconds found 0 Email
+2022-09-27 23:14:29,102 [ERROR] MainProcess(18156):qwant             (6836 ) | module.get:110 - [*] request: https://www.beianx.cn/seo/www.tiqianle.com
+2022-09-27 23:14:29,103 [ERROR] MainProcess(18156):qwant             (6836 ) | module.get:115 - HTTPSConnectionPool(host='www.beianx.cn', port=443): Read timed out. (read timeout=2)
+2022-09-27 23:14:33,600 [ERROR] MainProcess(18156):qwant             (6836 ) | module.get:110 - [*] request: http://bokerb.com/lxig/61605.html
+2022-09-27 23:14:33,600 [ERROR] MainProcess(18156):qwant             (6836 ) | module.get:115 - HTTPConnectionPool(host='bokerb.com', port=80): Read timed out. (read timeout=2)
+2022-09-27 23:14:38,091 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.vipcn.com/z/tiqianle/ 406 - Not Acceptable 1227
+2022-09-27 23:14:38,523 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.hackhome.com/z/tiqianle/ 406 - Not Acceptable 5437
+2022-09-27 23:14:40,068 [ALERT] MainProcess(18156):sogou             (16780) | utils.check_response:123 - GET https://www.csdn.net/tags/MtTaAg4sOTk2MjMzLWJsb2cO0O0O.html 404 - Not Found 31653
+2022-09-27 23:14:43,470 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.vipcn.com/z/tiqianle/ 406 - Not Acceptable 1227
+2022-09-27 23:14:43,928 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.hackhome.com/z/tiqianle/ 406 - Not Acceptable 5437
+2022-09-27 23:14:49,928 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.vipcn.com/z/tiqianle/ 406 - Not Acceptable 1227
+2022-09-27 23:14:50,356 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.hackhome.com/z/tiqianle/ 406 - Not Acceptable 5437
+2022-09-27 23:14:54,164 [ERROR] MainProcess(18156):ask               (16772) | module.get:99 - [*] params: {'q': 'intext:@tiqianle.com', 'page': 1}
+2022-09-27 23:14:54,165 [ERROR] MainProcess(18156):ask               (16772) | module.get:110 - [*] request: https://www.ask.com/web?q=intext:@tiqianle.com&page=1
+2022-09-27 23:14:54,165 [ERROR] MainProcess(18156):ask               (16772) | module.get:115 - HTTPSConnectionPool(host='www.ask.com', port=443): Max retries exceeded with url: /web?q=intext%3A%40tiqianle.com&page=1 (Caused by ConnectTimeoutError(<urllib3.connection.HTTPSConnection object at 0x0000021567C2D820>, 'Connection to www.ask.com timed out. (connect timeout=15)'))
+2022-09-27 23:14:54,182 [ERROR] MainProcess(18156):ask               (16772) | ask.search:44 - For module AskSearch, you need to configure the proxy in setting.py file
+2022-09-27 23:14:54,183 [DEBUG] MainProcess(18156):ask               (16772) | module.finish:66 - Finished AskSearch module to collect tiqianle.com's Email
+2022-09-27 23:14:54,184 [INFOR] MainProcess(18156):ask               (16772) | module.finish:68 - AskSearch module took 32.4 seconds found 0 Email
+2022-09-27 23:14:55,692 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.vipcn.com/z/tiqianle/ 406 - Not Acceptable 1227
+2022-09-27 23:14:56,263 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.hackhome.com/z/tiqianle/ 406 - Not Acceptable 5437
+2022-09-27 23:15:01,229 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.vipcn.com/z/tiqianle/ 406 - Not Acceptable 1227
+2022-09-27 23:15:01,991 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.hackhome.com/z/tiqianle/ 406 - Not Acceptable 5437
+2022-09-27 23:15:05,170 [ERROR] MainProcess(18156):so                (16080) | module.get:110 - [*] request: https://outlink.chinaz.com/tiqianle.com
+2022-09-27 23:15:05,171 [ERROR] MainProcess(18156):so                (16080) | module.get:115 - HTTPSConnectionPool(host='outlink.chinaz.com', port=443): Read timed out. (read timeout=5)
+2022-09-27 23:15:06,568 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.vipcn.com/z/tiqianle/ 406 - Not Acceptable 1227
+2022-09-27 23:15:06,926 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.hackhome.com/z/tiqianle/ 406 - Not Acceptable 5437
+2022-09-27 23:15:10,520 [ERROR] MainProcess(18156):so                (16080) | module.get:110 - [*] request: https://outlink.chinaz.com/tiqianle.com
+2022-09-27 23:15:10,521 [ERROR] MainProcess(18156):so                (16080) | module.get:115 - HTTPSConnectionPool(host='outlink.chinaz.com', port=443): Read timed out. (read timeout=5)
+2022-09-27 23:15:11,598 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.vipcn.com/z/tiqianle/ 406 - Not Acceptable 1227
+2022-09-27 23:15:12,523 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.hackhome.com/z/tiqianle/ 406 - Not Acceptable 5437
+2022-09-27 23:15:14,535 [DEBUG] MainProcess(18156):so                (16080) | so.search:65 - Searching https://www.so.com/s?p&n&=&2
+2022-09-27 23:15:17,028 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.vipcn.com/z/tiqianle/ 406 - Not Acceptable 1227
+2022-09-27 23:15:17,373 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.hackhome.com/z/tiqianle/ 406 - Not Acceptable 5437
+2022-09-27 23:15:22,243 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.vipcn.com/z/tiqianle/ 406 - Not Acceptable 1227
+2022-09-27 23:15:22,793 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.hackhome.com/z/tiqianle/ 406 - Not Acceptable 5437
+2022-09-27 23:15:27,648 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.vipcn.com/z/tiqianle/ 406 - Not Acceptable 1227
+2022-09-27 23:15:28,055 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.hackhome.com/z/tiqianle/ 406 - Not Acceptable 5437
+2022-09-27 23:15:33,242 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.vipcn.com/z/tiqianle/ 406 - Not Acceptable 1227
+2022-09-27 23:15:33,649 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.hackhome.com/z/tiqianle/ 406 - Not Acceptable 5437
+2022-09-27 23:15:35,591 [ALERT] MainProcess(18156):sogou             (16780) | utils.check_response:123 - GET https://github.com/Enul1ttle/penetrationLean 406 - Not Acceptable 0
+2022-09-27 23:15:38,573 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.vipcn.com/z/tiqianle/ 406 - Not Acceptable 1227
+2022-09-27 23:15:38,988 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.hackhome.com/z/tiqianle/ 406 - Not Acceptable 5437
+2022-09-27 23:15:42,725 [ALERT] MainProcess(18156):so                (16080) | utils.check_response:123 - GET http://www.fwol.cn/domain/?d=www.tianle.com 503 - Service Temporarily Unavailable 596
+2022-09-27 23:15:42,767 [ALERT] MainProcess(18156):so                (16080) | utils.check_response:123 - GET http://www.fwol.cn/domain/?d=www.tianle.com 503 - Service Temporarily Unavailable 596
+2022-09-27 23:15:43,936 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.vipcn.com/z/tiqianle/ 406 - Not Acceptable 1227
+2022-09-27 23:15:44,510 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.hackhome.com/z/tiqianle/ 406 - Not Acceptable 5437
+2022-09-27 23:15:49,608 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.vipcn.com/z/tiqianle/ 406 - Not Acceptable 1227
+2022-09-27 23:15:50,137 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.hackhome.com/z/tiqianle/ 406 - Not Acceptable 5437
+2022-09-27 23:15:54,444 [ALERT] MainProcess(18156):sogou             (16780) | utils.check_response:123 - GET https://github.com/zyjsuper/HeyComputer 406 - Not Acceptable 0
+2022-09-27 23:15:54,992 [DEBUG] MainProcess(18156):so                (16080) | so.search:65 - Searching https://www.so.com/s?p&n&=&3
+2022-09-27 23:15:55,386 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.vipcn.com/z/tiqianle/ 406 - Not Acceptable 1227
+2022-09-27 23:15:55,817 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.hackhome.com/z/tiqianle/ 406 - Not Acceptable 5437
+2022-09-27 23:16:00,677 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.vipcn.com/z/tiqianle/ 406 - Not Acceptable 1227
+2022-09-27 23:16:01,198 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.hackhome.com/z/tiqianle/ 406 - Not Acceptable 5437
+2022-09-27 23:16:06,176 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.vipcn.com/z/tiqianle/ 406 - Not Acceptable 1227
+2022-09-27 23:16:06,657 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.hackhome.com/z/tiqianle/ 406 - Not Acceptable 5437
+2022-09-27 23:16:11,576 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.vipcn.com/z/tiqianle/ 406 - Not Acceptable 1227
+2022-09-27 23:16:11,985 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.hackhome.com/z/tiqianle/ 406 - Not Acceptable 5437
+2022-09-27 23:16:12,810 [ERROR] MainProcess(18156):sogou             (16780) | module.get:110 - [*] request: https://dawhois.com/site/contaxe.com.html
+2022-09-27 23:16:12,810 [ERROR] MainProcess(18156):sogou             (16780) | module.get:115 - ('Connection aborted.', ConnectionResetError(10054, '远程主机强迫关闭了一个现有的连接。', None, 10054, None))
+2022-09-27 23:16:16,724 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.vipcn.com/z/tiqianle/ 406 - Not Acceptable 1227
+2022-09-27 23:16:17,202 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.hackhome.com/z/tiqianle/ 406 - Not Acceptable 5437
+2022-09-27 23:16:22,697 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.vipcn.com/z/tiqianle/ 406 - Not Acceptable 1227
+2022-09-27 23:16:23,854 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.hackhome.com/z/tiqianle/ 406 - Not Acceptable 5437
+2022-09-27 23:16:24,148 [ERROR] MainProcess(18156):so                (16080) | module.get:110 - [*] request: http://www.yumi.com/domain/tianleqi.net
+2022-09-27 23:16:24,149 [ERROR] MainProcess(18156):so                (16080) | module.get:115 - ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+2022-09-27 23:16:24,241 [ERROR] MainProcess(18156):so                (16080) | module.get:110 - [*] request: http://www.yumi.com/domain/tianleqi.net
+2022-09-27 23:16:24,241 [ERROR] MainProcess(18156):so                (16080) | module.get:115 - ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+2022-09-27 23:16:24,343 [ERROR] MainProcess(18156):so                (16080) | module.get:110 - [*] request: http://www.yumi.com/domain/tianleqi.net
+2022-09-27 23:16:24,344 [ERROR] MainProcess(18156):so                (16080) | module.get:115 - ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+2022-09-27 23:16:27,461 [ALERT] MainProcess(18156):so                (16080) | utils.check_response:123 - GET https://detail.zol.com.cn/series/6/16781_1.html 400 - Bad Request 170
+2022-09-27 23:16:27,713 [ALERT] MainProcess(18156):so                (16080) | utils.check_response:123 - GET https://detail.zol.com.cn/series/6/16781_1.html 400 - Bad Request 170
+2022-09-27 23:16:28,633 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.vipcn.com/z/tiqianle/ 406 - Not Acceptable 1227
+2022-09-27 23:16:29,458 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.hackhome.com/z/tiqianle/ 406 - Not Acceptable 5437
+2022-09-27 23:16:35,046 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.vipcn.com/z/tiqianle/ 406 - Not Acceptable 1227
+2022-09-27 23:16:35,492 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.hackhome.com/z/tiqianle/ 406 - Not Acceptable 5437
+2022-09-27 23:16:36,993 [DEBUG] MainProcess(18156):so                (16080) | so.search:65 - Searching https://www.so.com/s?p&n&=&4
+2022-09-27 23:16:41,140 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.vipcn.com/z/tiqianle/ 406 - Not Acceptable 1227
+2022-09-27 23:16:41,649 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.hackhome.com/z/tiqianle/ 406 - Not Acceptable 5437
+2022-09-27 23:16:47,275 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.vipcn.com/z/tiqianle/ 406 - Not Acceptable 1227
+2022-09-27 23:16:47,670 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.hackhome.com/z/tiqianle/ 406 - Not Acceptable 5437
+2022-09-27 23:16:51,264 [ALERT] MainProcess(18156):sogou             (16780) | utils.check_response:123 - GET https://github.com/wp-plugins/ezanga-intext 406 - Not Acceptable 0
+2022-09-27 23:16:52,651 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.vipcn.com/z/tiqianle/ 406 - Not Acceptable 1227
+2022-09-27 23:16:53,129 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.hackhome.com/z/tiqianle/ 406 - Not Acceptable 5437
+2022-09-27 23:16:58,016 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.vipcn.com/z/tiqianle/ 406 - Not Acceptable 1227
+2022-09-27 23:17:00,303 [ERROR] MainProcess(18156):qwant             (6836 ) | module.get:110 - [*] request: https://m.hackhome.com/z/tiqianle/
+2022-09-27 23:17:00,303 [ERROR] MainProcess(18156):qwant             (6836 ) | module.get:115 - HTTPSConnectionPool(host='m.hackhome.com', port=443): Read timed out. (read timeout=2)
+2022-09-27 23:17:05,421 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.vipcn.com/z/tiqianle/ 406 - Not Acceptable 1227
+2022-09-27 23:17:05,947 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.hackhome.com/z/tiqianle/ 406 - Not Acceptable 5437
+2022-09-27 23:17:07,715 [ERROR] MainProcess(18156):so                (16080) | module.get:110 - [*] request: http://www.yumi.com/domain/tianleqi.net
+2022-09-27 23:17:07,716 [ERROR] MainProcess(18156):so                (16080) | module.get:115 - ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+2022-09-27 23:17:07,825 [ERROR] MainProcess(18156):so                (16080) | module.get:110 - [*] request: http://www.yumi.com/domain/tianleqi.net
+2022-09-27 23:17:07,826 [ERROR] MainProcess(18156):so                (16080) | module.get:115 - ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+2022-09-27 23:17:07,937 [ERROR] MainProcess(18156):so                (16080) | module.get:110 - [*] request: http://www.yumi.com/domain/tianleqi.net
+2022-09-27 23:17:07,938 [ERROR] MainProcess(18156):so                (16080) | module.get:115 - ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+2022-09-27 23:17:10,994 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.vipcn.com/z/tiqianle/ 406 - Not Acceptable 1227
+2022-09-27 23:17:11,250 [ALERT] MainProcess(18156):so                (16080) | utils.check_response:123 - GET https://detail.zol.com.cn/series/6/16781_1.html 400 - Bad Request 170
+2022-09-27 23:17:11,622 [ALERT] MainProcess(18156):so                (16080) | utils.check_response:123 - GET https://detail.zol.com.cn/series/6/16781_1.html 400 - Bad Request 170
+2022-09-27 23:17:13,266 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.hackhome.com/z/tiqianle/ 406 - Not Acceptable 5437
+2022-09-27 23:17:17,413 [DEBUG] MainProcess(18156):so                (16080) | so.search:65 - Searching https://www.so.com/s?p&n&=&5
+2022-09-27 23:17:18,259 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.vipcn.com/z/tiqianle/ 406 - Not Acceptable 1227
+2022-09-27 23:17:18,677 [ALERT] MainProcess(18156):qwant             (6836 ) | utils.check_response:123 - GET https://m.hackhome.com/z/tiqianle/ 406 - Not Acceptable 5437
+2022-09-27 23:17:19,087 [DEBUG] MainProcess(18156):qwant             (6836 ) | module.finish:66 - Finished QwantSearch module to collect tiqianle.com's Email
+2022-09-27 23:17:19,088 [INFOR] MainProcess(18156):qwant             (6836 ) | module.finish:68 - QwantSearch module took 177.3 seconds found 0 Email
+2022-09-29 11:19:15,634 [DEBUG] MainProcess(23740):MainThread        (24016) | emailall.run:70 - [*] Starting EmailAll @ 2022-09-29 11:19:15
+
+2022-09-29 11:19:15,634 [INFOR] MainProcess(23740):MainThread        (24016) | utils.get_net_env:44 - Checking network environment
+2022-09-29 11:19:15,634 [DEBUG] MainProcess(23740):MainThread        (24016) | utils.check_net:24 - Trying to access http://ip-api.com/json/
+2022-09-29 11:19:15,953 [DEBUG] MainProcess(23740):MainThread        (24016) | utils.check_net:33 - Access to Internet OK
+2022-09-29 11:19:15,954 [DEBUG] MainProcess(23740):MainThread        (24016) | utils.check_net:36 - The computer is located in China
+2022-09-29 11:19:15,954 [DEBUG] MainProcess(23740):MainThread        (24016) | utils.get_domains:101 - Getting domains
+2022-09-29 11:19:15,955 [DEBUG] MainProcess(23740):MainThread        (24016) | utils.get_domains:109 - The obtained domains 
+['vulweb.com']
+2022-09-29 11:19:15,955 [INFOR] MainProcess(23740):MainThread        (24016) | collect.run:45 - Start collecting Emails of vulweb.com
+2022-09-29 11:19:16,142 [INFOR] MainProcess(23740):Emailf            (27072) | module.begin:57 - Start Email-Format module to collect Emaile of vulweb.com
+2022-09-29 11:19:16,144 [INFOR] MainProcess(23740):phonebook         (18776) | module.begin:57 - Start PhoneBook module to collect Emaile of vulweb.com
+2022-09-29 11:19:16,145 [INFOR] MainProcess(23740):skymem            (23728) | module.begin:57 - Start Skymem module to collect Emaile of vulweb.com
+2022-09-29 11:19:16,148 [INFOR] MainProcess(23740):snov              (9020 ) | module.begin:57 - Start Snov module to collect Emaile of vulweb.com
+2022-09-29 11:19:16,149 [INFOR] MainProcess(23740):veryvp            (26404) | module.begin:57 - Start Veryvp module to collect Emaile of vulweb.com
+2022-09-29 11:19:16,151 [INFOR] MainProcess(23740):ask               (21596) | module.begin:57 - Start AskSearch module to collect Emaile of vulweb.com
+2022-09-29 11:19:16,152 [INFOR] MainProcess(23740):baidu             (12908) | module.begin:57 - Start BaiduSearch module to collect Emaile of vulweb.com
+2022-09-29 11:19:16,155 [INFOR] MainProcess(23740):bingcn            (14696) | module.begin:57 - Start BingcnSearch module to collect Emaile of vulweb.com
+2022-09-29 11:19:16,156 [INFOR] MainProcess(23740):githubapi         (14748) | module.begin:57 - Start GithubApi module to collect Emaile of vulweb.com
+2022-09-29 11:19:16,158 [INFOR] MainProcess(23740):google            (18132) | module.begin:57 - Start GoogleSearch module to collect Emaile of vulweb.com
+2022-09-29 11:19:16,159 [INFOR] MainProcess(23740):qwant             (20240) | module.begin:57 - Start QwantSearch module to collect Emaile of vulweb.com
+2022-09-29 11:19:16,161 [INFOR] MainProcess(23740):so                (18792) | module.begin:57 - Start SoSearch module to collect Emaile of vulweb.com
+2022-09-29 11:19:16,163 [INFOR] MainProcess(23740):sogou             (22788) | module.begin:57 - Start SogouSearch module to collect Emaile of vulweb.com
+2022-09-29 11:19:18,406 [ERROR] MainProcess(23740):phonebook         (18776) | module.post:145 - HTTPSConnectionPool(host='public.intelx.io', port=443): Max retries exceeded with url: /phonebook/search?k=077424c6-7a26-410e-9269-c9ac546886a4 (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x0000017F320C8A00>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+2022-09-29 11:19:18,407 [DEBUG] MainProcess(23740):phonebook         (18776) | module.finish:66 - Finished PhoneBook module to collect vulweb.com's Email
+2022-09-29 11:19:18,407 [INFOR] MainProcess(23740):phonebook         (18776) | module.finish:68 - PhoneBook module took 2.3 seconds found 0 Email
+2022-09-29 11:19:19,689 [DEBUG] MainProcess(23740):Emailf            (27072) | module.finish:66 - Finished Email-Format module to collect vulweb.com's Email
+2022-09-29 11:19:19,690 [INFOR] MainProcess(23740):Emailf            (27072) | module.finish:68 - Email-Format module took 3.5 seconds found 0 Email
+2022-09-29 11:19:20,167 [DEBUG] MainProcess(23740):so                (18792) | so.search:65 - Searching https://www.so.com/s?p&n&=&1
+2022-09-29 11:19:20,474 [DEBUG] MainProcess(23740):veryvp            (26404) | module.finish:66 - Finished Veryvp module to collect vulweb.com's Email
+2022-09-29 11:19:20,474 [INFOR] MainProcess(23740):veryvp            (26404) | module.finish:68 - Veryvp module took 4.3 seconds found 0 Email
+2022-09-29 11:19:20,680 [ERROR] MainProcess(23740):ask               (21596) | module.get:99 - [*] params: {'q': 'intext:@vulweb.com', 'page': 1}
+2022-09-29 11:19:20,681 [ERROR] MainProcess(23740):ask               (21596) | module.get:110 - [*] request: https://www.ask.com/web?q=intext:@vulweb.com&page=1
+2022-09-29 11:19:20,681 [ERROR] MainProcess(23740):ask               (21596) | module.get:115 - ('Connection aborted.', ConnectionResetError(10054, '远程主机强迫关闭了一个现有的连接。', None, 10054, None))
+2022-09-29 11:19:20,682 [ERROR] MainProcess(23740):ask               (21596) | ask.search:44 - For module AskSearch, you need to configure the proxy in setting.py file
+2022-09-29 11:19:20,682 [DEBUG] MainProcess(23740):ask               (21596) | module.finish:66 - Finished AskSearch module to collect vulweb.com's Email
+2022-09-29 11:19:20,682 [INFOR] MainProcess(23740):ask               (21596) | module.finish:68 - AskSearch module took 4.5 seconds found 0 Email
+2022-09-29 11:19:21,152 [DEBUG] MainProcess(23740):skymem            (23728) | module.finish:66 - Finished Skymem module to collect vulweb.com's Email
+2022-09-29 11:19:21,152 [INFOR] MainProcess(23740):skymem            (23728) | module.finish:68 - Skymem module took 5.0 seconds found 0 Email
+2022-09-29 11:19:22,144 [DEBUG] MainProcess(23740):baidu             (12908) | module.finish:66 - Finished BaiduSearch module to collect vulweb.com's Email
+2022-09-29 11:19:22,144 [INFOR] MainProcess(23740):baidu             (12908) | module.finish:68 - BaiduSearch module took 6.0 seconds found 0 Email
+2022-09-29 11:19:22,932 [ALERT] MainProcess(23740):githubapi         (14748) | utils.check_response:123 - GET https://api.github.com/search/code?q=vulweb.com&per_page=100&page=1&sort=indexed&access_token= 401 - Unauthorized 90
+2022-09-29 11:19:22,933 [ALERT] MainProcess(23740):githubapi         (14748) | utils.check_response:132 - {'message': 'Bad credentials', 'documentation_url': 'https://docs.github.com/rest'}
+2022-09-29 11:19:22,938 [ALERT] MainProcess(23740):githubapi         (14748) | githubapi.search:72 - 'NoneType' object has no attribute 'json'
+2022-09-29 11:19:22,939 [DEBUG] MainProcess(23740):githubapi         (14748) | module.finish:66 - Finished GithubApi module to collect vulweb.com's Email
+2022-09-29 11:19:22,939 [INFOR] MainProcess(23740):githubapi         (14748) | module.finish:68 - GithubApi module took 6.8 seconds found 0 Email
+2022-09-29 11:19:23,223 [DEBUG] MainProcess(23740):bingcn            (14696) | module.finish:66 - Finished BingcnSearch module to collect vulweb.com's Email
+2022-09-29 11:19:23,223 [INFOR] MainProcess(23740):bingcn            (14696) | module.finish:68 - BingcnSearch module took 7.1 seconds found 0 Email
+2022-09-29 11:19:23,858 [ALERT] MainProcess(23740):snov              (9020 ) | snov.search:76 - Search Failed! you need to configure the username&password in api.py file
+2022-09-29 11:19:23,858 [DEBUG] MainProcess(23740):snov              (9020 ) | module.finish:66 - Finished Snov module to collect vulweb.com's Email
+2022-09-29 11:19:23,858 [INFOR] MainProcess(23740):snov              (9020 ) | module.finish:68 - Snov module took 7.7 seconds found 0 Email
+2022-09-29 11:19:39,787 [ERROR] MainProcess(23740):sogou             (22788) | module.get:110 - [*] request: https://github.com/webvul/vulhub
+2022-09-29 11:19:39,787 [ERROR] MainProcess(23740):sogou             (22788) | module.get:115 - HTTPSConnectionPool(host='github.com', port=443): Read timed out. (read timeout=5)
+2022-09-29 11:19:40,107 [ALERT] MainProcess(23740):sogou             (22788) | utils.check_response:123 - GET https://www.csdn.net/tags/MtTaAg4sOTk2MjMzLWJsb2cO0O0O.html 404 - Not Found 31653
+2022-09-29 11:19:42,079 [ERROR] MainProcess(23740):sogou             (22788) | module.get:110 - [*] request: https://webbport.com/
+2022-09-29 11:19:42,079 [ERROR] MainProcess(23740):sogou             (22788) | module.get:115 - ('Connection aborted.', ConnectionResetError(10054, '远程主机强迫关闭了一个现有的连接。', None, 10054, None))
+2022-09-29 11:19:58,957 [ALERT] MainProcess(23740):so                (18792) | utils.check_response:123 - GET http://www.spasvo.com/news/html/201563152940.html 406 - Not Acceptable 1227
+2022-09-29 11:19:59,049 [ALERT] MainProcess(23740):so                (18792) | utils.check_response:123 - GET http://www.spasvo.com/news/html/201563152940.html 406 - Not Acceptable 1227
+2022-09-29 11:19:59,116 [ALERT] MainProcess(23740):so                (18792) | utils.check_response:123 - GET http://www.spasvo.com/news/html/201563152940.html 406 - Not Acceptable 1227
+2022-09-29 11:20:00,460 [ERROR] MainProcess(23740):google            (18132) | module.get:110 - [*] request: https://www.google.com
+2022-09-29 11:20:00,461 [ERROR] MainProcess(23740):google            (18132) | module.get:115 - HTTPSConnectionPool(host='www.google.com', port=443): Max retries exceeded with url: / (Caused by ConnectTimeoutError(<urllib3.connection.HTTPSConnection object at 0x0000017F320EB2E0>, 'Connection to www.google.com timed out. (connect timeout=10)'))
+2022-09-29 11:20:00,462 [ERROR] MainProcess(23740):google            (18132) | google.search:41 - For module GoogleSearch, you need to configure the proxy in setting.py file
+2022-09-29 11:20:00,462 [DEBUG] MainProcess(23740):google            (18132) | module.finish:66 - Finished GoogleSearch module to collect vulweb.com's Email
+2022-09-29 11:20:00,462 [INFOR] MainProcess(23740):google            (18132) | module.finish:68 - GoogleSearch module took 44.3 seconds found 0 Email
+2022-09-29 11:20:03,118 [DEBUG] MainProcess(23740):so                (18792) | so.search:65 - Searching https://www.so.com/s?p&n&=&2
+2022-09-29 11:20:04,880 [ALERT] MainProcess(23740):sogou             (22788) | utils.check_response:123 - GET https://github.com/webvul/InsectsAwake 406 - Not Acceptable 0
+2022-09-29 11:20:08,108 [ALERT] MainProcess(23740):sogou             (22788) | utils.check_response:123 - GET https://github.com/ActorExpose/SCANNER-INURLBR/tree/e7ee006e6aa4c73bf1bf67c67882b7d96f06e75d 406 - Not Acceptable 0
+2022-09-29 11:20:13,727 [ALERT] MainProcess(23740):so                (18792) | utils.check_response:123 - GET https://blog.csdn.net/weixin_39617702/article/details/111839217 404 - Not Found 31521
+2022-09-29 11:20:13,894 [ALERT] MainProcess(23740):so                (18792) | utils.check_response:123 - GET https://blog.csdn.net/weixin_39617702/article/details/111839217 404 - Not Found 31521
+2022-09-29 11:20:15,934 [ERROR] MainProcess(23740):sogou             (22788) | module.get:110 - [*] request: https://github.com/SecWiki/AwvScan
+2022-09-29 11:20:15,934 [ERROR] MainProcess(23740):sogou             (22788) | module.get:115 - HTTPSConnectionPool(host='github.com', port=443): Read timed out. (read timeout=5)
+2022-09-29 11:20:16,069 [DEBUG] MainProcess(23740):so                (18792) | module.finish:66 - Finished SoSearch module to collect vulweb.com's Email
+2022-09-29 11:20:16,069 [INFOR] MainProcess(23740):so                (18792) | module.finish:68 - SoSearch module took 59.9 seconds found 0 Email
+2022-09-29 11:20:25,957 [ERROR] MainProcess(23740):sogou             (22788) | module.get:110 - [*] request: https://github.com/samueltt/SCANNER-INURLBR
+2022-09-29 11:20:25,959 [ERROR] MainProcess(23740):sogou             (22788) | module.get:115 - HTTPSConnectionPool(host='github.com', port=443): Max retries exceeded with url: /samueltt/SCANNER-INURLBR (Caused by ConnectTimeoutError(<urllib3.connection.HTTPSConnection object at 0x0000017F320DAA00>, 'Connection to github.com timed out. (connect timeout=5)'))
+2022-09-29 11:20:51,240 [ERROR] MainProcess(23740):sogou             (22788) | module.get:110 - [*] request: https://hipaywallet.com/
+2022-09-29 11:20:51,241 [ERROR] MainProcess(23740):sogou             (22788) | module.get:115 - HTTPSConnectionPool(host='hipaywallet.com', port=443): Read timed out. (read timeout=5)
+2022-09-29 11:21:25,116 [ERROR] MainProcess(23740):sogou             (22788) | module.get:110 - [*] request: https://vulpith.com/
+2022-09-29 11:21:25,116 [ERROR] MainProcess(23740):sogou             (22788) | module.get:115 - HTTPSConnectionPool(host='vulpith.com', port=443): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x0000017F320DA100>: Failed to establish a new connection: [WinError 10061] 由于目标计算机积极拒绝，无法连接。'))
+2022-09-29 11:21:55,524 [ALERT] MainProcess(23740):sogou             (22788) | utils.check_response:123 - GET https://www.web.com/ 403 - Forbidden 949255
+2022-09-29 11:22:36,282 [ERROR] MainProcess(23740):sogou             (22788) | module.get:110 - [*] request: http://www.lbldy.com/
+2022-09-29 11:22:36,283 [ERROR] MainProcess(23740):sogou             (22788) | module.get:115 - HTTPConnectionPool(host='www.lbldy.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000017F320FC5E0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))
+2022-09-29 11:23:48,076 [ERROR] MainProcess(23740):sogou             (22788) | module.get:110 - [*] request: http://webhostingdeals.easywebx.com/
+2022-09-29 11:23:48,077 [ERROR] MainProcess(23740):sogou             (22788) | module.get:115 - HTTPConnectionPool(host='webhostingdeals.easywebx.com', port=80): Max retries exceeded with url: / (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000017F320DA790>: Failed to establish a new connection: [Errno 11002] getaddrinfo failed'))
+2022-09-29 11:23:50,615 [ERROR] MainProcess(23740):sogou             (22788) | module.get:110 - [*] request: http://vulkk.com/
+2022-09-29 11:23:50,616 [ERROR] MainProcess(23740):sogou             (22788) | module.get:115 - ('Connection aborted.', ConnectionResetError(10054, '远程主机强迫关闭了一个现有的连接。', None, 10054, None))
+2022-09-29 11:24:12,823 [ALERT] MainProcess(23740):sogou             (22788) | utils.check_response:123 - GET http://www.ulinix.com/ 406 - Not Acceptable 1227
+2022-09-29 11:24:18,909 [ERROR] MainProcess(23740):sogou             (22788) | module.get:110 - [*] request: https://vuldb.com/
+2022-09-29 11:24:18,910 [ERROR] MainProcess(23740):sogou             (22788) | module.get:115 - HTTPSConnectionPool(host='vuldb.com', port=443): Read timed out. (read timeout=5)
+2022-09-29 11:24:55,386 [ERROR] MainProcess(23740):sogou             (22788) | module.get:110 - [*] request: http://servicevertrag.com/
+2022-09-29 11:24:55,386 [ERROR] MainProcess(23740):sogou             (22788) | module.get:115 - HTTPSConnectionPool(host='servicevertrag.com', port=443): Read timed out. (read timeout=5)
+2022-09-29 11:25:12,863 [ALERT] MainProcess(23740):sogou             (22788) | utils.check_response:123 - GET http://technet.microsoft.com/zh-cn/magazine/system.web.ui.webcontrols.loginstatus.logintext(ru-ru).aspx 403 - Forbidden 886
+2022-09-29 11:25:13,517 [ALERT] MainProcess(23740):sogou             (22788) | utils.check_response:123 - GET http://www.sccnn.com/ 406 - Not Acceptable 1313
+2022-09-29 11:25:13,874 [ALERT] MainProcess(23740):sogou             (22788) | utils.check_response:123 - GET http://msdn.microsoft.com/pt-br/system.web.ui.webcontrols.loginstatus.logintext(VS.80).aspx 403 - Forbidden 886
+2022-09-29 11:25:16,406 [ALERT] MainProcess(23740):sogou             (22788) | utils.check_response:123 - GET http://msdn.microsoft.com/pt-br/system.web.ui.webcontrols.loginstatus.logintext(VS.90).aspx 403 - Forbidden 886
+2022-09-29 11:25:50,447 [ALERT] MainProcess(23740):sogou             (22788) | utils.check_response:123 - GET https://msdn.microsoft.com/sr-latn-rs/library/system.web.ui.webcontrols.loginstatus.logintext(v=vs.80) 403 - Forbidden 886
+2022-09-29 11:26:00,861 [ERROR] MainProcess(23740):sogou             (22788) | module.get:110 - [*] request: http://www.jshoppers.com/
+2022-09-29 11:26:00,862 [ERROR] MainProcess(23740):sogou             (22788) | module.get:115 - HTTPSConnectionPool(host='www.jshoppers.com', port=443): Read timed out. (read timeout=5)

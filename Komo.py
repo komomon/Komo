@@ -134,7 +134,6 @@ class Komo(object):
         dd = download_tools.Download()
         dd.run()
 
-
     # 只进行子域扫描
     def subdomain(self):
         if self.domains_list:
@@ -198,6 +197,10 @@ class Komo(object):
         else:
             logger.error("[-] Please check --ip or --ips")
 
+    def attack(self):
+        self.webattack()
+        self.webattack()
+
     # 只扫描，不攻击 提供主域名或者主域名文件，顺序执行
     def collect(self):
         '''
@@ -209,11 +212,8 @@ class Komo(object):
         if self.domains_list:
             for domain in self.domains_list:
                 domain_main.manager(domain=domain, date=self.date)
-            for domain in self.domains_list:
                 finger_main.manager(domain=domain, url=None, urlsfile=None, date=self.date)
-            for domain in self.domains_list:
                 portscan_main.manager(domain=domain, ip=None, ipfile=None, date=self.date)
-            for domain in self.domains_list:
                 sensitiveinfo_main.manager(domain=domain, url=None, urlsfile=None, attackflag=self.attackflag,
                                            date=self.date)
                 # vulscan_main.webmanager(domain=self.domain, url=None, urlsfile=None, date=self.date)
@@ -231,16 +231,11 @@ class Komo(object):
         if self.domains_list:
             for domain in self.domains_list:
                 domain_main.manager(domain=domain, date=self.date)
-            for domain in self.domains_list:
                 finger_main.manager(domain=domain, urlsfile=None, date=self.date)
-            for domain in self.domains_list:
                 portscan_main.manager(domain=domain, ip=None, ipfile=None, date=self.date)
-            for domain in self.domains_list:
                 sensitiveinfo_main.manager(domain=domain, url=None, urlsfile=None, attackflag=self.attackflag,
                                            date=self.date)
-            for domain in self.domains_list:
                 vulscan_main.webmanager(domain=domain, url=None, urlsfile=None, date=self.date)
-            for domain in self.domains_list:
                 vulscan_main.hostmanager(domain=domain, ip=None, ipfile=None, date=self.date)
         else:
             logger.error("[-] Please check --domain or --domains")
@@ -248,3 +243,4 @@ class Komo(object):
 
 if __name__ == '__main__':
     fire.Fire(Komo)
+

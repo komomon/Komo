@@ -17,7 +17,6 @@ def create_logfile():
 
 
 def get_system():
-
     platform = sys.platform
     if platform == 'win32':
         suffix = ".exe"
@@ -29,20 +28,22 @@ def get_system():
         exit(1)
 
 
+
 @logger.catch
 def manager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
     suffix = get_system()
     root = os.getcwd()
     pwd_and_file = os.path.abspath(__file__)
     pwd = os.path.dirname(pwd_and_file)
+    grader_father = os.path.abspath(os.path.dirname(pwd_and_file) + os.path.sep + "../..")
+    # print(grader_father) # E:\ccode\python\006_lunzi\core
 
-    grader_father = os.path.abspath(
-        os.path.dirname(pwd_and_file) + os.path.sep + "../..")
-
+    # 创建存储工具扫描结果的文件夹
     portscan_log_folder = f"result/{date}/portscan_log"
     if os.path.exists(portscan_log_folder) is False:
         os.makedirs(portscan_log_folder)
 
+    # 三种模式
     if domain and ip is None and ipfile is None:
         ipfile = f'result/{date}/{domain}.subdomains.ips.txt'
         output_filename_prefix = domain
@@ -56,6 +57,7 @@ def manager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
             f.write(ip)
     else:
         logger.error("[-] Please --domain or --ip or --ipfile")
+        exit(1)
 
     @logger.catch
     def naabu(ip=ip, ipfile=ipfile):
@@ -63,8 +65,7 @@ def manager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
         naabu 2.1.0
         :return:
         '''
-        logger.info(
-            '-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
+        logger.info('-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
         ports_str = "22,80,1433,1521,3389,8009,8080,8443"
         ports_str = "21,22,23,25,53,53,69,80,81,88,110,111,111,123,123,135,137,139,161,177,389,427,443,445,465,500,515," \
                     "520,523,548,623,626,636,873,902,1080,1099,1433,1434,1521,1604,1645,1701,1883,1900,2049,2181,2375," \
@@ -74,22 +75,47 @@ def manager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
         # print(domain,ip,ips,ipfile)
         outputfile = f'{portscan_log_folder}/{output_filename_prefix}.{sys._getframe().f_code.co_name}.txt'
         cmdstr = f'{pwd}/naabu/naabu{suffix} -source-ip 8.8.8.8:22 -rate 150 -top-ports 100 -silent -no-color -list {ipfile} -o {outputfile}'
-        # naabu -list hosts.txt -p - 扫描全部  -exclude-cdn 跳过cdn检测，cdn只检查80 443
-        # cmd = pwd + f'/naabu{suffix} -p "{ports_str}" -silent -no-color -scan-all-ips -list result/{date}/{domain}.final.subdomains.txt -o {portscan_log_folder}/{domain}.{sys._getframe().f_code.co_name}.txt'
-        # nmap 常见100个端口 -scan-all-ips
-        # cmdstr = f'{pwd}/naabu{suffix} -top-ports 100 -silent -no-color -list result/{date}/{domain}.final.subdomains.txt -o {portscan_log_folder}/{domain}.{sys._getframe().f_code.co_name}.txt'
         logger.info(f"[+] command:{cmdstr}")
         os.system(cmdstr)
         logger.info(f'[+] naabu finished,outputfile:{outputfile}')
 
+    # win不可用先剔除
+    @logger.catch
+    def dismap(ip=ip, ipfile=ipfile):
+        '''
+        dismap 0.4
+        :return:
+        '''
+        logger.info('-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
+        ports_str = "22,80,1433,1521,3389,8009,8080,8443"
+        ports_str = "21,22,23,25,53,53,69,80,81,88,110,111,111,123,123,135,137,139,161,177,389,427,443,445,465,500,515," \
+                    "520,523,548,623,626,636,873,902,1080,1099,1433,1434,1521,1604,1645,1701,1883,1900,2049,2181,2375," \
+                    "2379,2425,3128,3306,3389,4730,5060,5222,5351,5353,5432,5555,5601,5672,5683,5900,5938,5984,6000,6379," \
+                    "7001,7077,8080,8081,8443,8545,8686,9000,9001,9042,9092,9100,9200,9418,9999,11211,11211,27017,33848," \
+                    "37777,50000,50070,61616"
+        # print(domain,ip,ips,ipfile)
+        if domain and ip is None and ipfile is None:
+            file = f'result/{date}/{domain}.subdomains.ips.txt'
+            outputfile = f'{portscan_log_folder}/{domain}.{sys._getframe().f_code.co_name}.txt'
+            cmdstr = f'{pwd}/dismap/dismap{suffix} --file {file} --np -p {ports_str} -o {outputfile}'
+        elif ipfile and domain is None and ip is None:
+            file = ipfile
+            outputfile = f'{portscan_log_folder}/{date}.{sys._getframe().f_code.co_name}.txt'
+            cmdstr = f'{pwd}/dismap/dismap{suffix} --file {file} --np -p {ports_str} -o {outputfile}'
+        else:
+            logger.error("[-] Please --domain or --ips")
+            return False
+        logger.info(f"[+] command:{cmdstr}")
+        os.system(cmdstr)
+
+    # 写好了，暂不调用了，这个项目使用了nmap的库，并对端口进行指纹识别，同时也借用了naabu的思路，但是是2020年的，同时使用的是connect连接，不是syn
     @logger.catch
     def nmaps(ip=ip, ipfile=ipfile):
         '''
         nmaps 1.0 2020
         :return:
         '''
-        logger.info(
-            '-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
+        logger.info('-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
         ports_str = "22,80,1433,1521,3389,8009,8080,8443"
         ports_str = "21,22,23,25,53,53,69,80,81,88,110,111,111,123,123,135,137,139,161,177,389,427,443,445,465,500,515," \
                     "520,523,548,623,626,636,873,902,1080,1099,1433,1434,1521,1604,1645,1701,1883,1900,2049,2181,2375," \
@@ -112,8 +138,11 @@ def manager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
         logger.info(f"[+] command:{cmdstr}")
         os.system(cmdstr)
 
-    naabu(ip=None, ipfile=ipfile)
-    # nmaps(ips=None,ipfile=ipfile)
+    def run():
+        naabu(ip=None, ipfile=ipfile)
+        # nmaps(ips=None,ipfile=ipfile)
+
+    run()
 
 
 @logger.catch
@@ -128,6 +157,7 @@ def run(ip=None, ips=None, ipfile=None, date=None):
     :param str  urlfile:    File path of ipfile per line
     :return:
     '''
+    # 后面吧ip 支持cidr,去掉ips参数
     create_logfile()
     import datetime
     date1 = str(datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S"))
@@ -140,8 +170,7 @@ def run(ip=None, ips=None, ipfile=None, date=None):
         else:
             logger.error(f'{ips} not found!')
     else:
-        logger.error(
-            "Please check --ip or --ips\nCheck that the parameters are correct.")
+        logger.error("Please check --ip or --ips\nCheck that the parameters are correct.")
 
 
 if __name__ == '__main__':

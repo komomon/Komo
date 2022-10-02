@@ -38,17 +38,20 @@ class Qwant(Search):
                       'device': 'desktop',
                       'safesearch': 1
                       }
-            resp = self.get(self.addr, params)
-            if not resp:
-                return
-            data = resp.json()
-            for urls in data['data']['result']['items']['mainline'][0]['items']:
-                rep = self.get(urls['url'])
-                emails = self.match_emails(rep)
-                if emails:
-                    self.results.update(emails)
-                else:
-                    continue
+            try:
+                resp = self.get(self.addr, params)
+                if not resp:
+                    return
+                data = resp.json()
+                for urls in data['data']['result']['items']['mainline'][0]['items']:
+                    rep = self.get(urls['url'])
+                    emails = self.match_emails(rep)
+                    if emails:
+                        self.results.update(emails)
+                    else:
+                        continue
+            except Exception as e:
+                print(str(e))
             self.page_num += 1
             if self.per_page_num == 0:
                 self.per_page_num = 10

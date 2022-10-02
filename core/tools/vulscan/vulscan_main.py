@@ -61,7 +61,7 @@ def getips(ipstr_list):
             except Exception as e:
                 logger.error(f'wentidata:{i}')
                 logger.exception(str(e))
-    #iplist =
+    # iplist =
     logger.info(f'[+] ip number：{len(ips_set)}')
     return list(ips_set)
 
@@ -69,7 +69,7 @@ def getips(ipstr_list):
 # 判断当前时间与上次修改时间的大小，如果差大于5天，则更新
 def whether_update(file):
     modify_time = os.path.getmtime(file)
-    if time.time()-modify_time > 86400*5:
+    if time.time() - modify_time > 86400 * 5:
         return True
     else:
         return False
@@ -77,8 +77,6 @@ def whether_update(file):
 
 def checkport(port):
     if port < 1024 or 65535 < port:
-        # privileged port
-        # out of range
         return False
     if 'win32' == sys.platform:
         cmd = 'netstat -aon|findstr ":%s "' % port
@@ -94,49 +92,42 @@ def checkport(port):
             logger.error('Port %s is not open' % port)
             return False
 
+
 # 启用子进程执行外部shell命令
-
-
 @logger.catch
 def __subprocess(cmd):
+    # 得到一个临时文件对象， 调用close后，此文件从磁盘删除
+    out_temp = tempfile.TemporaryFile(mode='w+b')
+    rt_list = []
     try:
-        # 得到一个临时文件对象， 调用close后，此文件从磁盘删除
-        out_temp = tempfile.TemporaryFile(mode='w+b')
         # 获取临时文件的文件号
         fileno = out_temp.fileno()
-
         # 执行外部shell命令， 输出结果存入临时文件中
         p = subprocess.Popen(cmd, shell=True, stdout=fileno, stderr=fileno)
         p.wait()
-
         # 从临时文件读出shell命令的输出结果
         out_temp.seek(0)
         rt = out_temp.read()
-
         # 以换行符拆分数据，并去掉换行符号存入列表
         rt_list = rt.strip().split('\n')
-
     except Exception as e:
         logger.error(traceback.format_exc())
         # print(traceback.format_exc())
-
     finally:
         if out_temp:
             out_temp.close()
-
     return rt_list
 
 
 # 启用子进程执行外部shell命令
-@logger.catch
+# @logger.catch
 def __subprocess1(cmd, timeout=None):
     if isinstance(cmd, str):
         cmd = cmd.split(' ')
     elif isinstance(cmd, list):
         cmd = cmd
     else:
-        logger.error(
-            f'[-] cmd type error,cmd should be a string or list: {cmd}')
+        logger.error(f'[-] cmd type error,cmd should be a string or list: {cmd}')
         return
     try:
         # 执行外部shell命令， 输出结果存入临时文件中
@@ -160,20 +151,16 @@ def __subprocess2(cmd):
     elif isinstance(cmd, list):
         cmd = cmd
     else:
-        logger.error(
-            f'[-] cmd type error,cmd should be a string or list: {cmd}')
+        logger.error(f'[-] cmd type error,cmd should be a string or list: {cmd}')
         return
     lines = []
+    out_temp = tempfile.SpooledTemporaryFile(max_size=10 * 1000, mode='w+b')
     try:
-        # cmd = "ls -lh"
-        out_temp = tempfile.SpooledTemporaryFile(
-            max_size=10 * 1000, mode='w+b')
         fileno = out_temp.fileno()
         obj = subprocess.Popen(cmd, stdout=fileno, stderr=fileno, shell=True)
         obj.wait()
         out_temp.seek(0)
         lines = out_temp.readlines()
-        # print(lines)
     except Exception as e:
         logger.error(traceback.format_exc())
     finally:
@@ -198,13 +185,9 @@ def request0(req_json):
     data0 = req_json['data'] if "data" in req_json.keys() else ""
     try:
         if (method0 == 'GET'):
-            a = requests.get(urls0, headers=headers0,
-                             proxies=proxies, timeout=30, verify=False)
-            # opt2File(urls0)
+            requests.get(urls0, headers=headers0, proxies=proxies, timeout=30, verify=False)
         elif (method0 == 'POST'):
-            a = requests.post(urls0, headers=headers0, data=data0,
-                              proxies=proxies, timeout=30, verify=False)
-            # opt2File(urls0)
+            requests.post(urls0, headers=headers0, data=data0, proxies=proxies, timeout=30, verify=False)
     except:
         logger.exception(f'[-] {urls0} request failed!')
         logger.error(f"[-] {req_json['url']} send to xray failed!")
@@ -218,13 +201,10 @@ def webmanager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39")
     suffix = get_system()
     root = os.getcwd()
     pwd_and_file = os.path.abspath(__file__)
-    # E:\ccode\python\006_lunzi\core\tools\domain
     pwd = os.path.dirname(pwd_and_file)
-    # 获取当前目录的前三级目录，即到domain目录下，来寻找exe domain目录下
-    grader_father = os.path.abspath(
-        os.path.dirname(pwd_and_file) + os.path.sep + "../..")
+    grader_father = os.path.abspath(os.path.dirname(pwd_and_file) + os.path.sep + "../..")
     logger.info('-' * 10 + f'start {__file__}' + '-' * 10)
-    # 创建存储子域名工具扫描结果的文件夹
+
     vulscan_log_folder = f"result/{date}/vulscan_log"
     if os.path.exists(vulscan_log_folder) is False:
         os.makedirs(vulscan_log_folder)
@@ -238,8 +218,7 @@ def webmanager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39")
         urlsfile = urlsfile
     elif domain is None and urlsfile is None and url:
         subdomain_tuple = tldextract.extract(url)
-        output_filename_prefix = '.'.join(
-            part for part in subdomain_tuple if part)  # www_baidu_com 127_0_0_1
+        output_filename_prefix = '.'.join(part for part in subdomain_tuple if part)  # www_baidu_com 127_0_0_1
         urlsfile = f"temp.{sys._getframe().f_code.co_name}.txt"
         with open(urlsfile, "w", encoding="utf-8") as f:
             f.write(url)
@@ -251,33 +230,27 @@ def webmanager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39")
         结果输出目录 {vulscan_log_folder}/{sys._getframe().f_code.co_name}_log
         :return:
         '''
-        logger.info(
-            '-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
+        logger.info('-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
 
-        # 更新poc库
         if os.path.exists(f"{pwd}/nuclei/pocdata") is False:
             os.makedirs(f"{pwd}/nuclei/pocdata")
         if whether_update(f"{pwd}/nuclei/pocdata"):
-            cmdstr = pwd + \
-                f"/nuclei/nuclei{suffix} -silent -ut -ud {pwd}/nuclei/pocdata"
+            cmdstr = pwd + f"/nuclei/nuclei{suffix} -silent -ut -ud {pwd}/nuclei/pocdata"
             logger.info(f"[+] command:{cmdstr}")
             os.system(cmdstr)
-            logger.info(
-                f'[+] {sys._getframe().f_code.co_name} update finished!')
+            logger.info(f'[+] {sys._getframe().f_code.co_name} update finished!')
 
-        # 创建nuclei_log目录，存储扫描结果，md报告
         output_folder = f"{vulscan_log_folder}/{sys._getframe().f_code.co_name}_log"
         if os.path.exists(output_folder) is False:
             os.makedirs(output_folder)
 
         # -as, -automatic-scan         automatic web scan using wappalyzer technology detection to tags mapping
         cmdstr = f'{pwd}/nuclei/nuclei{suffix}  -l {urlsfile} -t {pwd}/nuclei/pocdata ' \
-            f'-automatic-scan -s low,medium,high,critical,unknown -no-color -rate-limit 500 -bulk-size 250 -concurrency 250 ' \
-            f'-silent -stats -si 10 -retries 2 -me {output_folder}'
+                 f'-automatic-scan -s low,medium,high,critical,unknown -no-color -rate-limit 500 -bulk-size 250 -concurrency 250 ' \
+                 f'-silent -stats -si 10 -retries 2 -me {output_folder}'
         logger.info(f"[+] command:{cmdstr}")
         __subprocess1(cmdstr, timeout=None)
 
-    # result/{date}/{domain}.subdomains_with_http.txt result/{date}/{domain}.subdomains_ips.txt
     @logger.catch
     def afrog(urlsfile=urlsfile):
         '''
@@ -285,16 +258,13 @@ def webmanager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39")
         输出目录 reports/{domain}.afrog.html
         :return:
         '''
-        logger.info(
-            '-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
-        # 更新漏洞库，5天查一次更新一次
+        logger.info('-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
         try:
             if whether_update(f"{os.path.expanduser('~')}/afrog-pocs"):
                 cmdstr = pwd + f'/afrog/afrog{suffix} --up'
                 logger.info(f"[+] command:{cmdstr}")
                 os.system(cmdstr)
-                logger.info(
-                    f'[+] {sys._getframe().f_code.co_name} update finished!')
+                logger.info(f'[+] {sys._getframe().f_code.co_name} update finished!')
         except Exception as e:
             logger.exception(e)
             logger.error('afrog 更新失败')
@@ -308,11 +278,9 @@ def webmanager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39")
         __subprocess1(cmdstr, timeout=None)
         # 移动结果文件到对应目录下
         if isexist(f"reports/{output_filename_prefix}.{sys._getframe().f_code.co_name}.html"):
-            shutil.move(
-                f"reports/{output_filename_prefix}.{sys._getframe().f_code.co_name}.html", output_folder)
+            shutil.move(f"reports/{output_filename_prefix}.{sys._getframe().f_code.co_name}.html", output_folder)
 
     # 目前只支持urls文件，单个url也是写入文件，然后工具从文件中读取
-
     @logger.catch
     def vulmap(url=url, urlsfile=urlsfile):
         '''
@@ -321,9 +289,7 @@ def webmanager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39")
         输出目录
         :return:
         '''
-        # if get_system() =="":
-        logger.info(
-            '-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
+        logger.info('-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
         # 目前只支持urls文件，单个url也是写入文件，然后工具从文件中读取
         if url:
             cmdstr = f'python3 {pwd}/vulmap/vulmap.py -u {url} --output-text {vulscan_log_folder}/{output_filename_prefix}.{sys._getframe().f_code.co_name}.txt'
@@ -343,16 +309,14 @@ def webmanager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39")
         xray 主动扫描
         xray 1.9.1
         '''
-        cprint(
-            '-' * 10 + f'start {sys._getframe().f_code.co_name} ...' + '-' * 10, 'green')
+        cprint('-' * 10 + f'start {sys._getframe().f_code.co_name} ...' + '-' * 10, 'green')
         tool_name = '{pwd}/xray/xray{suffix}'
         ports_list = ['80', '443', '8080', '8009', '8443']
 
         if os.path.exists(tool_name) is False:
             cprint('-' * 10 + f'{tool_name} not found' + '-' * 10, 'red')
             return
-        # result/{date}/vulscan_log/xray_log
-        output_folder = f'{vulscan_log_folder}/xray_log'
+        output_folder = f'{vulscan_log_folder}/xray_log'  # result/{date}/vulscan_log/xray_log
         if os.path.exists(output_folder) is False:
             os.makedirs(output_folder)
 
@@ -363,17 +327,13 @@ def webmanager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39")
                     for url in f.readlines():
                         if url.strip() != "":
                             # cmd = pwd + f'/xray/xray{suffix} {mode} --basic-crawler {url.strip()} --html-output result/{date}/xray_log/{domain}.xray.{mode}.html'
-                            cmdstr = pwd + \
-                                f'/xray/xray{suffix} {mode} --basic-crawler {url.strip()} --html-output {output_folder}/{output_filename_prefix}.{sys._getframe().f_code.co_name}.{mode}.html'
+                            cmdstr = pwd + f'/xray/xray{suffix} {mode} --basic-crawler {url.strip()} --html-output {output_folder}/{output_filename_prefix}.{sys._getframe().f_code.co_name}.{mode}.html'
                             cprint(f"[+] command:{cmdstr}", 'green')
                             os.system(cmdstr)
             # 扫主机到时候在改改,需要加端口
             elif mode == 'servicescan':
                 pass
-                # 批量检查的 1.file 中的目标, 一行一个目标，带端口
-                # ./xray servicescan --target-file 1.file
-                cmd = pwd + \
-                    f'/xray/xray{suffix} {mode} --target-file {file} --html-output {output_folder}/{output_filename_prefix}.{sys._getframe().f_code.co_name}.{mode}.html'
+                cmd = pwd + f'/xray/xray{suffix} {mode} --target-file {file} --html-output {output_folder}/{output_filename_prefix}.{sys._getframe().f_code.co_name}.{mode}.html'
                 cprint(f"[+] command:{cmd}", 'green')
                 os.system(cmd)
             elif mode == 'x':
@@ -382,8 +342,7 @@ def webmanager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39")
                 with open(file, 'r', encoding='utf-8') as f:
                     for url in f.readlines():
                         if url.strip() != "":
-                            cmdstr = pwd + \
-                                f'/xray/xray{suffix} {mode} --target {url.strip()} -p "{",".join(ports_list)}"--html-output {output_folder}/{output_filename_prefix}.{sys._getframe().f_code.co_name}.{mode}.html'
+                            cmdstr = pwd + f'/xray/xray{suffix} {mode} --target {url.strip()} -p "{",".join(ports_list)}"--html-output {output_folder}/{output_filename_prefix}.{sys._getframe().f_code.co_name}.{mode}.html'
                             cprint(f"[+] command:{cmdstr}", 'green')
                             os.system(cmdstr)
                             # __subprocess1(cmdstr, timeout=900)
@@ -395,41 +354,32 @@ def webmanager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39")
         xray 1.9.1
         :return:
         '''
-        logger.info(
-            '-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
-        # f"result/{date}/vulscan_log/xray_log"
-        output_folder = f'{vulscan_log_folder}/xray_log'
+        logger.info('-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
+        output_folder = f'{vulscan_log_folder}/xray_log'  # f"result/{date}/vulscan_log/xray_log"
         if os.path.exists(output_folder) is False:
             os.makedirs(output_folder)
         xray_out = f'{pwd}/result/{date}/vulscan_log/xray_log/{time.strftime("%Y-%m-%d_%H_%M_%S", time.localtime())}.html'
-        xray_cmd = ["xray.exe", "webscan", "--listen",
-                    "127.0.0.1:7777", "--html-output", xray_out]
+        xray_cmd = ["xray.exe", "webscan", "--listen", "127.0.0.1:7777", "--html-output", xray_out]
         logger.info(f"[+] xray: {xray_cmd}")
         tool_path = os.path.join(pwd, 'xray')
-        # 不是有wait() 进行阻塞，否则就只监听没结果了
-        xray_rsp = subprocess.Popen(xray_cmd, shell=True, cwd=tool_path)
+        xray_rsp = subprocess.Popen(xray_cmd, shell=True, cwd=tool_path)  # 不是有wait() 进行阻塞，否则就只监听没结果了
         time.sleep(5)
 
     # 暂时先不用，发送到xray被动扫描 存在很多遗漏，以后有时间再细测
     def to_xray():
-        logger.info(
-            '-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
-        if checkport(7777) is False:
-            return
+        logger.info('-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
+        if checkport(7777) is False: return
         # 发送给xray的监听端口
-        if isexist(f'result/{date}/{domain}.links.csv') is False:
-            return
+        if isexist(f'result/{date}/{domain}.links.csv') is False: return
         with open(f'result/{date}/{domain}.links.csv') as f:
             reader = csv.reader(f)
             next(reader)
             for row in reader:
                 # print(type(row[2]))  dict(json.loads(row[2]))
                 # print({"method":row[0],"url":row[1],"headers":dict(json.loads(row[2])),"data":row[3]})
-                request0({"method": row[0], "url": row[1],
-                         "headers": row[2], "data": row[3]})
+                request0({"method": row[0], "url": row[1], "headers": row[2], "data": row[3]})
 
     # 目前只支持urls文件，单个url也是写入文件，然后工具从文件中读取
-
     @logger.catch
     def vscan(urlsfile=urlsfile):
         '''
@@ -441,8 +391,7 @@ def webmanager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39")
         :return:
         '''
         # if get_system() =="":
-        logger.info(
-            '-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
+        logger.info('-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
         ports_str = "21,22,23,25,53,53,69,80,81,88,110,111,111,123,123,135,137,139,161,177,389,427,443,445,465,500,515," \
                     "520,523,548,623,626,636,873,902,1080,1099,1433,1434,1521,1604,1645,1701,1883,1900,2049,2181,2375," \
                     "2379,2425,3128,3306,3389,4730,5060,5222,5351,5353,5432,5555,5601,5672,5683,5900,5938,5984,6000,6379," \
@@ -460,13 +409,17 @@ def webmanager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39")
         logger.info(f"[+] command:{cmdstr}")
         __subprocess1(cmdstr, timeout=None)
 
-    # {domain}.subdomain_with_http.txt
-    nuclei(urlsfile=urlsfile)
-    afrog(urlsfile=urlsfile)
-    vulmap(urlsfile=urlsfile)
-    # to_xray()
-    # 扫描敏感目录和弱口令爆破
-    vscan(urlsfile=urlsfile)
+    def run():
+        # {domain}.subdomain_with_http.txt
+        nuclei(urlsfile=urlsfile)
+        afrog(urlsfile=urlsfile)
+        vulmap(urlsfile=urlsfile)
+        # to_xray()
+        # 扫描敏感目录和弱口令爆破
+        vscan(urlsfile=urlsfile)
+        logger.info('-' * 10 + f'finished {sys._getframe().f_code.co_name}' + '-' * 10)
+
+    run()
 
 
 # 对ip进行扫描
@@ -475,11 +428,9 @@ def hostmanager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
     suffix = get_system()
     root = os.getcwd()
     pwd_and_file = os.path.abspath(__file__)
-    # E:\ccode\python\006_lunzi\core\tools\domain
-    pwd = os.path.dirname(pwd_and_file)
+    pwd = os.path.dirname(pwd_and_file)  # E:\ccode\python\006_lunzi\core\tools\domain
     # 获取当前目录的前三级目录，即到domain目录下，来寻找exe domain目录下
-    grader_father = os.path.abspath(
-        os.path.dirname(pwd_and_file) + os.path.sep + "../..")
+    grader_father = os.path.abspath(os.path.dirname(pwd_and_file) + os.path.sep + "../..")
     logger.info('-' * 10 + f'start {__file__}' + '-' * 10)
     # 创建存储子域名工具扫描结果的文件夹
     vulscan_log_folder = f"result/{date}/vulscan_log"
@@ -507,8 +458,7 @@ def hostmanager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
         输出目录
         :return:
         '''
-        logger.info(
-            '-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
+        logger.info('-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
         if ip:
             cmdstr = f'{pwd}\goon\goon{suffix} -ip {ip} -ofile {vulscan_log_folder}/{output_filename_prefix}.{sys._getframe().f_code.co_name}.txt'
         elif ipfile:
@@ -517,7 +467,6 @@ def hostmanager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
             logger.error("Please check ip or ipfile")
             return
         logger.info(f"[+] command:{cmdstr}")
-        # os.system(cmdstr)
         __subprocess1(cmdstr, timeout=None)
 
     # 只是为了统一 -host参数可以为单ip cidr 也可以为文件
@@ -525,24 +474,12 @@ def hostmanager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
     def SweetBabyScan(ip=ip, ipfile=ipfile):
         '''
         SweetBabyScan v0.1.0
-        目前输出文件-oe -ot 参数不可用，指定不生效，对原文件进行了修改默认进行截屏，改成了false 在编译的。
-        ++SweetBabyScan-轻量级内网资产探测漏洞扫描工具类似fscan，集成了xray和nucleipoc--inbug-team
-            主机[IP&域名]存活检测，支持PING/ICMP模式
-            端口[IP&域名]服务扫描
-            网站爬虫截图，CMS识别
-            Nuclei & Xray POC
-            网卡识别、域控识别、SMBGhost、MS17017
-            弱口令爆破：
-            文件：FTP/SMB
-            远程：SSH/RDP/SNMP
-            数据库：Redis/MongoDB/MySQL/SQLServer/PgSQL/ES/Oracle/Memcached
         SbScanAmd64_false.exe -host 44.228.249.3 -p normal -wsh 150 -wsp 150 -is False -oe 1/xx.xlsx -ot 1/xx.txt
         输出目录
         :return:
         '''
         # if get_system() =="":
-        logger.info(
-            '-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
+        logger.info('-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
         ports_str = "21,22,23,25,53,53,69,80,81,88,110,111,111,123,123,135,137,139,161,177,389,427,443,445,465,500,515," \
                     "520,523,548,623,626,636,873,902,1080,1099,1433,1434,1521,1604,1645,1701,1883,1900,2049,2181,2375," \
                     "2379,2425,3128,3306,3389,4730,5060,5222,5351,5353,5432,5555,5601,5672,5683,5900,5938,5984,6000,6379," \
@@ -558,7 +495,6 @@ def hostmanager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
             logger.error("Please check ip or ipfile")
             return
         logger.info(f"[+] command:{cmdstr}")
-        # os.system(cmdstr)
         __subprocess1(cmdstr, timeout=None)
 
     # ip参数支持c段，直接使用其他工具测也可以
@@ -566,17 +502,10 @@ def hostmanager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
     def vscan(ip=ip, ipfile=ipfile):
         '''
         vscan v2.1
-        zhuyi:由于权限要求，不能使用子线程执行，只能使用主线程执行即os.system执行
-        改自nabbu，进行端口扫描，端口指纹识别，和简单的端口服务爆破
-        说白了也是一个web扫描，移植的naabu,在naabu的基础上添加了一些功能，当使用-top-ports的时候
-        直接调用原生naabu只扫描端口不识别指纹，不进行其他附加工作，即使有web，但使用-p参数可以，
-        输入可以是url可以是ip，如果是url则只进行web探测，bug点
-        输出目录
         :return:
         '''
         # if get_system() =="":
-        logger.info(
-            '-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
+        logger.info('-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
         ports_str = "21,22,23,25,53,53,69,80,81,88,110,111,111,123,123,135,137,139,161,177,389,427,443,445,465,500,515," \
                     "520,523,548,623,626,636,873,902,1080,1099,1433,1434,1521,1604,1645,1701,1883,1900,2049,2181,2375," \
                     "2379,2425,3128,3306,3389,4730,5060,5222,5351,5353,5432,5555,5601,5672,5683,5900,5938,5984,6000,6379," \
@@ -594,10 +523,14 @@ def hostmanager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
         logger.info(f"[+] command:{cmdstr}")
         __subprocess1(cmdstr, timeout=None)
 
-    goon(ip=ip, ipfile=ipfile)
-    # 暂未使用，主要是会下载chromewin每次执行
-    SweetBabyScan(ip=ip, ipfile=ipfile)
-    vscan(ip=ip, ipfile=ipfile)
+    def run():
+        goon(ip=ip, ipfile=ipfile)
+        # 暂未使用，主要是会下载chromewin每次执行
+        SweetBabyScan(ip=ip, ipfile=ipfile)
+        vscan(ip=ip, ipfile=ipfile)
+        logger.info('-' * 10 + f'finished {sys._getframe().f_code.co_name}' + '-' * 10)
+
+    run()
 
 
 @logger.catch
