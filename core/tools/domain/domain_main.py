@@ -12,6 +12,7 @@ import fire
 from loguru import logger
 import sys
 import dns
+import tldextract
 
 
 def create_logfile():
@@ -304,6 +305,7 @@ def manager(domain=None, date="2022-09-02-00-01-39"):
     @logger.catch
     def merge_result():
         subdomains_list = []
+        other_subdomains_list = []
         # subdomains_ips = []
         oneforall_output_filename = f"result/{date}/oneforall_log/{domain}.oneforall.csv"
         if os.path.exists(oneforall_output_filename):
@@ -314,8 +316,16 @@ def manager(domain=None, date="2022-09-02-00-01-39"):
                     subdomains_list.append(row[5])
                     # subdomains_ips.append(row)
         subdomains_list = list(set(subdomains_list))
+        for ssubdomain in subdomains_list:
+            # ExtractResult(subdomain='www', domain='worldbank', suffix='org.kg')
+            subdomain_tuple = tldextract.extract(ssubdomain)
+            if domain != subdomain_tuple.domain+subdomain_tuple.suffix:
+                other_subdomains_list.append(ssubdomain)
+                subdomains_list.remove(ssubdomain)
         with open(f"result/{date}/{domain}.final.subdomains.txt", 'w', encoding='utf-8') as fd2:
             fd2.writelines("\n".join(subdomains_list))
+        with open(f"result/{date}/{domain}.other.subdomains.txt", 'w', encoding='utf-8') as fd3:
+            fd3.writelines("\n".join(other_subdomains_list))
         logger.info(f'[+] Final find subdomains number: {len(subdomains_list)}')
         logger.info(f'[+] Final find subdomains outputfile: result/{date}/{domain}.final.subdomains.txt')
 
