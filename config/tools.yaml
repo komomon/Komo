@@ -116,6 +116,17 @@ download:
         - core/tools/finger/webanalyze/
         - webanalyze/
   portscan:
+    TxPortMap:
+      toolname: TxPortMap
+      whetherdownload: True
+      link: https://github.com/4dogs-cn/TXPortMap/releases/download/v1.1.2/TxPortMap_windows_x64.exe
+      downloadfile: TxPortMap.exe
+      source_name: TxPortMap.exe
+      final_name: TxPortMap.exe
+      tool_main_filename: TxPortMap.exe
+      topath:
+        - core/tools/portscan/TxPortMap/
+        - TxPortMap/
     # 暂不使用
     dismap:
       toolname: dismap
@@ -130,7 +141,7 @@ download:
         - dismap/
     naabu:
       toolname: naabu
-      whetherdownload: True
+      whetherdownload: False
       link: https://github.com/projectdiscovery/naabu/releases/download/v2.1.0/naabu_2.1.0_windows_amd64.zip
       downloadfile: naabu.zip
       source_name: naabu.exe
