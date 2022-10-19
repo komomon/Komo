@@ -68,11 +68,17 @@ def getips(ipstr_list):
 
 # 判断当前时间与上次修改时间的大小，如果差大于5天，则更新
 def whether_update(file):
-    modify_time = os.path.getmtime(file)
-    if time.time() - modify_time > 86400 * 5:
-        return True
+    if os.path.exists(file):
+        modify_time = os.path.getmtime(file)
+        time_difference = time.time() - modify_time
+        if time_difference < 86400 or time_difference > 86400 * 5:
+            return True
+        else:
+            return False
     else:
-        return False
+        os.makedirs(file)
+        logger.info(f"[+] Create {file} success")
+        return True
 
 
 def checkport(port):
