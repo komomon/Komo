@@ -141,7 +141,7 @@ download:
         - dismap/
     naabu:
       toolname: naabu
-      whetherdownload: False
+      whetherdownload: True
       link: https://github.com/projectdiscovery/naabu/releases/download/v2.1.0/naabu_2.1.0_windows_amd64.zip
       downloadfile: naabu.zip
       source_name: naabu.exe
@@ -158,7 +158,7 @@ download:
       downloadfile: chrome-win.zip
       source_name: chrome-win/
       final_name: chrome-win/
-      tool_main_filename:
+      tool_main_filename: chrome.exe
       topath:
         - core/tools/sensitiveinfo/
         - /
@@ -167,7 +167,7 @@ download:
       whetherdownload: True
       link: https://github.com/Qianlitp/crawlergo/releases/download/v0.4.3/crawlergo_windows_amd64.exe
       downloadfile: crawlergo.exe
-      source_name: crawlergo_windows_amd64.exe
+      source_name: crawlergo.exe
       final_name: crawlergo.exe
       tool_main_filename: crawlergo.exe
       topath:
@@ -312,17 +312,7 @@ download:
       topath:
         - core/tools/vulscan/SweetBabyScan/
         - SweetBabyScan/
-    vscan:
-      toolname: vscan
-      whetherdownload: True
-      link: https://github.com/veo/vscan/releases/download/v2.1.0/vscan_2.1.0_windows_amd64.zip
-      downloadfile: vscan.zip
-      source_name: vscan.exe
-      final_name: vscan.exe
-      tool_main_filename: vscan.exe
-      topath:
-        - core/tools/vulscan/vscan/
-        - vscan/
+
     vulmap:
       # py
       toolname: vulmap
@@ -337,7 +327,17 @@ download:
         - /
 #        - core/tools/vulscan/vulmap/
 #        - vulmap/
-
+    vscan:
+      toolname: vscan
+      whetherdownload: True
+      link: https://github.com/veo/vscan/releases/download/v2.1.0/vscan_2.1.0_windows_amd64.zip
+      downloadfile: vscan.zip
+      source_name: vscan.exe
+      final_name: vscan.exe
+      tool_main_filename: vscan.exe
+      topath:
+        - core/tools/vulscan/vscan/
+        - vscan/
 
 
 

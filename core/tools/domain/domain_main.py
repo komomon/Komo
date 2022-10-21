@@ -319,7 +319,7 @@ def manager(domain=None, date="2022-09-02-00-01-39"):
         for ssubdomain in subdomains_list:
             # ExtractResult(subdomain='www', domain='worldbank', suffix='org.kg')
             subdomain_tuple = tldextract.extract(ssubdomain)
-            if domain != subdomain_tuple.domain+subdomain_tuple.suffix:
+            if domain != subdomain_tuple.domain+'.'+subdomain_tuple.suffix:
                 other_subdomains_list.append(ssubdomain)
                 subdomains_list.remove(ssubdomain)
         with open(f"result/{date}/{domain}.final.subdomains.txt", 'w', encoding='utf-8') as fd2:
