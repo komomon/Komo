@@ -102,13 +102,11 @@ python3 Komo.py install
 
 > install：下载所有工具
 >
-> collect:只资产收集，多种方式收集域名，收集域名邮箱，域名存活探测，域名反查ip，域名指纹识别，ip端口扫描，web服务链接爬取
->
-> all: 资产收集+攻击
-> 输入：域名/域名文件
-> 功能：多种方式收集域名，收集域名邮箱，域名存活探测，域名反查ip，域名指纹识别，ip端口扫描，web服务链接爬取，将爬取的链接发送给xray进行扫描，POC漏洞扫描，反查的ip进行其他端口漏洞扫描，弱口令扫描
+> all: 资产收集+攻击，多种方式收集域名，收集域名邮箱，域名存活探测，域名反查ip，域名指纹识别，ip端口扫描，web服务链接爬取，将爬取的链接发送给xray进行扫描，POC漏洞扫描，反查的ip进行其他端口漏洞扫描，弱口令扫描
 >
 > all2: 资产收集+攻击，提供子域名，域名存活探测，域名反查ip，域名指纹识别，ip端口扫描，web服务链接爬取，将爬取的链接发送给xray进行扫描，POC漏洞扫描，反查的ip进行其他端口漏洞扫描，弱口令扫描
+> 
+> collect:只资产收集，多种方式收集域名，收集域名邮箱，域名存活探测，域名反查ip，域名指纹识别，ip端口扫描，web服务链接爬取
 >
 > subdomain: 通过多种方式进行域名收集，dns爬取，爆破，证书获取，DNS运营商处获取。
 >
@@ -319,16 +317,25 @@ python3 Komo.py --ips ./ips.txt hostattack
 ## **完整Usage**
 
 ```python
-Komo help summary page
+    Komo help summary page
 
-Komo is an automated scanning tool set
+    Komo is an automated scanning tool set
 
     mode:
     install     Download the required tools
-    all         all scan and attack
+    all         all scan and attack:subdomain, survival detection, finger, portscan, email collect, sensitive(crawl urls), pocscan, Weak password scanning, to_xray
         --domain    one domain
         --domains   a domain file
-    collect     run all collection modules :subdomain, finger, port, sensitive, poc, to_xray
+    all2        run scan and attack except domain collection: survival detection, finger, portscan, email collect, sensitive(crawl urls), pocscan, Weak password scanning, to_xray
+        --subdomain    one subdomain
+        --subdomains   a subdomain file
+    collect     run all collection modules :subdomain, survival detection, finger, port, email collect, sensitive(crawl urls), pocscan, to_xray
+        --domain    one domain
+        --domains   a domain file
+    collect1    run collection modules :subdomain, survival detection, finger
+        --domain    one domain
+        --domains   a domain file
+    collect2    run collection modules :subdomain, survival detection, finger, portscan
         --domain    one domain
         --domains   a domain file
     subdomain   only collect subdomain
@@ -343,12 +350,17 @@ Komo is an automated scanning tool set
     sensitive   only collect directory with crawl,email
         --url       one url
         --urls      an urls file
-    webattack   only attack web from url or urls
+    webattack   only attack web from url or urls: pocscan, Weak password scanning, crawl urls to xray
+        --url       one url
+        --urls      an urls file
+    webattack2  only poc scan from url or urls: pocscan, Weak password scanning
         --url       one url
         --urls      an urls file
     hostattack  only attack ip from ip or ips
         --ip        one ip
         --ips       an ips file
+    attack      run webattack and hostattack: crawl url to xray, pocscan, Weak password scanning
+
 
     Example:
         python3 Komo.py install
@@ -356,8 +368,15 @@ Komo is an automated scanning tool set
         python3 Komo.py --domains ./domains.txt all
         python3 Komo.py --domain example.com collect
         python3 Komo.py --domains ./domains.txt collect
+        python3 Komo.py --domain example.com collect1
+        python3 Komo.py --domains ./domains.txt collect1
+        python3 Komo.py --domain example.com collect2
+        python3 Komo.py --domains ./domains.txt collect2
         python3 Komo.py --domain example.com subdomain
         python3 Komo.py --domains ./domains.txt subdomain
+
+        python3 Komo.py --subdomain aaa.example.com all2
+        python3 Komo.py --subdomains ./subdomains.txt all2
 
         python3 Komo.py --url http://example.com finger
         python3 Komo.py --urls ./urls.txt finger
@@ -365,12 +384,13 @@ Komo is an automated scanning tool set
         python3 Komo.py --urls ./urls.txt sensitive
         python3 Komo.py --url http://example.com webattack
         python3 Komo.py --urls ./urls.txt webattack
+        python3 Komo.py --url http://example.com webattack2
+        python3 Komo.py --urls ./urls.txt webattack2
 
         python3 Komo.py --ip example.com portscan
         python3 Komo.py --ips ./domains.txt portscan
         python3 Komo.py --ip example.com hostattack
         python3 Komo.py --ips ./domains.txt hostattack
-
 ```
 
 
