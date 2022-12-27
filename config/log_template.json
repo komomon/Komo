@@ -1,0 +1,17 @@
+{
+  "date": "",
+  "domain": {
+    "scanning_target": "",
+    "scanned_targets": []
+  },
+  "finger": false,
+  "portscan": false,
+  "sensitiveinfo": {
+    "scanning_target": "",
+    "scanned_targets": []
+  },
+  "vulscan": {
+    "webattack": false,
+    "hostattack": false
+  }
+}

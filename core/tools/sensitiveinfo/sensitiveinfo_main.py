@@ -4,9 +4,11 @@ import inspect
 import json
 import os
 import re
-import shutil
 import subprocess
 import requests
+import platform
+
+import yaml
 from fake_useragent import UserAgent
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
@@ -22,9 +24,11 @@ import fire
 import simplejson
 import tldextract
 from loguru import logger
+from common.getconfig import *
+import common
 
-
-Xray_Port = 7777
+all_config = getconfig()
+Xray_Port = int(all_config['tools']['other']['xray']['listenport'])
 
 def create_logfile():
     if os.path.exists(f'{os.getcwd()}/log') is False:
@@ -44,6 +48,75 @@ def get_system():
     else:
         print("get system type error")
         exit(1)
+
+
+# 暂不使用
+def getconfig_():
+    # ostype = platform.system().lower() #get_system()
+    toolsyaml_path = f"{os.path.realpath(f'{os.path.dirname(os.path.abspath(__file__))}/../../../')}/config/config.yaml"
+    # toolsyaml_path = "tools_linux.yaml"
+    if os.path.exists(toolsyaml_path):
+        with open(toolsyaml_path, 'r', encoding='utf-8') as f:
+            tools_config = yaml.load(f, Loader=yaml.FullLoader)['tools']
+        return tools_config
+    else:
+        logger.error(f"[-] not found {toolsyaml_path}")
+        logger.error("Exit!")
+        exit(1)
+
+
+# 进度记录,基于json
+def progress_record(date=None,target=None,module=None,submodule=None,value=None,finished=False):
+    logfile = f"result/{date}/log.json"
+    if os.path.exists(logfile) is False:
+        shutil.copy("config/log_template.json", f"result/{date}/log.json")
+    with open(logfile, 'r', encoding='utf-8') as f1:
+        log_json = json.loads(f1.read())
+    # if module in dict(log_json).keys() and target:
+    # 先检查是否存在于scanned_targets 不存在则开始扫
+    if finished is False:
+        if target not in log_json[module]["scanned_targets"]:
+            return False
+        else:
+            return True
+        # finished flag设置则证明扫描完成
+    elif finished is True:
+        log_json[module]["scanned_targets"].append(target)
+        with open(logfile, "w", encoding="utf-8") as f:
+            f.write(json.dumps(log_json))
+        return True
+
+
+# 进度记录,基于json,暂时弃用，记录log比较详细的版本，需要考虑记住本次扫描的是哪个url，下次先读取url
+def progress_record_(date=None, target=None, module=None, submodule=None, value=None, submodule_finished=False,target_finished=False,):
+    logfile = f"result/{date}/log.json"
+    if os.path.exists(logfile) is False:
+        shutil.copy("config/log_template.json", f"result/{date}/log.json")
+    with open(logfile, "r", encoding="utf-8") as f1:
+        log_json = json.loads(f1.read())
+    if target_finished is False:
+        if target not in log_json[module]["scanned_targets"]:
+            return False
+        else:
+            return True
+        # if submodule_finished is False:
+        #     # 读取log.json 如果是false则扫描，是true则跳过
+        #     if log_json[module][submodule] is False:
+        #         return False
+        #     elif log_json[module][submodule] is True:  # 即log_json[module] 为true的情况
+        #         return True
+        # elif submodule_finished is True:
+        #     log_json[module][submodule] = True
+        #     with open(logfile, "w", encoding="utf-8") as f:
+        #         f.write(json.dumps(log_json))
+        #     return True
+    elif target_finished is True:
+        log_json[module]["scanned_targets"].append(target)
+        with open(logfile, "w", encoding="utf-8") as f:
+            f.write(json.dumps(log_json))
+        return True
+
+
 
 
 def makedir0(path):
@@ -249,11 +322,11 @@ def __subprocess2(cmd):
 
 # 废弃 将请求发给xray
 @logger.catch
-def to_xray(urls, attackflag=None, fromurl=None):
+def to_xray(urls, attackflag=None,fromurl=None):
     # headers = {
     #     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.80 Safari/537.36 Edg/98.0.1108.43'}
     xrayport = Xray_Port
-    black_list = ['.jpg', '.png', '.css', '.pdf', '.doc', '.docx', '.xlsx', '.csv']
+    black_list = ['.jpg','.gif', '.png', '.css', '.pdf', '.doc', '.docx', '.xlsx', '.csv']
     if attackflag:
         if checkport(xrayport):
             for url in urls:
@@ -261,6 +334,7 @@ def to_xray(urls, attackflag=None, fromurl=None):
                 splitresult = urlsplit(url)
                 ssubdomain = splitresult.netloc
                 uri = splitresult.path
+                # 只发送给xray要爬去的网站的url
                 if urlsplit(fromurl).netloc == ssubdomain:
                     if os.path.splitext(uri)[1] not in black_list:
                         request0({"method": "GET", "url": url, "headers": "", "data": ""})
@@ -304,11 +378,11 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
     suffix = get_system()
     root = os.getcwd()
     pwd_and_file = os.path.abspath(__file__)
-    pwd = os.path.dirname(pwd_and_file)  # E:\ccode\python\006_lunzi\core\tools\domain
+    pwd = os.path.dirname(pwd_and_file)  # E:\ccode\python\006_lunzi\core\tools\sensitiveinfo
     # 获取当前目录的前三级目录，即到domain目录下，来寻找exe domain目录下
     grader_father = os.path.abspath(os.path.dirname(pwd_and_file) + os.path.sep + "../..")
     # print(grader_father) # E:\ccode\python\006_lunzi\core
-    # 存储爬取到的links，不在其中的links.csv 存储该结果
+    # 存储爬取到的links，不在其中的 links.csv 存储该结果
     links_set = set()
 
     # 创建存储工具扫描结果的文件夹
@@ -318,18 +392,19 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
     # 初始话往result/{date}/{domain}.links.csv  写入 title
     to_csv(f"result/{date}/{domain}.links.csv", [["tool", "method", "url", "header", "body"]], mmode='a')
 
-    # 爬取url的link  result/{date}/sensitiveinfo_log/{domain}.{sys._getframe().f_code.co_name}.json
+    # 爬取url的link  result/{date}/sensitiveinfo_log/{domain}.{tool_name}.json
     @logger.catch
     def crawlergo(data1, attackflag=attackflag):
         '''
         只能单个url,爬取网站的url,保存完整请求到json文件，并存储一份"method url"的txt
         crawlergo 0.4.3
-        存储的在：{sensitiveinfo_log_folder}/{subdomain}.{sys._getframe().f_code.co_name}.json
+        存储的在：{sensitiveinfo_log_folder}/{subdomain}.{tool_name}.json
         :return:
         '''
-        logger.info('-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
+        tool_name = str(sys._getframe().f_code.co_name)
+        logger.info('-' * 10 + f'start {tool_name}' + '-' * 10)
         # 创建多个子域名结果输出文件夹
-        output_folder = f'{sensitiveinfo_log_folder}/{sys._getframe().f_code.co_name}_log'
+        output_folder = f'{sensitiveinfo_log_folder}/{tool_name}_log'
         makedir0(output_folder)
 
         target = data1
@@ -350,14 +425,14 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         if attackflag:
             # 端口没开则直接结束
             if checkport(xray_port) is False:
-                logger.error(f"xray_port {xray_port} not open, {sys._getframe().f_code.co_name} skip")
+                logger.error(f"xray_port {xray_port} not open, {tool_name} skip")
                 return False
                 # logger.error("Exit!!!")
                 # exit(1)
             proxy = f"http://127.0.0.1:{xray_port}"
-            cmdstr = f"{pwd}/crawlergo/crawlergo{suffix} -c {pwd}/chrome-win/chrome.exe -t 8 -f smart --fuzz-path --robots-path --output-mode json --output-json {output_folder}/{output_filename_prefix}.{sys._getframe().f_code.co_name}.json --push-to-proxy {proxy} {target}"
+            cmdstr = f"{pwd}/crawlergo/crawlergo{suffix} -c {pwd}/chrome-win/chrome.exe -t 8 -f smart --fuzz-path --robots-path --output-mode json --output-json {output_folder}/{output_filename_prefix}.{tool_name}.json --push-to-proxy {proxy} {target}"
         else:
-            cmdstr = f"{pwd}/crawlergo/crawlergo{suffix} -c {pwd}/chrome-win/chrome.exe -t 8 -f smart --fuzz-path --robots-path --output-mode json --output-json {output_folder}/{output_filename_prefix}.{sys._getframe().f_code.co_name}.json {target}"
+            cmdstr = f"{pwd}/crawlergo/crawlergo{suffix} -c {pwd}/chrome-win/chrome.exe -t 8 -f smart --fuzz-path --robots-path --output-mode json --output-json {output_folder}/{output_filename_prefix}.{tool_name}.json {target}"
 
         logger.info(f"[+] command:{cmdstr}")
         cmd = cmdstr.split(' ')
@@ -375,28 +450,38 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         req_list = result["req_list"]
         sub_domain_list = result["sub_domain_list"]
 
+        # 结果处理：存储到links.csv
+        urls_data_tmp_to_csv = []
         # 从crawlergo结果中获取url 存储crawlergo爬取到的url method headers body, result/{date}/{domain}.links.csv,也进行了去重处理
-        with open(f"result/{date}/{domain}.links.csv", "a", encoding="utf-8", newline='') as f1:
-            writer = csv.writer(f1)
-            for req in req_list:
-                if req['url'] not in links_set:
-                    del req["headers"]["Spider-Name"]
-                    writer.writerow(
-                        [str(sys._getframe().f_code.co_name), req['method'], req['url'], json.dumps(req['headers']),
-                         req['data']])
-                    links_set.add(req['url'])
+        # 下面9行老版方法，为了节约消耗，少遍历一次，但是代码不规则很乱
+        # with open(f"result/{date}/{domain}.links.csv", "a", encoding="utf-8", newline='') as f1:
+        #     writer = csv.writer(f1)
+        #     for req in req_list:
+        #         if req['url'] not in links_set:
+        #             del req["headers"]["Spider-Name"]
+        #             writer.writerow(
+        #                 [str(tool_name), req['method'], req['url'], json.dumps(req['headers']),
+        #                  req['data']])
+        #             links_set.add(req['url'])
+        # 新方法，和下面的工具统一，新增结果存储到urls_data_tmp_to_csv，然后再存入csv
+        for req in req_list:
+            if req['url'] not in links_set:
+                del req["headers"]["Spider-Name"]
+                urls_data_tmp_to_csv.append([tool_name, req['method'], req['url'], json.dumps(req['headers']),req['data']])
+                links_set.add(req['url'])
+        to_csv(f"result/{date}/{domain}.links.csv", urls_data_tmp_to_csv, mmode='a')
         logger.info(f'[+] From url {target} found {len(req_list)} links')
         logger.info(f'[+] Links file exist:{root}/result/{date}/{domain}.links.csv')
 
         # 存储crawlergo爬取到的子域名
         if sub_domain_list is not None:
-            with open(f"{sensitiveinfo_log_folder}/{domain}.subdomains.{sys._getframe().f_code.co_name}.txt", "a",
+            with open(f"{sensitiveinfo_log_folder}/{domain}.subdomains.{tool_name}.txt", "a",
                       encoding="utf-8") as f2:
                 for i in sub_domain_list:
                     f2.write(i + "\n")
-        logger.info(f"[+] {sys._getframe().f_code.co_name} finished: {target}")
+        logger.info(f"[+] {tool_name} finished: {target}")
 
-    # 爬取url的link  result/{date}/sensitiveinfo_log/{domain}.{sys._getframe().f_code.co_name}.json
+    # 爬取url的link  result/{date}/sensitiveinfo_log/{domain}.{tool_name}.json
     @logger.catch
     def rad(data1, attackflag=attackflag):
         '''
@@ -404,9 +489,10 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         rad 0.4
         :return:
         '''
-        logger.info('-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
+        tool_name = str(sys._getframe().f_code.co_name)
+        logger.info('-' * 10 + f'start {tool_name}' + '-' * 10)
         # 创建多个子域名结果输出文件夹
-        output_folder = f'{sensitiveinfo_log_folder}/{sys._getframe().f_code.co_name}_log'
+        output_folder = f'{sensitiveinfo_log_folder}/{tool_name}_log'
         makedir0(output_folder)
         xray_port = Xray_Port
         target = data1
@@ -414,46 +500,43 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         output_filename_prefix = '.'.join(part for part in subdomain_tuple if part)
         # cmd = ["rad.exe", "--http-proxy", "http://127.0.0.1:7777", "--target", target]
         # 提前删除结果文件，否则rad报错，结果文件已存在
-        print(f"{output_folder}/{output_filename_prefix}.{sys._getframe().f_code.co_name}.json")
-        if os.path.exists(f"{output_folder}/{output_filename_prefix}.{sys._getframe().f_code.co_name}.json"):
-            os.remove(f"{output_folder}/{output_filename_prefix}.{sys._getframe().f_code.co_name}.json")
+        print(f"{output_folder}/{output_filename_prefix}.{tool_name}.json")
+        if os.path.exists(f"{output_folder}/{output_filename_prefix}.{tool_name}.json"):
+            os.remove(f"{output_folder}/{output_filename_prefix}.{tool_name}.json")
             logger.info(
-                f"{output_folder}/{output_filename_prefix}.{sys._getframe().f_code.co_name}.json delete success!")
+                f"{output_folder}/{output_filename_prefix}.{tool_name}.json delete success!")
         time.sleep(2)
 
         if attackflag:
             # 端口没开则直接结束
             if checkport(xray_port) is False:
-                logger.error(f"xray_port {xray_port} not open, {sys._getframe().f_code.co_name} skip")
+                logger.error(f"xray_port {xray_port} not open, {tool_name} skip")
                 return False
                 # logger.error("Exit!!!")
                 # exit(1)
             proxy = f"http://127.0.0.1:{xray_port}"
-            cmdstr = f"{pwd}/rad/rad{suffix} --target {target} --json-output {output_folder}/{output_filename_prefix}.{sys._getframe().f_code.co_name}.json --http-proxy {proxy}"
+            cmdstr = f"{pwd}/rad/rad{suffix} --target {target} --json-output {output_folder}/{output_filename_prefix}.{tool_name}.json --http-proxy {proxy}"
         else:
-            cmdstr = f"{pwd}/rad/rad{suffix} --target {target} --json-output {output_folder}/{output_filename_prefix}.{sys._getframe().f_code.co_name}.json"
+            cmdstr = f"{pwd}/rad/rad{suffix} --target {target} --json-output {output_folder}/{output_filename_prefix}.{tool_name}.json"
         logger.info(f"[+] command:{cmdstr}")
-        __subprocess1(cmdstr, timeout=60*20, path=f"{pwd}/{sys._getframe().f_code.co_name}")
+        __subprocess1(cmdstr, timeout=60*20, path=f"{pwd}/{tool_name}")
 
         urls_data_tmp_to_csv = []  # 存储urldata四个字段的列表
         # 从rad结果中获取url,不存在url的则写入csv和links_set
-        if os.path.exists(f"{output_folder}/{output_filename_prefix}.{sys._getframe().f_code.co_name}.json"):
-            with open(f"{output_folder}/{output_filename_prefix}.{sys._getframe().f_code.co_name}.json", "r",
+        if os.path.exists(f"{output_folder}/{output_filename_prefix}.{tool_name}.json"):
+            with open(f"{output_folder}/{output_filename_prefix}.{tool_name}.json", "r",
                       encoding="utf-8", errors='ignore') as f2:
                 result = json.loads(f2.read())
                 for row in result:
                     if row["URL"] not in links_set:
                         if row["Method"] == "GET":
-                            data = [str(sys._getframe().f_code.co_name), row["Method"], row["URL"],
-                                    json.dumps(row["Header"]), ""]
+                            data = [tool_name, row["Method"], row["URL"], json.dumps(row["Header"]), ""]
                         elif row["Method"] == "POST":
                             # print(base64.b64decode(row["b64_body"]))
                             if 'b64_body' in row.keys():
-                                data = [str(sys._getframe().f_code.co_name), row["Method"], row["URL"],
-                                        json.dumps(row["Header"]), base64.b64decode(row["b64_body"]).decode()]
+                                data = [tool_name, row["Method"], row["URL"], json.dumps(row["Header"]), base64.b64decode(row["b64_body"]).decode()]
                             else:
-                                data = [str(sys._getframe().f_code.co_name), row["Method"], row["URL"],
-                                        json.dumps(row["Header"]), ""]
+                                data = [tool_name, row["Method"], row["URL"], json.dumps(row["Header"]), ""]
                             # data = row["Method"] + "," + row["URL"] + "," + str(row["Header"]) + "," + base64.b64decode(row["b64_body"])
                         urls_data_tmp_to_csv.append(data)
                         links_set.add(row["URL"])
@@ -461,7 +544,7 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         # 存储rad 爬取到的url method headers body
         # with open(f"{root}/result/{date}/{domain}.links.csv", "a", encoding="utf-8") as f1:
         to_csv(f"result/{date}/{domain}.links.csv", urls_data_tmp_to_csv, mmode='a')
-        logger.info(f"[+] {sys._getframe().f_code.co_name} finished: {target}")
+        logger.info(f"[+] {tool_name} finished: {target}")
 
     # URLFinder爬取
     @logger.catch
@@ -473,22 +556,23 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         可以多个url，一个url一个csv 格式子域名.csv
         :return: jieguowenjian:new.xxx.com.cn：443.csv 中文冒号
         '''
-        logger.info('-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
+        tool_name = str(sys._getframe().f_code.co_name)
+        logger.info('-' * 10 + f'start {tool_name}' + '-' * 10)
 
         # 创建多个子域名结果输出文件夹
-        output_folder = f'{sensitiveinfo_log_folder}/{sys._getframe().f_code.co_name}_log'
+        output_folder = f'{sensitiveinfo_log_folder}/{tool_name}_log'
         makedir0(output_folder)
 
         target = data1
         urls_data_tmp_to_csv = []
         urls_set_tmp = set()
 
-        # 结果文件名 {subdomain}.csv {sensitiveinfo_log_folder}/URLFinder_log/{domain}.{sys._getframe().f_code.co_name}.csv
+        # 结果文件名 {subdomain}.csv {sensitiveinfo_log_folder}/URLFinder_log/{domain}.{tool_name}.csv
         cmdstr = f'{pwd}/URLFinder/URLFinder{suffix} -u {target} -s all -m 2 -o {output_folder}'
         logger.info(f"[+] command:{cmdstr}")
-        __subprocess1(cmdstr, timeout=600, path=f"{pwd}/{sys._getframe().f_code.co_name}")
-        # print(f"[+] {sys._getframe().f_code.co_name} finished: {target}")
-        logger.info(f"[+] {sys._getframe().f_code.co_name} finished: {target}")
+        __subprocess1(cmdstr, timeout=600, path=f"{pwd}/{tool_name}")
+        # print(f"[+] {tool_name} finished: {target}")
+        logger.info(f"[+] {tool_name} finished: {target}")
 
         # 对结果处理，不在links_set的就存储到link.csv中
         groups_tmp = urlsplit(target)
@@ -505,7 +589,7 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
                     if len(row) != 0:
                         if row[1] == "200" and row[0] not in links_set:
                             # data = f'GET,{row[0]},,'
-                            data = [str(sys._getframe().f_code.co_name), "GET", row[0], "", ""]
+                            data = [tool_name, "GET", row[0], "", ""]
                             urls_data_tmp_to_csv.append(data)
                             urls_set_tmp.add(row[0])
                             links_set.add(row[0])  # links_set 增加新的
@@ -531,14 +615,15 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         :param attackflag:
         :return:
         '''
-        logger.info('-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
+        tool_name = str(sys._getframe().f_code.co_name)
+        logger.info('-' * 10 + f'start {tool_name}' + '-' * 10)
         # 创建多个子域名结果输出文件夹
-        output_folder = f'{sensitiveinfo_log_folder}/{sys._getframe().f_code.co_name}_log'
+        output_folder = f'{sensitiveinfo_log_folder}/{tool_name}_log'
         makedir0(output_folder)
 
         target = data1
         if 'http://' not in target and 'https://' not in target:
-            logger.error(f"{sys._getframe().f_code.co_name} can't run: {target} Exclude http or https")
+            logger.error(f"{tool_name} can't run: {target} Exclude http or https")
             return
         subdomain_tuple = tldextract.extract(target)
         output_filename = '.'.join(part for part in subdomain_tuple if part).replace('.',
@@ -549,8 +634,8 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         cmdstr = f'{pwd}/gospider/gospider{suffix} -s {target} --threads 10 --depth 2 --js --subs --sitemap --robots --other-source --include-subs --quiet --output {output_folder}'
         logger.info(f"[+] command:{cmdstr}")
         # os.system(cmdstr)
-        __subprocess1(cmdstr, timeout=60 * 15, path=f"{pwd}/{sys._getframe().f_code.co_name}")
-        logger.info(f"[+] {sys._getframe().f_code.co_name} finished: {target}")
+        __subprocess1(cmdstr, timeout=60 * 10, path=f"{pwd}/{tool_name}")
+        logger.info(f"[+] {tool_name} finished: {target}")
         # 对结果处理，不在links_set的就存储到link.csv中
         if os.path.exists(f'{output_folder}/{output_filename}'):
             with open(f'{output_folder}/{output_filename}', 'r', encoding="utf-8", errors='ignore') as f:
@@ -559,7 +644,7 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
                     url = re.sub('.*? - ', '', line)
                     if url not in links_set:
                         # data = f'GET,{url},,'
-                        data = [str(sys._getframe().f_code.co_name), "GET", url, "", ""]
+                        data = [tool_name, "GET", url, "", ""]
                         urls_data_tmp_to_csv.append(data)
                         urls_set_tmp.add(url)
                         links_set.add(url)  # links_set 增加新的
@@ -582,11 +667,11 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         :param attackflag:
         :return:
         '''
-
-        logger.info('-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
+        tool_name = str(sys._getframe().f_code.co_name)
+        logger.info('-' * 10 + f'start {tool_name}' + '-' * 10)
 
         # 创建多个子域名结果输出文件夹
-        output_folder = f'{sensitiveinfo_log_folder}/{sys._getframe().f_code.co_name}_log'
+        output_folder = f'{sensitiveinfo_log_folder}/{tool_name}_log'
         makedir0(output_folder)
 
         target = data1
@@ -599,14 +684,14 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         # cmdstr = f'{os.path.realpath(f"{pwd}/hakrawler/hakrawler{suffix}")} -u {target} -d 4 -subs -timeout 10 -unique'
         logger.info(f"[+] command:{cmdstr}")
         resultlist = __subprocess2(cmdstr)
-        logger.info(f"[+] {sys._getframe().f_code.co_name} finished: {target}")
+        logger.info(f"[+] {tool_name} finished: {target}")
         # 二进制读取结果，没有生成文件,后面将结果存储起来
         # 对结果处理，不在links_set的就存储到link.csv中
         for i in resultlist:
             url = i.decode().strip()
             if url not in links_set:
                 # data = f'GET,{url},,'
-                data = [str(sys._getframe().f_code.co_name), "GET", url, "", ""]
+                data = [tool_name, "GET", url, "", ""]
                 urls_data_tmp_to_csv.append(data)
                 urls_set_tmp.add(url)
                 links_set.add(url)
@@ -615,7 +700,7 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         to_xray(urls_set_tmp, attackflag=attackflag, fromurl=target)
 
         # 对结果处理,新增的,不是扫描的全部结果,是剔除links_set之后的url,将结果存储到txt中
-        with open(f'{output_folder}/{subdomain}.{sys._getframe().f_code.co_name}.txt', 'w', encoding='utf-8',
+        with open(f'{output_folder}/{subdomain}.{tool_name}.txt', 'w', encoding='utf-8',
                   errors='ignore') as f:
             for i in urls_set_tmp:
                 f.write(i + '\n')
@@ -634,11 +719,11 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         :param attackflag:
         :return:
         '''
-
-        logger.info('-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
+        tool_name = str(sys._getframe().f_code.co_name)
+        logger.info('-' * 10 + f'start {tool_name}' + '-' * 10)
 
         # 创建多个子域名结果输出文件夹
-        output_folder = f'{sensitiveinfo_log_folder}/{sys._getframe().f_code.co_name}_log'
+        output_folder = f'{sensitiveinfo_log_folder}/{tool_name}_log'
         makedir0(output_folder)
 
         target = urlsplit(data1)[1]
@@ -648,17 +733,17 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         urls_data_tmp_to_csv = []
         urls_set_tmp = set()
         # 结果文件名 xx_xx_xx 结果是指定文件夹
-        cmdstr = f'{pwd}/gau/gau{suffix} --subs --retries 2 --fc 404,302 --verbose --o {output_folder}/{target}.{sys._getframe().f_code.co_name}.txt {target}'
+        cmdstr = f'{pwd}/gau/gau{suffix} --subs --retries 2 --fc 404,302 --verbose --o {output_folder}/{target}.{tool_name}.txt {target}'
         logger.info(f"[+] command:{cmdstr}")
         # cmd = cmdstr.split(' ')
-        __subprocess1(cmdstr, timeout=None, path=f"{pwd}/{sys._getframe().f_code.co_name}")
-        logger.info(f"[+] {sys._getframe().f_code.co_name} finished: {target}")
+        __subprocess1(cmdstr, timeout=None, path=f"{pwd}/{tool_name}")
+        logger.info(f"[+] {tool_name} finished: {target}")
         if os.path.exists(f'{output_folder}/{target}.txt'):
             with open(f'{output_folder}/{target}.txt', 'r', encoding='utf-8') as f:
                 for line in f.readlines():
                     line = line.strip()
                     if line not in links_set:
-                        data = [str(sys._getframe().f_code.co_name), "GET", line, "", ""]
+                        data = [tool_name, "GET", line, "", ""]
                         urls_data_tmp_to_csv.append(data)
                         urls_set_tmp.add(line)
                         links_set.add(line)  # links_set 增加新的
@@ -678,11 +763,12 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         :param data1:
         :return:
         '''
-        logger.info('-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
+        tool_name = str(sys._getframe().f_code.co_name)
+        logger.info('-' * 10 + f'start {tool_name}' + '-' * 10)
         target = data1
         urls_tmp = []
         # 将dirsearch扫出的url添加到xray去 -x 301,302,403,404,405,500,501,502,503 -r -R 3 --crawl
-        cmdstr = f'python3 {pwd}/dirsearch/dirsearch.py -x 403,404 -u {target} --full-url -t 10 --random-agent --format csv -o {sensitiveinfo_log_folder}/{domain}.{sys._getframe().f_code.co_name}.csv'
+        cmdstr = f'python3 {pwd}/dirsearch/dirsearch.py -x 403,404 -u {target} --full-url -t 10 --random-agent --format csv -o {sensitiveinfo_log_folder}/{domain}.{tool_name}.csv'
         logger.info(f"[+] command:{cmdstr}")
         os.system(cmdstr)
         # cmd = cmdstr.split(' ')
@@ -690,7 +776,7 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         # print("".join(output).encode())
         print(f"[+] {target} dirsearch finished")
         # 将200的url找出来
-        with open(f"{sensitiveinfo_log_folder}/{domain}.{sys._getframe().f_code.co_name}.csv", "r") as f:
+        with open(f"{sensitiveinfo_log_folder}/{domain}.{tool_name}.csv", "r") as f:
             reader = csv.reader(f)
             head = next(reader)
             for row in reader:
@@ -713,14 +799,15 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         :param attackflag:
         :return:
         '''
-        logger.info('-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
+        tool_name = str(sys._getframe().f_code.co_name)
+        logger.info('-' * 10 + f'start {tool_name}' + '-' * 10)
         # 代理端口没开跳过
         if checkport(10809) is False:
             logger.error("proxy port 10809 not open!")
             return
 
         # 创建多个子域名结果输出文件夹
-        output_folder = f'{sensitiveinfo_log_folder}/{sys._getframe().f_code.co_name}_log'
+        output_folder = f'{sensitiveinfo_log_folder}/{tool_name}_log'
         makedir0(output_folder)
 
         target = data1
@@ -735,7 +822,7 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         cmdstr = f'{pwd}/urlcollector/urlcollector{suffix} -i {dorkfile} -o {output_folder}/{domain}.txt --routine-count 5 --proxy "http://127.0.0.1:10809"'
         logger.info(f"[+] command:{cmdstr}")
         resultlist = __subprocess2(cmdstr)
-        logger.info(f"[+] {sys._getframe().f_code.co_name} finished: {target}")
+        logger.info(f"[+] {tool_name} finished: {target}")
         # 二进制读取结果，没有生成文件
         # 对结果处理，不在links_set的就存储到link.csv中
         for i in resultlist:
@@ -768,9 +855,10 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         :param data1:
         :return:
         '''
-        logger.info('-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
+        tool_name = str(sys._getframe().f_code.co_name)
+        logger.info('-' * 10 + f'start {tool_name}' + '-' * 10)
         # 创建多个子域名结果输出文件夹
-        output_folder = f'{sensitiveinfo_log_folder}/{sys._getframe().f_code.co_name}_log'
+        output_folder = f'{sensitiveinfo_log_folder}/{tool_name}_log'
         makedir0(output_folder)
 
         subdomain_tuple = tldextract.extract(data1)
@@ -779,17 +867,17 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         cmdstr = f'python3 {pwd}/emailall/emailall.py --domain {data1} run'
         logger.info(f"[+] command:{cmdstr}")
         # os.system(cmdstr)
-        __subprocess1(cmdstr, timeout=None, path=f"{pwd}/{sys._getframe().f_code.co_name}")
+        __subprocess1(cmdstr, timeout=None, path=f"{pwd}/{tool_name}")
 
         # 移动结果文件 \sensitiveinfo\emailall\result\vulweb_com\vulweb.com_All.json
-        output_filename_tmp = f"{pwd}/{sys._getframe().f_code.co_name}/result/{output_filename_prefix.replace('.', '_')}/{output_filename_prefix}_All.json"
+        output_filename_tmp = f"{pwd}/{tool_name}/result/{output_filename_prefix.replace('.', '_')}/{output_filename_prefix}_All.json"
         if os.path.exists(output_filename_tmp):
             try:
                 shutil.copy(output_filename_tmp, output_folder)
             except Exception as e:
                 logger.error(traceback.format_exc())
         else:
-            logger.error(f'[-] {sys._getframe().f_code.co_name} not found {output_filename_tmp} ')
+            logger.error(f'[-] {tool_name} not found {output_filename_tmp} ')
 
     def run():
         # if domain and url is None and urlsfile is None:
@@ -800,15 +888,17 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
             for url in f.readlines():
                 url = url.strip()
                 print(url)
-                crawlergo(url, attackflag=attackflag)
-                rad(url, attackflag=attackflag)
-                hakrawler(url, attackflag=attackflag)
-                gospider(url, attackflag=attackflag)
-                gau(url, attackflag=attackflag)
-                URLFinder(url, attackflag=attackflag)
-                # urlcollector('未完成')
-                links_set.clear()
-                # dirsearch(url.strip())
+                if progress_record(date=date, target=url, module="sensitiveinfo", finished=False) is False:
+                    crawlergo(url, attackflag=attackflag)
+                    rad(url, attackflag=attackflag)
+                    hakrawler(url, attackflag=attackflag)
+                    gospider(url, attackflag=attackflag)
+                    gau(url, attackflag=attackflag)
+                    URLFinder(url, attackflag=attackflag)
+                    # urlcollector('未完成')
+                    links_set.clear()
+                    # dirsearch(url.strip())
+                    progress_record(date=date, target=url, module="sensitiveinfo", finished=True)
         logger.info('-' * 10 + f'finished {sys._getframe().f_code.co_name}' + '-' * 10)
 
     run()
@@ -846,3 +936,4 @@ if __name__ == '__main__':
     fire.Fire(run)
     # manager("tiqianle.com", date="2022-09-02-00-01-39")
     # manager(domain="vulweb.com",url=None,urlsfile=None,attackflag=False, date="2022-09-02-00-01-39")
+    # print(tools_config)

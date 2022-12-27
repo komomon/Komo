@@ -1,5 +1,7 @@
 import csv
+import json
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -67,6 +69,26 @@ def isexist(filepath):
         return False
 
 
+# 进度记录,基于json
+def progress_record(date=None,target=None,module=None,value=None,finished=False):
+    logfile = f"result/{date}/log.json"
+    if os.path.exists(logfile) is False:
+        shutil.copy("config/log_template.json", f"result/{date}/log.json")
+    with open(logfile, "r", encoding="utf-8") as f1:
+        log_json = json.loads(f1.read())
+    if finished is False:
+        # 读取log.json 如果是false则扫描，是true则跳过
+        if log_json[module] is False:
+            return False
+        elif log_json[module] is True:# 即log_json[module] 为true的情况
+            return True
+    elif finished is True:
+        log_json[module] = True
+        with open(logfile, "w", encoding="utf-8") as f:
+            f.write(json.dumps(log_json))
+        return True
+
+
 # 获取ip并去重
 @logger.catch
 def getips(ipstr_list):
@@ -104,9 +126,20 @@ def manager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39"):
     if os.path.exists(finger_log_folder) is False:
         os.makedirs(finger_log_folder)
 
+    # 两种模式,三种情况
+    # if domain and urlsfile is None and url is None:
+    #     urlsfile = f"result/{date}/{domain}.final.subdomains.txt"
+    # if domain is None and urlsfile and url is None:
+    #     domain = date
+    # elif domain is None and urlsfile is None and url:
+    #     domain = date
+    #     urlsfile = "temp.txt"
+    #     with open(urlsfile, "w", encoding="utf-8") as f:
+    #         f.write(url)
+
     # 生成带http的域名url 和ip文件 result/{date}/{domain}.subdomains_with_http.txt result/{date}/{domain}.subdomains_ips.txt
     @logger.catch
-    def httpx(url=url, file=urlsfile):
+    def httpx(domain=domain,url=url, file=urlsfile):
         '''
         httpx 1.2.4
         输入是子域名文件，可以带http可以不带，主要为了进行域名探活
@@ -122,15 +155,18 @@ def manager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39"):
         if domain and file is None and url is None:
             inputfile = f'result/{date}/{domain}.final.subdomains.txt'
             output_filename_prefix = domain
+            # print(1,domain,file)
         elif file and domain is None and url is None:
             inputfile = file
             # 如果从文件输入则结果以时间为文件名
             output_filename_prefix = date
             # domain = date
+            # print(2,domain,file)
         elif url and domain is None and file is None:
             # domain = date
             inputfile = f"temp.{sys._getframe().f_code.co_name}.txt"
             output_filename_prefix = date
+            # print(3,domain,file)
             # subdomain_tuple = tldextract.extract(url)
             # output_filename_prefix = '.'.join(part for part in subdomain_tuple if part)  # www.baidu.com 127_0_0_1
             with open(urlsfile, "w", encoding="utf-8") as f:
@@ -248,6 +284,11 @@ def manager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39"):
         logger.info(f"[+] command:{cmdstr}")
         # os.system(cmdstr)
         cmd = cmdstr.split(' ')
+        # cwd=tool_path,
+        # rsp = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        # output = str(rsp.stdout, encoding='utf-8')
+        # print(output)
+
         result1 = __subprocess2(cmd)
         finger_list = []
 
@@ -273,9 +314,11 @@ def manager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39"):
                 os.remove(inputfile)
 
     def run():
-        httpx(url=url, file=urlsfile)
-        ehole(url=url, file=urlsfile)
-        webanalyze(url=url, file=urlsfile)
+        if progress_record(date=date, module="finger",finished=False) is False:
+            httpx(domain=domain, url=url, file=urlsfile)
+            ehole(url=url, file=urlsfile)
+            webanalyze(url=url, file=urlsfile)
+            progress_record(date=date, module="finger", finished=True)
 
     run()
 
@@ -309,4 +352,7 @@ def run(url=None, urlfile=None, date=None):
 
 if __name__ == '__main__':
     fire.Fire(run)
- 
+    # import datetime
+    # date = str(datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S"))
+    # manager(domain="tiqianle.com",url=None,urlsfile=None, date="2022-09-02-00-01-39")
+    # manager(domain=None,url=None, urlsfile="subdomains.txt", date="2022-09-02-00-01-39")

@@ -1,6 +1,112 @@
 tools:
   domain:
-    - amass:
+    amass:
+      toolname: amass
+    ksubdomain:
+      toolname: ksubdomain
+    subfinder:
+      toolname: subfinder
+    oneforall:
+      toolname: oneforall
+    ip2location:
+      toolname: ip2location
+    subnames_big:
+      # https://raw.githubusercontent.com/shmilylty/OneForAll/blob/master/data/subnames_big.7z
+      toolname: subnames_big
+    ip2region:
+      toolname: ip2region
+  finger:
+    ehole:
+      toolname: ehole
+    httpx:
+      toolname: httpx
+    webanalyze:
+      toolname: webanalyze
+  portscan:
+    TxPortMap:
+      toolname: TxPortMap
+    # 暂不使用
+    dismap:
+      toolname: dismap
+    naabu:
+      toolname: naabu
+  sensitiveinfo:
+    chrome-win:
+      toolname: chrome-win
+    emailall:
+      # https://github.com/Taonn/EmailAll/archive/refs/heads/master.zip 修改过
+      toolname: emailall
+    crawlergo:
+      toolname: crawlergo
+      runtime: 900
+    rad:
+      toolname: rad
+      runtime: 900
+    gospider:
+      toolname: gospider
+      runtime: 900
+    hakrawler:
+      # 修改了加了-f参数
+      toolname: hakrawler
+      runtime: 600
+    dirsearch:
+      # zanbuyong，不移动 dirsearch-master/ /
+      toolname: dirsearch
+    gau:
+      toolname: gau
+      runtime: 600
+    urlcollector:
+      toolname: urlcollector
+      runtime: 600
+    URLFinder:
+      toolname: URLFinder
+      runtime: 600
+  vulscan:
+    afrog:
+      toolname: afrog
+    goon:
+      toolname: goon
+    nuclei:
+      toolname: nuclei
+    SweetBabyScan:
+      toolname: SweetBabyScan
+    vulmap:
+      # py
+      toolname: vulmap
+    vscan:
+      toolname: vscan
+  other:
+    xray:
+      toolname: xray
+      listenport: 7777
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

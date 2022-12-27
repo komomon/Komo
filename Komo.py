@@ -1,4 +1,8 @@
 import os
+import random
+import shutil
+import string
+
 import fire
 import datetime
 from loguru import logger
@@ -17,7 +21,7 @@ blue = '\033[01;34m'
 red = '\033[1;31m'
 end = '\033[0m'
 
-version = 'v1.0'
+version = 'v1.1'
 message = white + '{' + red + version + ' #dev' + white + '}'
 
 banner = f"""
@@ -49,10 +53,19 @@ class Komo(object):
 
     mode:
     install     Download the required tools
-    all         all scan and attack
+    all         all scan and attack:subdomain, survival detection, finger, portscan, email collect, sensitive(crawl urls), pocscan, Weak password scanning, to_xray
         --domain    one domain
         --domains   a domain file
-    collect     run all collection modules :subdomain, finger, port, sensitive, poc, to_xray
+    all2        run scan and attack except domain collection: survival detection, finger, portscan, email collect, sensitive(crawl urls), pocscan, Weak password scanning, to_xray
+        --subdomain    one subdomain
+        --subdomains   a subdomain file
+    collect     run all collection modules :subdomain, survival detection, finger, port, email collect, sensitive(crawl urls), pocscan, to_xray
+        --domain    one domain
+        --domains   a domain file
+    collect1    run collection modules :subdomain, survival detection, finger
+        --domain    one domain
+        --domains   a domain file
+    collect2    run collection modules :subdomain, survival detection, finger, portscan
         --domain    one domain
         --domains   a domain file
     subdomain   only collect subdomain
@@ -67,12 +80,17 @@ class Komo(object):
     sensitive   only collect directory with crawl,email
         --url       one url
         --urls      an urls file
-    webattack   only attack web from url or urls
+    webattack   only attack web from url or urls: pocscan, Weak password scanning, crawl urls to xray
+        --url       one url
+        --urls      an urls file
+    webattack2  only poc scan from url or urls: pocscan, Weak password scanning
         --url       one url
         --urls      an urls file
     hostattack  only attack ip from ip or ips
         --ip        one ip
         --ips       an ips file
+    attack      run webattack and hostattack: crawl url to xray, pocscan, Weak password scanning
+
 
     Example:
         python3 Komo.py install
@@ -80,8 +98,15 @@ class Komo(object):
         python3 Komo.py --domains ./domains.txt all
         python3 Komo.py --domain example.com collect
         python3 Komo.py --domains ./domains.txt collect
+        python3 Komo.py --domain example.com collect1
+        python3 Komo.py --domains ./domains.txt collect1
+        python3 Komo.py --domain example.com collect2
+        python3 Komo.py --domains ./domains.txt collect2
         python3 Komo.py --domain example.com subdomain
         python3 Komo.py --domains ./domains.txt subdomain
+
+        python3 Komo.py --subdomain aaa.example.com all2
+        python3 Komo.py --subdomains ./subdomains.txt all2
 
         python3 Komo.py --url http://example.com finger
         python3 Komo.py --urls ./urls.txt finger
@@ -89,6 +114,8 @@ class Komo(object):
         python3 Komo.py --urls ./urls.txt sensitive
         python3 Komo.py --url http://example.com webattack
         python3 Komo.py --urls ./urls.txt webattack
+        python3 Komo.py --url http://example.com webattack2
+        python3 Komo.py --urls ./urls.txt webattack2
 
         python3 Komo.py --ip example.com portscan
         python3 Komo.py --ips ./domains.txt portscan
@@ -98,18 +125,24 @@ class Komo(object):
 
     :param domain:
     :param domains:
+    :param subdomain:
+    :param subdomains:
     :param url:
-    :param urlsfile:
+    :param urls:
     :param ip:
     :param ips:
     :param attackflag:
+    :param date:
     '''
 
-    def __init__(self, domain=None, domains=None, url=None, urls=None, ip=None, ips=None, attackflag=False, date=None):
+    def __init__(self, domain=None, domains=None, subdomain=None, subdomains=None, url=None, urls=None, ip=None,
+                 ips=None, attackflag=False, date=None):
 
         date1 = str(datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S"))
         self.domain = domain
         self.domains = domains  # domainsfile
+        self.subdomain = subdomain
+        self.subdomains = subdomains
         self.url = url
         self.urlsfile = urls
         self.ip = ip
@@ -119,6 +152,11 @@ class Komo(object):
         self.domains_list = []
         create_logfile()
         print(banner)
+        self.randomstr = ''.join(random.sample(string.ascii_letters + string.digits, 16))
+        # 创建结果文件夹
+        self.result_folder = f"result/{self.date}"
+        if os.path.exists(self.result_folder) is False:
+            os.makedirs(self.result_folder)
 
         if self.domain and self.domains is None:
             self.domains_list.append(self.domain)
@@ -128,6 +166,32 @@ class Komo(object):
                     line = line.strip()
                     self.domains_list.append(line)
             self.domains_list = list(set(self.domains_list))
+        elif self.subdomain and self.subdomains is None:
+            with open(f"result/{self.date}/{self.randomstr}.final.subdomains.txt", "w", encoding="utf-8") as f:
+                f.write(str(self.subdomain))
+        elif self.subdomains and self.subdomain is None:
+            if os.path.exists(self.subdomains):
+                shutil.copy(self.subdomains, f"result/{self.date}/{self.randomstr}.final.subdomains.txt")
+            else:
+                logger.error(f"[-] {self.subdomains} Not found and exit!")
+                exit(1)
+
+        # 变成绝对路径
+        if self.domains is not None:
+            if os.path.isabs(self.domains) is False:
+                newpath = os.path.realpath(os.getcwd() + '/' + self.domains)
+                if os.path.exists(newpath):
+                    self.domains = newpath
+        if self.urlsfile is not None:
+            if os.path.isabs(self.urlsfile) is False:
+                newpath = os.path.realpath(os.getcwd() + '/' + self.urlsfile)
+                if os.path.exists(newpath):
+                    self.urlsfile = newpath
+        if self.ips is not None:
+            if os.path.isabs(self.ips) is False:
+                newpath = os.path.realpath(os.getcwd() + '/' + self.ips)
+                if os.path.exists(newpath):
+                    self.ips = newpath
 
     def install(self):
         # download tools
@@ -171,7 +235,6 @@ class Komo(object):
             logger.error("[-] Please check --url or --urlsfile")
 
     # 对urls进行漏洞扫描
-    # def vulscan(self):
     def webattack(self):
         self.attackflag = True
         if self.url:
@@ -181,6 +244,16 @@ class Komo(object):
         elif self.urlsfile:
             sensitiveinfo_main.manager(domain=None, url=None, urlsfile=self.urlsfile, attackflag=self.attackflag,
                                        date=self.date)
+            vulscan_main.webmanager(domain=None, url=None, urlsfile=self.urlsfile, date=self.date)
+        else:
+            logger.error("[-] Please check --url or --urlsfile")
+
+    # only poc scan
+    def webattack2(self):
+        self.attackflag = True
+        if self.url:
+            vulscan_main.webmanager(domain=None, url=self.url, urlsfile=None, date=self.date)
+        elif self.urlsfile:
             vulscan_main.webmanager(domain=None, url=None, urlsfile=self.urlsfile, date=self.date)
         else:
             logger.error("[-] Please check --url or --urlsfile")
@@ -199,7 +272,7 @@ class Komo(object):
 
     def attack(self):
         self.webattack()
-        self.webattack()
+        self.hostattack()
 
     # 只扫描，不攻击 提供主域名或者主域名文件，顺序执行
     def collect(self):
@@ -220,6 +293,26 @@ class Komo(object):
         else:
             logger.error("[-] Please check --domain or --domains")
 
+    def collect1(self):
+        # self.attackflag = False
+        if self.domains_list:
+            for domain in self.domains_list:
+                domain_main.manager(domain=domain, date=self.date)
+                finger_main.manager(domain=domain, url=None, urlsfile=None, date=self.date)
+                # portscan_main.manager(domain=domain, ip=None, ipfile=None, date=self.date)
+        else:
+            logger.error("[-] Please check --domain or --domains")
+
+    def collect2(self):
+        # self.attackflag = False
+        if self.domains_list:
+            for domain in self.domains_list:
+                domain_main.manager(domain=domain, date=self.date)
+                finger_main.manager(domain=domain, url=None, urlsfile=None, date=self.date)
+                portscan_main.manager(domain=domain, ip=None, ipfile=None, date=self.date)
+        else:
+            logger.error("[-] Please check --domain or --domains")
+
     # 扫描+攻击 all_scan
     def all(self):
         '''
@@ -233,14 +326,76 @@ class Komo(object):
                 domain_main.manager(domain=domain, date=self.date)
                 finger_main.manager(domain=domain, urlsfile=None, date=self.date)
                 portscan_main.manager(domain=domain, ip=None, ipfile=None, date=self.date)
-                sensitiveinfo_main.manager(domain=domain, url=None, urlsfile=None, attackflag=self.attackflag,
-                                           date=self.date)
                 vulscan_main.webmanager(domain=domain, url=None, urlsfile=None, date=self.date)
                 vulscan_main.hostmanager(domain=domain, ip=None, ipfile=None, date=self.date)
+                sensitiveinfo_main.manager(domain=domain, url=None, urlsfile=None, attackflag=self.attackflag,
+                                           date=self.date)
         else:
             logger.error("[-] Please check --domain or --domains")
+
+    # 扫描+攻击 提供子域名列表,不扫描子域
+    def all2(self):
+        '''
+        python main.py --subdomain aaa.tiqianle.com all2
+        python main.py --subdomains tiqianle.com.txt all2
+        :return:
+        '''
+        self.attackflag = True
+        if self.subdomain or self.subdomains:
+            # for domain in self.domains_list:
+            # domain_main.manager(domain=domain, date=self.date)
+            finger_main.manager(domain=self.randomstr, urlsfile=None, date=self.date)
+            portscan_main.manager(domain=self.randomstr, ip=None, ipfile=None, date=self.date)
+            vulscan_main.webmanager(domain=self.randomstr, url=None, urlsfile=None, date=self.date)
+            vulscan_main.hostmanager(domain=self.randomstr, ip=None, ipfile=None, date=self.date)
+            sensitiveinfo_main.manager(domain=self.randomstr, url=None, urlsfile=None, attackflag=self.attackflag,
+                                       date=self.date)
+        else:
+            logger.error("[-] Please check --subdomain or --subdomains")
 
 
 if __name__ == '__main__':
     fire.Fire(Komo)
 
+# fire.Fire(ctfr)
+# fire.Fire(test1.b)
+# test1.a()
+# fire.Fire(test1.ooo)
+# test1.a()
+# fire.Fire(oneforall.OneForAll)
+
+# class ooo(object):
+#     def __init__(self, target=None, targets=None, brute=None, dns=None, req=None,
+#                  port=None, alive=None, fmt=None, path=None, takeover=None):
+#         self.target = target
+#         self.targets = targets
+#         self.brute = brute
+#         self.dns = dns
+#         self.req = req
+#         self.port = port
+#         self.alive = alive
+#         self.fmt = fmt
+#         self.path = path
+#         self.takeover = takeover
+#         self.domain = str()  # The domain currently being collected
+#         self.domains = set()  # All domains that are to be collected
+#         self.data = list()  # The subdomain results of the current domain
+#         self.datas = list()  # All subdomain results of the domain
+#         self.in_china = None
+#         self.access_internet = False
+#         self.enable_wildcard = False
+#         print(self.target)
+#
+#     def run(self):
+#
+#
+
+
+# os.system("python3 core/test1/test1.py")
+
+
+# domain_main.manager("tiqianle.com", date)
+#
+# test1.yoyo()
+# test1.Yoyo().yoyoketang()
+# test1.sss()

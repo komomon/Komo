@@ -1,0 +1,391 @@
+# amass:
+#      toolname: amass gongjvname
+#      whetherdownload: True 是否下载
+#      link: https://github.com/OWASP/Amass/releases/download/v3.20.0/amass_windows_amd64.zip 二进制文件路径
+#      downloadfile: amass.zip 下载后存储的文件exe或zip或.tar.gz 的文件名和后缀
+#      unzipsubfile: amass_windows_amd64 解压的指定子目录
+#      source_name: amass.exe   下载后压缩包中文件的名称
+#      final_name: amass.exe    最终移动到的位置格式化为的文件名称，如果两者不相同，则move修改为final_name的名称，移动文件夹或者文件
+#      tool_main_filename: /gospider.exe 最终二进制文件或某个文件的名称，如果不存在，则说明没解压到对应目录或者没下载，用于下载的文件中包含一层文件夹的情况
+#      topath:
+#        - core/tools/domain/amass/ # 存储路径，整体使用的时候的存储路径
+#        - amass/   # 存储路径，单模块使用的时候的存储路径
+# 由于有些工具比如amass gospider vulmap, 解压后下面还有一层目录，为了让最后工具目录结构为 core/tools/mukuai/toolname/toolname.exe
+# eg core/tools/domain/amass/amass.exe,所以通过下面的source_name，final_name topath进行调整保证最终目录结构符合上述结构要求
+# topath为解压到的工具目录，对于压缩包子目录下才是工具的情况，topath要往上一层，这样解压到目录的是子目录
+# source_name为压缩包子目录或者下载的工具压缩包或二进制exe文件的名称,final_name为最终修改为的名称，使用rename修改名称
+download:
+  domain:
+    amass:
+      toolname: amass
+      whetherdownload: True
+      link: https://github.com/OWASP/Amass/releases/download/v3.21.2/amass_windows_amd64.zip
+      downloadfile: amass.zip
+#      unzipsubfile: amass_windows_amd64
+      source_name: amass_windows_amd64/
+      final_name: amass/
+      tool_main_filename: amass.exe
+      topath:
+        - core/tools/domain/
+        - /
+#        - core/tools/domain/amass/
+#        - amass/
+    ksubdomain:
+      toolname: ksubdomain
+      whetherdownload: True
+      link: https://github.com/boy-hack/ksubdomain/releases/download/v1.9.5/KSubdomain-windows.tar
+      downloadfile: ksubdomain.tar
+      source_name: ksubdomain.exe
+      final_name: ksubdomain.exe
+      tool_main_filename: ksubdomain.exe
+      topath:
+        - core/tools/domain/ksubdomain/
+        - ksubdomain/
+    subfinder:
+      toolname: subfinder
+      whetherdownload: True
+      link: https://github.com/projectdiscovery/subfinder/releases/download/v2.5.3/subfinder_2.5.3_windows_amd64.zip
+      downloadfile: subfinder.zip
+      source_name: subfinder.exe
+      final_name: subfinder.exe
+      tool_main_filename: subfinder.exe
+      topath:
+        - core/tools/domain/subfinder/
+        - subfinder/
+    oneforall:
+      toolname: oneforall
+      whetherdownload: False
+      link:
+      downloadfile:
+      source_name:
+      final_name:
+      tool_main_filename: oneforall.py
+      topath:
+        - core/tools/domain/OneForAll/
+        - OneForAll/
+    ip2location:
+      toolname: ip2location
+      whetherdownload: True
+      link: https://github.com/shmilylty/OneForAll/blob/master/data/ip2location.zip?raw=true
+      downloadfile: ip2location.zip
+      source_name: ip2location.db
+      final_name: ip2location.db
+      tool_main_filename: ip2location.db
+      topath:
+        - core/tools/domain/OneForAll/data/
+        - OneForAll/data/
+    subnames_big:
+      # https://raw.githubusercontent.com/shmilylty/OneForAll/blob/master/data/subnames_big.7z
+      toolname: subnames_big
+      whetherdownload: True
+      link: https://github.com/shmilylty/OneForAll/blob/master/data/subnames_big.7z?raw=true
+      downloadfile: subnames_big.7z
+      source_name: subnames_big.7z
+      final_name: subnames_big.7z
+      tool_main_filename: subnames_big.7z
+      topath:
+        - core/tools/domain/OneForAll/data/
+        - OneForAll/data/
+    ip2region:
+      toolname: ip2region
+      whetherdownload: True
+      link: https://github.com/shmilylty/OneForAll/blob/master/data/ip2region.db?raw=true
+      downloadfile: ip2region.db
+      source_name: ip2region.db
+      final_name: ip2region.db
+      tool_main_filename: ip2region.db
+      topath:
+        - core/tools/domain/OneForAll/data/
+        - OneForAll/data/
+  finger:
+    ehole:
+      toolname: ehole
+      whetherdownload: False
+      link:
+      downloadfile:
+      source_name:
+      final_name:
+      tool_main_filename:
+      topath:
+        - core/tools/finger/Ehole/
+        - Ehole/
+    httpx:
+      toolname: httpx
+      whetherdownload: True
+      link: https://github.com/projectdiscovery/httpx/releases/download/v1.2.4/httpx_1.2.4_windows_amd64.zip
+      downloadfile: httpx.zip
+      source_name: httpx.exe
+      final_name: httpx.exe
+      tool_main_filename: httpx.exe
+      topath:
+        - core/tools/finger/httpx/
+        - httpx/
+    webanalyze:
+      toolname: webanalyze
+      whetherdownload: True
+      link: https://github.com/rverton/webanalyze/releases/download/v0.3.8/webanalyze_0.3.8_Windows_x86_64.tar.gz
+      downloadfile: webanalyze.tar.gz
+      source_name: webanalyze.exe
+      final_name: webanalyze.exe
+      tool_main_filename: webanalyze.exe
+      topath:
+        - core/tools/finger/webanalyze/
+        - webanalyze/
+  portscan:
+    TxPortMap:
+      toolname: TxPortMap
+      whetherdownload: True
+      link: https://github.com/4dogs-cn/TXPortMap/releases/download/v1.1.2/TxPortMap_windows_x64.exe
+      downloadfile: TxPortMap.exe
+      source_name: TxPortMap.exe
+      final_name: TxPortMap.exe
+      tool_main_filename: TxPortMap.exe
+      topath:
+        - core/tools/portscan/TxPortMap/
+        - TxPortMap/
+    # 暂不使用
+    dismap:
+      toolname: dismap
+      whetherdownload: False
+      link:
+      downloadfile:
+      source_name:
+      final_name:
+      tool_main_filename:
+      topath:
+        - core/tools/portscan/dismap/
+        - dismap/
+    naabu:
+      toolname: naabu
+      whetherdownload: True
+      link: https://github.com/projectdiscovery/naabu/releases/download/v2.1.1/naabu_2.1.1_windows_amd64.zip
+      downloadfile: naabu.zip
+      source_name: naabu.exe
+      final_name: naabu.exe
+      tool_main_filename: naabu.exe
+      topath:
+        - core/tools/portscan/naabu/
+        - naabu/
+  sensitiveinfo:
+    chrome-win:
+      toolname: chrome-win
+      whetherdownload: True
+      link: https://commondatastorage.googleapis.com/chromium-browser-snapshots/Win_x64/1051001/chrome-win.zip
+      downloadfile: chrome-win.zip
+      source_name: chrome-win/
+      final_name: chrome-win/
+      tool_main_filename: chrome.exe
+      topath:
+        - core/tools/sensitiveinfo/
+        - /
+    crawlergo:
+      toolname: crawlergo
+      whetherdownload: True
+      link: https://github.com/Qianlitp/crawlergo/releases/download/v0.4.4/crawlergo_win_amd64.exe
+      downloadfile: crawlergo.exe
+      source_name: crawlergo.exe
+      final_name: crawlergo.exe
+      tool_main_filename: crawlergo.exe
+      topath:
+        - core/tools/sensitiveinfo/crawlergo/
+        - crawlergo/
+    rad:
+      toolname: rad
+      whetherdownload: True
+      link: https://github.com/chaitin/rad/releases/download/0.4/rad_windows_amd64.exe.zip
+      downloadfile: rad.zip
+      source_name: rad_windows_amd64.exe
+      final_name: rad.exe
+      tool_main_filename: rad.exe
+      topath:
+        - core/tools/sensitiveinfo/rad/
+        - rad/
+    emailall:
+      # https://github.com/Taonn/EmailAll/archive/refs/heads/master.zip 修改过
+      toolname: emailall
+      whetherdownload: False
+      link:
+      downloadfile: emailall.zip
+      source_name:
+      final_name:
+      tool_main_filename: emailall.py
+      topath:
+        - core/tools/sensitiveinfo/emailall/
+        - emailall/
+    gospider:
+      toolname: gospider
+      whetherdownload: True
+      link: https://github.com/jaeles-project/gospider/releases/download/v1.1.6/gospider_v1.1.6_windows_x86_64.zip
+      downloadfile: gospider.zip
+      source_name: gospider_v1.1.6_windows_x86_64/
+      final_name: gospider/
+      tool_main_filename: gospider.exe
+      topath:
+        - core/tools/sensitiveinfo/
+        - /
+#        - core/tools/sensitiveinfo/gospider/
+#        - gospider/
+    hakrawler:
+      # 修改了加了-f参数
+      toolname: hakrawler
+      whetherdownload: False
+      link:
+      downloadfile:
+      source_name: hakrawler.exe
+      final_name: hakrawler.exe
+      tool_main_filename: hakrawler.exe
+      topath:
+        - core/tools/sensitiveinfo/hakrawler/
+        - hakrawler/
+    dirsearch:
+      # zanbuyong，不移动 dirsearch-master/ /
+      toolname: dirsearch
+      whetherdownload: False
+      link: https://github.com/maurosoria/dirsearch/archive/refs/heads/master.zip
+      downloadfile: dirsearch.zip
+      source_name:
+      final_name:
+      tool_main_filename: dirsearch.py
+      topath:
+        - core/tools/sensitiveinfo/dirsearch/
+        - dirsearch/
+    gau:
+      toolname: gau
+      whetherdownload: True
+      link: https://github.com/lc/gau/releases/download/v2.1.2/gau_2.1.2_windows_amd64.zip
+      downloadfile: gau.zip
+      source_name: gau.exe
+      final_name: gau.exe
+      tool_main_filename: gau.exe
+      topath:
+        - core/tools/sensitiveinfo/gau/
+        - gau/
+    urlcollector:
+      toolname: urlcollector
+      whetherdownload: False
+      link:
+      downloadfile:
+      source_name:
+      final_name:
+      tool_main_filename:
+      topath:
+        - core/tools/sensitiveinfo/urlcollector/
+        - urlcollector/
+    URLFinder:
+      toolname: URLFinder
+      whetherdownload: True
+      link: https://github.com/pingc0y/URLFinder/blob/master/URLFinder-windows64.exe?raw=true
+      downloadfile: URLFinder.exe
+      source_name: URLFinder.exe
+      final_name: URLFinder.exe
+      tool_main_filename: URLFinder.exe
+      topath:
+        - core/tools/sensitiveinfo/URLFinder/
+        - URLFinder/
+  vulscan:
+    afrog:
+      toolname: afrog
+      whetherdownload: True
+      link: https://github.com/zan8in/afrog/releases/download/v2.1.1/afrog_2.1.1_windows_amd64.zip
+      downloadfile: afrog.zip
+      source_name: afrog.exe
+      final_name: afrog.exe
+      tool_main_filename: afrog.exe
+      topath:
+        - core/tools/vulscan/afrog/
+        - afrog/
+    goon:
+      toolname: goon
+      whetherdownload: True
+      link: https://github.com/i11us0ry/goon/releases/download/v3.5/goon3_win_amd64.zip
+      downloadfile: goon.zip
+      source_name: goon3_win_amd64.exe
+      final_name: goon.exe
+      tool_main_filename: goon.exe
+      topath:
+        - core/tools/vulscan/goon/
+        - goon/
+    nuclei:
+      toolname: nuclei
+      whetherdownload: True
+      link: https://github.com/projectdiscovery/nuclei/releases/download/v2.8.3/nuclei_2.8.3_windows_amd64.zip
+      downloadfile: nuclei.zip
+      source_name: nuclei.exe
+      final_name: nuclei.exe
+      tool_main_filename: nuclei.exe
+      topath:
+        - core/tools/vulscan/nuclei/
+        - nuclei/
+    SweetBabyScan:
+      toolname: SweetBabyScan
+      whetherdownload: True
+      link: https://github.com/inbug-team/SweetBabyScan/releases/download/v0.1.0/SbScanAmd64.exe
+      downloadfile: SweetBabyScan.exe
+      #      source_name: SbScanAmd64.exe
+      source_name: SweetBabyScan.exe
+      final_name: SweetBabyScan.exe
+      tool_main_filename: SweetBabyScan.exe
+      topath:
+        - core/tools/vulscan/SweetBabyScan/
+        - SweetBabyScan/
+
+    vulmap:
+      # py
+      toolname: vulmap
+      whetherdownload: True
+      link: https://github.com/zhzyker/vulmap/archive/refs/tags/v0.9.zip
+      downloadfile: vulmap.zip
+      source_name: vulmap-0.9/
+      final_name: vulmap/
+      tool_main_filename: vulmap.py
+      topath:
+        - core/tools/vulscan/
+        - /
+#        - core/tools/vulscan/vulmap/
+#        - vulmap/
+    vscan:
+      toolname: vscan
+      whetherdownload: True
+      link: https://github.com/veo/vscan/releases/download/v2.1.0/vscan_2.1.0_windows_amd64.zip
+      downloadfile: vscan.zip
+      source_name: vscan.exe
+      final_name: vscan.exe
+      tool_main_filename: vscan.exe
+      topath:
+        - core/tools/vulscan/vscan/
+        - vscan/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
