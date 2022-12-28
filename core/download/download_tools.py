@@ -9,6 +9,7 @@ import traceback
 import zipfile
 import py7zr
 from pathlib import Path
+import platform
 import yaml
 import requests
 from loguru import logger
@@ -47,6 +48,10 @@ class Download:
         self.download_path = "download_tmp"
         self.tools_dict = {}
         self.getconfig()
+        self.rootpath = os.getcwd()
+        self.pwd = os.path.dirname(os.path.abspath(__file__))
+        self.ostype = platform.system().lower()
+        self.suffix = ".exe" if "windows" == self.ostype else ""
         self.executor = ThreadPoolExecutor(max_workers=5)
         self.tools_installed = {}
         if os.path.exists(self.download_path) is False:
@@ -56,9 +61,8 @@ class Download:
                 self.tools_installed[k] = False
 
     def getconfig(self):
-        filename = f"{os.path.dirname(os.path.abspath(__file__))}"
-        platform = get_system()
-        toolsyaml_path = f"{os.getcwd()}/config/tools_{platform}.yaml"
+        # ostype = platform.system().lower() #get_system()
+        toolsyaml_path = f"{self.rootpath}/config/tools_{self.ostype}.yaml"
         # toolsyaml_path = "tools_linux.yaml"
         if os.path.exists(toolsyaml_path):
             with open(toolsyaml_path, 'r', encoding='utf-8') as f:
@@ -76,6 +80,7 @@ class Download:
         else:
             logger.error(f"[-] not found {toolsyaml_path}")
             logger.error("Exit!")
+            exit(1)
 
     # 解压到指定目录
     def unzipfile(self, filename, dirs="."):
@@ -198,6 +203,19 @@ class Download:
         except KeyboardInterrupt:
             return False
 
+    # 工具初始化
+    def tools_init(self):
+        if os.path.exists(f"core/tools/vulscan/vulmap/module/licenses"):
+           if os.path.exists(f"core/tools/vulscan/vulmap/module/licenses/licenses.txt") is False:
+                shutil.copy("config/supplementary_files/vulmap/licenses.txt","core/tools/vulscan/vulmap/module/licenses")
+                logger.info(f"[+] {self.rootpath}/core/tools/vulscan/vulmap/vulmap.py initialization is complete")
+        if os.path.exists(f"core/tools/vulscan/goon/goon{self.suffix}"):
+            os.system(os.path.realpath(f"{self.rootpath}/core/tools/vulscan/goon/goon{self.suffix}"))
+            logger.info(f"[+] {self.rootpath}/core/tools/vulscan/goon/goon{self.suffix} initialization is complete")
+        if os.path.exists(f"core/tools/vulscan/afrog/afrog{self.suffix}"):
+            os.system(f"{self.rootpath}/core/tools/vulscan/afrog/afrog{self.suffix}")
+            logger.info(f"[+] {self.rootpath}/core/tools/vulscan/afrog/afrog{self.suffix} initialization is complete")
+
     # 可以捕获异常
     def run(self):
         flag = 0
@@ -223,6 +241,8 @@ class Download:
             exit()
         else:
             logger.info(f"\n[+] All tools are installed\n")
+        # 部分工具初始化
+        self.tools_init()
 
     # pass，找的c+c终止的方法，不太好用https://www.jianshu.com/p/45e526c792c3
     def run1(self):

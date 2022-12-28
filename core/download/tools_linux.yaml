@@ -167,8 +167,8 @@ download:
         - core/tools/portscan/naabu/
         - naabu/
   sensitiveinfo:
-    chrome-win:
-      toolname: chrome-win
+    chrome-linux:
+      toolname: chrome-linux
       whetherdownload: True
       link: https://commondatastorage.googleapis.com/chromium-browser-snapshots/Linux_x64/1086242/chrome-linux.zip
       downloadfile: chrome-linux.zip
