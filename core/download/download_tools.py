@@ -47,13 +47,13 @@ class Download:
         # logger.info('检查是否已安装工具，如缺少将进行安装; tips: github网速可能不好，如下载频繁失败，建议百度云获取。')
         self.download_path = "download_tmp"
         self.tools_dict = {}
-        self.getconfig()
         self.rootpath = os.getcwd()
         self.pwd = os.path.dirname(os.path.abspath(__file__))
         self.ostype = platform.system().lower()
         self.suffix = ".exe" if "windows" == self.ostype else ""
         self.executor = ThreadPoolExecutor(max_workers=5)
         self.tools_installed = {}
+        self.getconfig()
         if os.path.exists(self.download_path) is False:
             os.makedirs(self.download_path)
         for k in self.tools_dict.keys():
