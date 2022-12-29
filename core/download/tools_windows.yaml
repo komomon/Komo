@@ -274,7 +274,7 @@ download:
     URLFinder:
       toolname: URLFinder
       whetherdownload: True
-      link: https://github.com/pingc0y/URLFinder/blob/master/URLFinder-windows64.exe?raw=true
+      link: https://github.com/pingc0y/URLFinder/blob/master/URLFinder-windows-amd64.exe?raw=true
       downloadfile: URLFinder.exe
       source_name: URLFinder.exe
       final_name: URLFinder.exe
