@@ -16,7 +16,6 @@ from loguru import logger
 from concurrent.futures import ThreadPoolExecutor, ALL_COMPLETED, wait, as_completed
 
 
-
 def get_system():
     # global suffix
     platform = sys.platform
@@ -27,7 +26,6 @@ def get_system():
     else:
         print("get system type error")
         exit(1)
-
 
 
 def executor_callback(worker):
@@ -41,11 +39,11 @@ def executor_callback(worker):
         print(result)
 
 
-
 class Download:
-    def __init__(self):
+    def __init__(self, proxy=None):
         # logger.info('检查是否已安装工具，如缺少将进行安装; tips: github网速可能不好，如下载频繁失败，建议百度云获取。')
         self.download_path = "download_tmp"
+        self.proxy = proxy
         self.tools_dict = {}
         self.rootpath = os.getcwd()
         self.pwd = os.path.dirname(os.path.abspath(__file__))
@@ -114,13 +112,14 @@ class Download:
         #     os.makedirs(dst_path)
         if os.path.exists(target_filename) is False:
             try:
-                headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36"}
+                headers = {
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36"}
                 proxies = {
-                    'http': '127.0.0.1:7890',
-                    'https': '127.0.0.1:7890'
+                    'http': self.proxy,
+                    'https': self.proxy
                 }
-                # response = requests.get(url,headers=headers,proxies=proxies, stream=True)
-                response = requests.get(url, headers=headers, stream=True)
+                response = requests.get(url, headers=headers, proxies=proxies, stream=True)
+                # response = requests.get(url, headers=headers, stream=True)
                 handle = open(target_filename, "wb")
                 for chunk in response.iter_content(chunk_size=512):
                     if chunk:  # filter out keep-alive new chunks
@@ -154,7 +153,7 @@ class Download:
                 # dis whether exist
                 if os.path.exists(tool_filename) is False:
                     installflag = True
-                else: # exists
+                else:  # exists
                     # print("tool_filename:",tool_filename)
                     if os.path.isdir(tool_filename):
                         tool_filename = f"{toolinfo['topath'][0]}/{toolinfo['final_name']}/{toolinfo['tool_main_filename']}"
@@ -163,7 +162,7 @@ class Download:
                             shutil.rmtree(f"{toolinfo['topath'][0]}/{toolinfo['final_name']}")  # 如果存在则删除文件夹,否则不能rename
                         else:
                             installflag = False
-                    else: # not dir
+                    else:  # not dir
                         installflag = False
                 # installflag is True-> install tools
                 if installflag is True:
@@ -195,7 +194,7 @@ class Download:
                                 logger.info(f"[+] chmod +x {tool_filename} success!")
                             else:
                                 logger.error(f"[-] {tool_filename} non-existent, chmod +x {tool_filename} failed!")
-                        else: # not dir
+                        else:  # not dir
                             os.system(f"chmod +x {tool_filename}")
                             logger.info(f"[+] chmod +x {tool_filename} success!")
                     else:
@@ -206,8 +205,9 @@ class Download:
     # 工具初始化
     def tools_init(self):
         if os.path.exists(f"core/tools/vulscan/vulmap/module/licenses"):
-           if os.path.exists(f"core/tools/vulscan/vulmap/module/licenses/licenses.txt") is False:
-                shutil.copy("config/supplementary_files/vulmap/licenses.txt","core/tools/vulscan/vulmap/module/licenses")
+            if os.path.exists(f"core/tools/vulscan/vulmap/module/licenses/licenses.txt") is False:
+                shutil.copy("config/supplementary_files/vulmap/licenses.txt",
+                            "core/tools/vulscan/vulmap/module/licenses")
                 logger.info(f"[+] {self.rootpath}/core/tools/vulscan/vulmap/vulmap.py initialization is complete")
         if os.path.exists(f"core/tools/vulscan/goon/goon{self.suffix}"):
             os.system(os.path.realpath(f"{self.rootpath}/core/tools/vulscan/goon/goon{self.suffix}"))

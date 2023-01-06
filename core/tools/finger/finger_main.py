@@ -37,13 +37,13 @@ def get_system():
 
 # @logger.catch
 def __subprocess2(cmd):
-    if isinstance(cmd, str):
-        cmd = cmd.split(' ')
-    elif isinstance(cmd, list):
-        cmd = cmd
-    else:
-        logger.error(f'[-] cmd type error,cmd should be a string or list: {cmd}')
-        return
+    # if isinstance(cmd, str):
+    #     cmd = cmd.split(' ')
+    # elif isinstance(cmd, list):
+    #     cmd = cmd
+    # else:
+    #     logger.error(f'[-] cmd type error,cmd should be a string or list: {cmd}')
+    #     return
     out_temp = tempfile.SpooledTemporaryFile(max_size=10 * 1000, mode='w+b')
     lines = []
     try:

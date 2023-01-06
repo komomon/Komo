@@ -40,6 +40,30 @@ Komo目前已经适配window、linux。
 
 ## Usage
 
+### 初始化
+
+安装`python3`（`python2`暂时不支持）
+
+安装相应的库文件`pip3 install -r requirements.txt`
+
+第一次使用下载所需工具，以及部分工具初始化（goon，vulmap，afrog）
+
+**注：国内访问github可能存在超时问题，推荐使用代理下载工具进行初始化。**
+
+```python
+python3 Komo.py install
+python3 Komo.py  --proxy http://127.0.0.1:10809 install
+python3 Komo.py  --proxy socks5://127.0.0.1:10809 install
+```
+
+如下图所示，如果下载失败，则需要手动去下载对应工具到对应目录。
+
+![image-20220927001258352](images/image-20220927001258352.png)
+
+注意：使用v2ray的开全局不一定能行，可以使用clash开TUN。
+
+
+
 ### 配置
 
 配置文件config/config.yaml
@@ -68,33 +92,7 @@ other:
 
 其他配置为以后扩充开发预留配置，暂时不用修改。
 
-
-
-### 初始化
-
-安装`python3`（`python2`暂时不支持）
-
-安装相应的库文件`pip3 install -r requirements.txt`
-
-第一次使用下载所需工具，以及部分工具初始化（goon，vulmap，afrog）
-
-```python
-python3 Komo.py install
-```
-
-如下图所示，如果下载失败，则需要手动去下载对应工具到对应目录。
-
-![image-20220927001258352](images/image-20220927001258352.png)
-
-
-
-
-
-
-
-
-
-
+oneforall等工具的配置，要在初始化之后进入到对应工具目录进行修改，比如oneforall：`core/tools/domain/Oneforall`
 
 
 
@@ -323,6 +321,7 @@ python3 Komo.py --ips ./ips.txt hostattack
 
     mode:
     install     Download the required tools
+    	--proxy Set proxy
     all         all scan and attack:subdomain, survival detection, finger, portscan, email collect, sensitive(crawl urls), pocscan, Weak password scanning, to_xray
         --domain    one domain
         --domains   a domain file
@@ -458,6 +457,20 @@ target 为domain或date
 
 
 ## 更新日志
+
+
+
+### 20230106
+
+1、修复linux下子线程执行进入交互shell的bug
+
+2、配置文件修改hakrawler采用下载方式，进一步缩进Komo体积
+
+3、log文件增加扫描参数记录，便于回忆使用的参数。
+
+4、install 模块添加代理参数`--proxy`，解决国内无法访问github下载工具的问题
+
+
 
 ### 20221227
 

@@ -25,7 +25,7 @@ import simplejson
 import tldextract
 from loguru import logger
 from common.getconfig import *
-import common
+# import common
 
 all_config = getconfig()
 Xray_Port = int(all_config['tools']['other']['xray']['listenport'])
@@ -228,7 +228,7 @@ def request0(req_json):
         pass
 
 
-# 启用子进程执行外部shell命令
+# 启用子进程执行外部shell命令,目前未使用
 def __subprocess(cmd):
     # 得到一个临时文件对象， 调用close后，此文件从磁盘删除
     out_temp = tempfile.TemporaryFile(mode='w+b')
@@ -264,13 +264,13 @@ def __subprocess1(cmd, timeout=None, path=None):
     :return:
     '''
     f_name = inspect.getframeinfo(inspect.currentframe().f_back)[2]
-    if isinstance(cmd, str):
-        cmd = cmd.split(' ')
-    elif isinstance(cmd, list):
-        cmd = cmd
-    else:
-        logger.error(f'[-] cmd type error,cmd should be a string or list: {cmd}')
-        return
+    # if isinstance(cmd, str):
+    #     cmd = cmd.split(' ')
+    # elif isinstance(cmd, list):
+    #     cmd = cmd
+    # else:
+    #     logger.error(f'[-] cmd type error,cmd should be a string or list: {cmd}')
+    #     return
     try:
         # 执行外部shell命令， 输出结果存入临时文件中
         # logger.info(f"[+] command:{' '.join(cmd)}")
@@ -294,13 +294,13 @@ def __subprocess1(cmd, timeout=None, path=None):
 
 # @logger.catch
 def __subprocess2(cmd):
-    if isinstance(cmd, str):
-        cmd = cmd.split(' ')
-    elif isinstance(cmd, list):
-        cmd = cmd
-    else:
-        logger.error(f'[-] cmd type error,cmd should be a string or list: {cmd}')
-        return
+    # if isinstance(cmd, str):
+    #     cmd = cmd.split(' ')
+    # elif isinstance(cmd, list):
+    #     cmd = cmd
+    # else:
+    #     logger.error(f'[-] cmd type error,cmd should be a string or list: {cmd}')
+    #     return
     lines = []
     out_temp = tempfile.SpooledTemporaryFile(max_size=10 * 1000, mode='w+b')
     try:
@@ -489,7 +489,9 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         rad 0.4
         :return:
         '''
+        global Xray_Port
         tool_name = str(sys._getframe().f_code.co_name)
+        # tool_path =
         logger.info('-' * 10 + f'start {tool_name}' + '-' * 10)
         # 创建多个子域名结果输出文件夹
         output_folder = f'{sensitiveinfo_log_folder}/{tool_name}_log'
@@ -503,8 +505,7 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         print(f"{output_folder}/{output_filename_prefix}.{tool_name}.json")
         if os.path.exists(f"{output_folder}/{output_filename_prefix}.{tool_name}.json"):
             os.remove(f"{output_folder}/{output_filename_prefix}.{tool_name}.json")
-            logger.info(
-                f"{output_folder}/{output_filename_prefix}.{tool_name}.json delete success!")
+            logger.info(f"{output_folder}/{output_filename_prefix}.{tool_name}.json delete success!")
         time.sleep(2)
 
         if attackflag:
@@ -512,14 +513,12 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
             if checkport(xray_port) is False:
                 logger.error(f"xray_port {xray_port} not open, {tool_name} skip")
                 return False
-                # logger.error("Exit!!!")
-                # exit(1)
             proxy = f"http://127.0.0.1:{xray_port}"
             cmdstr = f"{pwd}/rad/rad{suffix} --target {target} --json-output {output_folder}/{output_filename_prefix}.{tool_name}.json --http-proxy {proxy}"
         else:
             cmdstr = f"{pwd}/rad/rad{suffix} --target {target} --json-output {output_folder}/{output_filename_prefix}.{tool_name}.json"
         logger.info(f"[+] command:{cmdstr}")
-        __subprocess1(cmdstr, timeout=60*20, path=f"{pwd}/{tool_name}")
+        __subprocess1(cmdstr, timeout=int(all_config['tools']['sensitiveinfo'][tool_name]['runtime']), path=f"{pwd}/{tool_name}")
 
         urls_data_tmp_to_csv = []  # 存储urldata四个字段的列表
         # 从rad结果中获取url,不存在url的则写入csv和links_set
@@ -570,7 +569,7 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         # 结果文件名 {subdomain}.csv {sensitiveinfo_log_folder}/URLFinder_log/{domain}.{tool_name}.csv
         cmdstr = f'{pwd}/URLFinder/URLFinder{suffix} -u {target} -s all -m 2 -o {output_folder}'
         logger.info(f"[+] command:{cmdstr}")
-        __subprocess1(cmdstr, timeout=600, path=f"{pwd}/{tool_name}")
+        __subprocess1(cmdstr, timeout=int(all_config['tools']['sensitiveinfo'][tool_name]['runtime']), path=f"{pwd}/{tool_name}")
         # print(f"[+] {tool_name} finished: {target}")
         logger.info(f"[+] {tool_name} finished: {target}")
 
@@ -634,7 +633,7 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         cmdstr = f'{pwd}/gospider/gospider{suffix} -s {target} --threads 10 --depth 2 --js --subs --sitemap --robots --other-source --include-subs --quiet --output {output_folder}'
         logger.info(f"[+] command:{cmdstr}")
         # os.system(cmdstr)
-        __subprocess1(cmdstr, timeout=60 * 10, path=f"{pwd}/{tool_name}")
+        __subprocess1(cmdstr, timeout=int(all_config['tools']['sensitiveinfo'][tool_name]['runtime']), path=f"{pwd}/{tool_name}")
         logger.info(f"[+] {tool_name} finished: {target}")
         # 对结果处理，不在links_set的就存储到link.csv中
         if os.path.exists(f'{output_folder}/{output_filename}'):

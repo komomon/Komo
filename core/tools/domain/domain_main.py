@@ -192,13 +192,13 @@ def __subprocess1(cmd, timeout=None, path=None):
     :return:
     '''
     f_name = inspect.getframeinfo(inspect.currentframe().f_back)[2]
-    if isinstance(cmd, str):
-        cmd = cmd.split(' ')
-    elif isinstance(cmd, list):
-        cmd = cmd
-    else:
-        logger.error(f'[-] cmd type error,cmd should be a string or list: {cmd}')
-        return
+    # if isinstance(cmd, str):
+    #     cmd = cmd.split(' ')
+    # elif isinstance(cmd, list):
+    #     cmd = cmd
+    # else:
+    #     logger.error(f'[-] cmd type error,cmd should be a string or list: {cmd}')
+    #     return
     try:
         # 执行外部shell命令， 输出结果存入临时文件中
         # logger.info(f"[+] command:{' '.join(cmd)}")
@@ -221,13 +221,13 @@ def __subprocess1(cmd, timeout=None, path=None):
 
 # @logger.catch
 def __subprocess2(cmd):
-    if isinstance(cmd, str):
-        cmd = cmd.split(' ')
-    elif isinstance(cmd, list):
-        cmd = cmd
-    else:
-        logger.error(f'[-] cmd type error,cmd should be a string or list: {cmd}')
-        return
+    # if isinstance(cmd, str):
+    #     cmd = cmd.split(' ')
+    # elif isinstance(cmd, list):
+    #     cmd = cmd
+    # else:
+    #     logger.error(f'[-] cmd type error,cmd should be a string or list: {cmd}')
+    #     return
     lines = []
     out_temp = tempfile.SpooledTemporaryFile(max_size=10 * 1000, mode='w+b')
     try:

@@ -150,17 +150,17 @@ def __subprocess(cmd):
 # 启用子进程执行外部shell命令,使用Popen函数，shell=False, linux下 goon，vscan vulmap afrog不支持Popen子线程执行，但是shell为False是可以的,但是支持run，window下可以使用Popen
 # @logger.catch
 def __subprocess1(cmd, timeout=None):
-    if isinstance(cmd, str):
-        cmd = cmd.split(' ')
-    elif isinstance(cmd, list):
-        cmd = cmd
-    else:
-        logger.error(f'[-] cmd type error,cmd should be a string or list: {cmd}')
-        return
+    # if isinstance(cmd, str):
+    #     cmd = cmd.split(' ')
+    # elif isinstance(cmd, list):
+    #     cmd = cmd
+    # else:
+    #     logger.error(f'[-] cmd type error,cmd should be a string or list: {cmd}')
+    #     return
     try:
         # 执行外部shell命令， 输出结果存入临时文件中
         # p = subprocess.Popen(cmd, shell=True)
-        p = subprocess.Popen(cmd, shell=False)
+        p = subprocess.Popen(cmd, shell=True)
         if timeout:
             p.wait(timeout=timeout)
         else:
@@ -177,21 +177,21 @@ def __subprocess1(cmd, timeout=None):
 
 # 启用子进程执行外部shell命令,使用subprocess.run函数，暂未使用
 def __subprocess11(cmd, timeout=None, path=None):
-    if isinstance(cmd, str):
-        cmd = cmd.split(' ')
-    elif isinstance(cmd, list):
-        cmd = cmd
-    else:
-        logger.error(f'[-] cmd type error,cmd should be a string or list: {cmd}')
-        return
+    # if isinstance(cmd, str):
+    #     cmd = cmd.split(' ')
+    # elif isinstance(cmd, list):
+    #     cmd = cmd
+    # else:
+    #     logger.error(f'[-] cmd type error,cmd should be a string or list: {cmd}')
+    #     return
     try:
         # 执行外部shell命令， 输出结果存入临时文件中
         if timeout:
             # p = subprocess.run(cmd, shell=True, timeout=int(timeout), cwd=path, stdout=subprocess.PIPE)
-            p = subprocess.run(cmd, shell=False, timeout=int(timeout), cwd=path)
+            p = subprocess.run(cmd, shell=True, timeout=int(timeout), cwd=path)
         else:
             # p = subprocess.run(cmd, shell=True, cwd=path, stdout=subprocess.PIPE)
-            p = subprocess.run(cmd, shell=False, cwd=path)
+            p = subprocess.run(cmd, shell=True, cwd=path)
     except subprocess.TimeoutExpired as e:
         logger.error(f"{cmd[0]} run {timeout}s, Timeout and Exit. Error:{e}")
     except Exception as e:
@@ -204,13 +204,13 @@ def __subprocess11(cmd, timeout=None, path=None):
 
 @logger.catch
 def __subprocess2(cmd):
-    if isinstance(cmd, str):
-        cmd = cmd.split(' ')
-    elif isinstance(cmd, list):
-        cmd = cmd
-    else:
-        logger.error(f'[-] cmd type error,cmd should be a string or list: {cmd}')
-        return
+    # if isinstance(cmd, str):
+    #     cmd = cmd.split(' ')
+    # elif isinstance(cmd, list):
+    #     cmd = cmd
+    # else:
+    #     logger.error(f'[-] cmd type error,cmd should be a string or list: {cmd}')
+    #     return
     lines = []
     out_temp = tempfile.SpooledTemporaryFile(max_size=10 * 1000, mode='w+b')
     try:
@@ -259,7 +259,7 @@ def webmanager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39")
     suffix = get_system()
     root = os.getcwd()
     pwd_and_file = os.path.abspath(__file__)
-    pwd = os.path.dirname(pwd_and_file)  # E:\ccode\python\006_lunzi\core\tools\domain
+    pwd = os.path.dirname(pwd_and_file)  # E:\ccode\python\006_lunzi\core\tools\vulscan
     # 获取当前目录的前三级目录，即到domain目录下，来寻找exe domain目录下
     grader_father = os.path.abspath(os.path.dirname(pwd_and_file) + os.path.sep + "../..")
     logger.info('-' * 10 + f'start {__file__}' + '-' * 10)
@@ -307,7 +307,7 @@ def webmanager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39")
 
         # -as, -automatic-scan         automatic web scan using wappalyzer technology detection to tags mapping
         cmdstr = f'{pwd}/nuclei/nuclei{suffix}  -l {urlsfile} -t {pwd}/nuclei/pocdata ' \
-                 f'-automatic-scan -s low,medium,high,critical,unknown -no-color -rate-limit 500 -bulk-size 250 -concurrency 250 ' \
+                 f'-automatic-scan -s low,medium,high,critical,unknown -no-color -rate-limit 150 -bulk-size 50 -concurrency 100 ' \
                  f'-silent -stats -si 10 -retries 2 -me {output_folder}'
         logger.info(f"[+] command:{cmdstr}")
         os.system(cmdstr)

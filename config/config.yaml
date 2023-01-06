@@ -44,7 +44,7 @@ tools:
       runtime: 900
     gospider:
       toolname: gospider
-      runtime: 900
+      runtime: 600
     hakrawler:
       # 修改了加了-f参数
       toolname: hakrawler

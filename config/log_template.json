@@ -1,5 +1,27 @@
 {
   "date": "",
+  "command": [],
+  "params": {
+    "domain": "", 
+    "domains": "", 
+    "subdomain": "", 
+    "subdomains": "", 
+    "url": "", 
+    "urls": "", 
+    "ip": "", 
+    "ips": "", 
+    "attackflag": "",
+    "date": ""
+  },
+  "file": {
+    "domain": "",
+    "domain_file": "",
+    "subdomain": "",
+    "subdomain_file": "",
+    "port_file": "",
+    "links_file": "",
+    "ip_file": ""
+  },
   "domain": {
     "scanning_target": "",
     "scanned_targets": []

@@ -228,9 +228,9 @@ download:
     hakrawler:
       # 修改了加了-f参数
       toolname: hakrawler
-      whetherdownload: False
-      link:
-      downloadfile:
+      whetherdownload: True
+      link: https://github.com/komomon/hakrawler_plus/blob/main/hakrawler?raw=true
+      downloadfile: hakrawler
       source_name: hakrawler
       final_name: hakrawler
       tool_main_filename: hakrawler

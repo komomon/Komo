@@ -1,3 +1,5 @@
+import hashlib
+import json
 import os
 import random
 import shutil
@@ -8,11 +10,14 @@ import datetime
 from loguru import logger
 from core.tools.domain import domain_main
 from core.tools.finger import finger_main
-
 from core.tools.sensitiveinfo import sensitiveinfo_main
 from core.tools.vulscan import vulscan_main
 from core.tools.portscan import portscan_main
 from core.download import download_tools
+
+# from common.getconfig import *
+# import common
+
 
 yellow = '\033[01;33m'
 white = '\033[01;37m'
@@ -21,7 +26,7 @@ blue = '\033[01;34m'
 red = '\033[1;31m'
 end = '\033[0m'
 
-version = 'v1.1'
+version = 'v1.0'
 message = white + '{' + red + version + ' #dev' + white + '}'
 
 banner = f"""
@@ -37,11 +42,29 @@ banner = f"""
 """
 
 
+# all_config = getconfig()
+# Xray_Port = int(all_config['tools']['other']['xray']['listenport'])
+
+
 def create_logfile():
     if os.path.exists(f'{os.getcwd()}/log') is False:
         os.makedirs(f'{os.getcwd()}/log')
     logger.add(sink='log/runtime.log', level='INFO', encoding='utf-8')
     logger.add(sink='log/error.log', level='ERROR', encoding='utf-8')
+
+
+# 进度记录,基于json
+def progress_record(date=None, module=None, value=None):
+    logfile = f"result/{date}/log.json"
+    if os.path.exists(logfile) is False:
+        shutil.copy("config/log_template.json", f"result/{date}/log.json")
+    with open(logfile, 'r', encoding='utf-8') as f1:
+        log_json = json.loads(f1.read())
+    log_json[module] = value
+    with open(logfile, "w", encoding="utf-8") as f:
+        f.write(json.dumps(log_json))
+    return True
+    # if module in dict(log_json).keys() and target:
 
 
 class Komo(object):
@@ -136,7 +159,7 @@ class Komo(object):
     '''
 
     def __init__(self, domain=None, domains=None, subdomain=None, subdomains=None, url=None, urls=None, ip=None,
-                 ips=None, attackflag=False, date=None):
+                 ips=None, attackflag=False, date=None, proxy=None):
 
         date1 = str(datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S"))
         self.domain = domain
@@ -149,10 +172,27 @@ class Komo(object):
         self.ips = ips
         self.attackflag = attackflag
         self.date = date if date else date1
+        self.proxy = proxy
         self.domains_list = []
+        # self.command = "python3 Komo.py"
+        self.params = {
+            "domain": self.domain,
+            "domains": self.domains,
+            "subdomain": self.subdomain,
+            "subdomains": self.subdomains,
+            "url": self.url,
+            "urls": self.urlsfile,
+            "ip": self.ip,
+            "ips": self.ips,
+            "attackflag": self.attackflag,
+            "date": self.date
+        }
+        # for i in [self.domain,self.domains,self.subdomain,self.subdomains,self.url,self.urlsfile,self.ip,self.ips,self.date]:
+        #     if i is not None:
+        #         self.command += "--{}".format(i)
         create_logfile()
         print(banner)
-        self.randomstr = ''.join(random.sample(string.ascii_letters + string.digits, 16))
+        self.randomstr = hashlib.md5(bytes(self.date, encoding='utf-8')).hexdigest()
         # 创建结果文件夹
         self.result_folder = f"result/{self.date}"
         if os.path.exists(self.result_folder) is False:
@@ -193,13 +233,17 @@ class Komo(object):
                 if os.path.exists(newpath):
                     self.ips = newpath
 
+        progress_record(self.date, "date", self.date)
+        progress_record(self.date, "params", self.params)
+
     def install(self):
         # download tools
-        dd = download_tools.Download()
+        dd = download_tools.Download(proxy=self.proxy)
         dd.run()
 
     # 只进行子域扫描
     def subdomain(self):
+        # self.command += "--{}".format(self.subdomain)
         if self.domains_list:
             for domain in self.domains_list:
                 domain_main.manager(domain=domain, date=self.date)
@@ -212,7 +256,7 @@ class Komo(object):
         elif self.urlsfile:
             finger_main.manager(domain=None, url=None, urlsfile=self.urlsfile, date=self.date)
         else:
-            logger.error("[-] Please check --url or --urlsfile")
+            logger.error("[-] Please check --url or --urls")
 
     def portscan(self):
         if self.ip:
@@ -232,7 +276,7 @@ class Komo(object):
             sensitiveinfo_main.manager(domain=None, url=None, urlsfile=self.urlsfile, attackflag=self.attackflag,
                                        date=self.date)
         else:
-            logger.error("[-] Please check --url or --urlsfile")
+            logger.error("[-] Please check --url or --urls")
 
     # 对urls进行漏洞扫描
     def webattack(self):
@@ -246,7 +290,18 @@ class Komo(object):
                                        date=self.date)
             vulscan_main.webmanager(domain=None, url=None, urlsfile=self.urlsfile, date=self.date)
         else:
-            logger.error("[-] Please check --url or --urlsfile")
+            logger.error("[-] Please check --url or --urls")
+
+    def webattack1(self):
+        self.attackflag = True
+        if self.url:
+            sensitiveinfo_main.manager(domain=None, url=self.url, urlsfile=None, attackflag=self.attackflag,
+                                       date=self.date)  # toxray
+        elif self.urlsfile:
+            sensitiveinfo_main.manager(domain=None, url=None, urlsfile=self.urlsfile, attackflag=self.attackflag,
+                                       date=self.date)
+        else:
+            logger.error("[-] Please check --url or --urls")
 
     # only poc scan
     def webattack2(self):
@@ -256,7 +311,7 @@ class Komo(object):
         elif self.urlsfile:
             vulscan_main.webmanager(domain=None, url=None, urlsfile=self.urlsfile, date=self.date)
         else:
-            logger.error("[-] Please check --url or --urlsfile")
+            logger.error("[-] Please check --url or --urls")
 
     # 对主机ip攻击
     def hostattack(self):
