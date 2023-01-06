@@ -358,10 +358,10 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
     :return:
     '''
     logger.info('-' * 10 + f'start {__file__}' + '-' * 10)
-    isdomain = False
+    # isdomain = False
     # 两种模式,三种情况
     if domain and urlsfile is None and url is None:
-        isdomain = True
+        # isdomain = True
         urlsfile = f"result/{date}/{domain}.subdomains.with.http.txt"
         # output_filename_prefix = domain
     elif urlsfile and domain is None and url is None:
@@ -880,7 +880,7 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
 
     def run():
         # if domain and url is None and urlsfile is None:
-        if isdomain:
+        if len(all_config["domain"]["scanned_targets"]):
             emailall(domain)
         # urlsfile = f"result/{date}/{domain}.subdomains.with.http.txt"
         with open(urlsfile, "r", encoding="utf-8") as f:
