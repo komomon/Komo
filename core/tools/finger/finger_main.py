@@ -70,7 +70,7 @@ def isexist(filepath):
 
 
 # 进度记录,基于json
-def progress_record(date=None,target=None,module=None,value=None,finished=False):
+def progress_record(date=None, target=None, module=None, value=None, finished=False):
     logfile = f"result/{date}/log.json"
     if os.path.exists(logfile) is False:
         shutil.copy("config/log_template.json", f"result/{date}/log.json")
@@ -80,7 +80,7 @@ def progress_record(date=None,target=None,module=None,value=None,finished=False)
         # 读取log.json 如果是false则扫描，是true则跳过
         if log_json[module] is False:
             return False
-        elif log_json[module] is True:# 即log_json[module] 为true的情况
+        elif log_json[module] is True:  # 即log_json[module] 为true的情况
             return True
     elif finished is True:
         log_json[module] = True
@@ -138,8 +138,8 @@ def manager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39"):
     #         f.write(url)
 
     # 生成带http的域名url 和ip文件 result/{date}/{domain}.subdomains_with_http.txt result/{date}/{domain}.subdomains_ips.txt
-    @logger.catch
-    def httpx(domain=domain,url=url, file=urlsfile):
+    @logger.catch #废弃了迁移到其他模块了
+    def httpx(domain=domain, url=url, file=urlsfile):
         '''
         httpx 1.2.4
         输入是子域名文件，可以带http可以不带，主要为了进行域名探活
@@ -169,7 +169,7 @@ def manager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39"):
             # print(3,domain,file)
             # subdomain_tuple = tldextract.extract(url)
             # output_filename_prefix = '.'.join(part for part in subdomain_tuple if part)  # www.baidu.com 127_0_0_1
-            with open(urlsfile, "w", encoding="utf-8") as f:
+            with open(inputfile, "w", encoding="utf-8") as f:
                 f.write(url)
         else:
             logger.error(f'[-] Please check url or urlfile or domain')
@@ -314,8 +314,8 @@ def manager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39"):
                 os.remove(inputfile)
 
     def run():
-        if progress_record(date=date, module="finger",finished=False) is False:
-            httpx(domain=domain, url=url, file=urlsfile)
+        if progress_record(date=date, module="finger", finished=False) is False:
+            # httpx(domain=domain, url=url, file=urlsfile)
             ehole(url=url, file=urlsfile)
             webanalyze(url=url, file=urlsfile)
             progress_record(date=date, module="finger", finished=True)

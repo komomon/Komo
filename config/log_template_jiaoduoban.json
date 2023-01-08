@@ -1,18 +1,6 @@
 {
   "date": "",
   "command": [],
-  "params": {
-    "domain": "", 
-    "domains": "", 
-    "subdomain": "", 
-    "subdomains": "", 
-    "url": "", 
-    "urls": "", 
-    "ip": "", 
-    "ips": "", 
-    "attackflag": "",
-    "date": ""
-  },
   "file": {
     "domain": "",
     "domain_file": "",
@@ -26,8 +14,6 @@
     "scanning_target": "",
     "scanned_targets": []
   },
-  "emailcollect": false,
-  "survivaldetect": false,
   "finger": false,
   "portscan": false,
   "sensitiveinfo": {

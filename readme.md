@@ -20,6 +20,18 @@ Komo is a comprehensive asset collection and vulnerability scanning tool
 
 🚋**Komo**集成了**oneforall**，**subfinder**，**ksubdomain**，**amass**，**ctfr**，**emailall**，**httpx**，**naabu**，**TxPortMap**，**ehole**，**goon3**，**crawlergo**，**rad**，**hakrawler**，**gau**，**gospider**，**URLfinder**，**vscan**，**nuclei**，**afrog**，**vulmap**，**SweetBabyScan**，**xray**等**20**多款工具，全自动化、智能化工具。本工具依托各工具特色，进行模块化构建。
 
+同时也对某些模块进行魔改，修改的模块如下：
+
+> oneforall：对oneforall添加模块，将其他工具的子域扫描结果，聚合到oneforall的set()中，由oneforall进行去重、状态码和title的识别。
+>
+> ctfr：自己修改过的ctfr。
+>
+> emailall：修改emailall的部分bug，[github地址](https://github.com/komomon/emailall)。
+>
+> hakrawler：对hakrawler添加了参数，[github地址](https://github.com/komomon/hakrawler_plus)。
+>
+> SweetBabyScan：去掉了截屏功能。
+
 Komo的目的为了一键化，便捷性，可移植性，便于打点和红队外围渗透工作，所以将基于模块化开发，所有工具都汇总到统一接口，以便于下一个模块调用和后续某模块新增工具。**==如果你有好的工具和改进建议，可以添加下面的公众号群聊来沟通==**。
 
 ~~Komo的每个模块可以单独拿出来直接使用，每个模块下面都有一个main，注意工具下载到对应目录下即可。~~
@@ -28,9 +40,7 @@ Komo可以自动下载所需的所有工具，不用使用者自己下载每个�
 
 Komo目前已经适配window、linux。
 
-
-
-
+**注：如果需要最新版本，可以去beta分支下载，但是可能存在bug，有意向测试的，如果发现bug，可以把bug发给我。**
 
 ## Project structure
 

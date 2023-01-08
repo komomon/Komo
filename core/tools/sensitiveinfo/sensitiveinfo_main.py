@@ -288,13 +288,6 @@ def __subprocess1(cmd, timeout=None, path=None):
 
 # @logger.catch
 def __subprocess2(cmd):
-    # if isinstance(cmd, str):
-    #     cmd = cmd.split(' ')
-    # elif isinstance(cmd, list):
-    #     cmd = cmd
-    # else:
-    #     logger.error(f'[-] cmd type error,cmd should be a string or list: {cmd}')
-    #     return
     lines = []
     out_temp = tempfile.SpooledTemporaryFile(max_size=10 * 1000, mode='w+b')
     try:
@@ -352,10 +345,10 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
     :return:
     '''
     logger.info('-' * 10 + f'start {__file__}' + '-' * 10)
-    isdomain = False
+    # isdomain = False
     # 两种模式,三种情况
     if domain and urlsfile is None and url is None:
-        isdomain = True
+        # isdomain = True
         urlsfile = f"result/{date}/{domain}.subdomains.with.http.txt"
         # output_filename_prefix = domain
     elif urlsfile and domain is None and url is None:
@@ -842,7 +835,7 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
             for i in urls_data_tmp:
                 f1.write(i + "\n")
 
-    @logger.catch
+    @logger.catch # 废弃了迁移到其他模块了
     def emailall(data1):
         '''
         emailall 20220908  exe路径
@@ -876,8 +869,8 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
     def run():
         # if domain and url is None and urlsfile is None:
         # if len(all_config["domain"]["scanned_targets"]):
-        if isdomain:
-            emailall(domain)
+        # if isdomain:
+        #     emailall(domain)
         # urlsfile = f"result/{date}/{domain}.subdomains.with.http.txt"
         with open(urlsfile, "r", encoding="utf-8") as f:
             for url in f.readlines():

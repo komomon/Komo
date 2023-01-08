@@ -97,6 +97,31 @@ download:
       topath:
         - core/tools/domain/OneForAll/data/
         - OneForAll/data/
+  emailcollect:
+    emailall:
+      # https://github.com/Taonn/EmailAll/archive/refs/heads/master.zip 修改过
+      toolname: emailall
+      whetherdownload: True
+      link: https://github.com/komomon/emailall/archive/refs/heads/main.zip
+      downloadfile: emailall.zip
+      source_name: emailall.py
+      final_name: emailall.py
+      tool_main_filename: emailall.py
+      topath:
+        - core/tools/emaillcollect/emailall/
+        - emailall/
+  survivaldetect:
+    httpx:
+      toolname: httpx
+      whetherdownload: True
+      link: https://github.com/projectdiscovery/httpx/releases/download/v1.2.4/httpx_1.2.4_linux_amd64.zip
+      downloadfile: httpx.zip
+      source_name: httpx
+      final_name: httpx
+      tool_main_filename: httpx
+      topath:
+        - core/tools/survivaldetect/httpx/
+        - httpx/
   finger:
     ehole:
       toolname: ehole
@@ -109,17 +134,6 @@ download:
       topath:
         - core/tools/finger/Ehole/
         - Ehole/
-    httpx:
-      toolname: httpx
-      whetherdownload: True
-      link: https://github.com/projectdiscovery/httpx/releases/download/v1.2.4/httpx_1.2.4_linux_amd64.zip
-      downloadfile: httpx.zip
-      source_name: httpx
-      final_name: httpx
-      tool_main_filename: httpx
-      topath:
-        - core/tools/finger/httpx/
-        - httpx/
     webanalyze:
       toolname: webanalyze
       whetherdownload: True
@@ -200,18 +214,6 @@ download:
       topath:
         - core/tools/sensitiveinfo/rad/
         - rad/
-    emailall:
-      # https://github.com/Taonn/EmailAll/archive/refs/heads/master.zip 修改过
-      toolname: emailall
-      whetherdownload: False
-      link:
-      downloadfile: emailall.zip
-      source_name:
-      final_name:
-      tool_main_filename: emailall.py
-      topath:
-        - core/tools/sensitiveinfo/emailall/
-        - emailall/
     gospider:
       toolname: gospider
       whetherdownload: True

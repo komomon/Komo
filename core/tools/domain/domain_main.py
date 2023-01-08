@@ -199,19 +199,17 @@ def __subprocess1(cmd, timeout=None, path=None):
     # else:
     #     logger.error(f'[-] cmd type error,cmd should be a string or list: {cmd}')
     #     return
+    # 执行外部shell命令， 输出结果存入临时文件中
+    # logger.info(f"[+] command:{' '.join(cmd)}")
+    p = subprocess.Popen(cmd, shell=True, cwd=path)
+    # p = subprocess.Popen(cmd, shell=True,cwd=path,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     try:
-        # 执行外部shell命令， 输出结果存入临时文件中
-        # logger.info(f"[+] command:{' '.join(cmd)}")
-        p = subprocess.Popen(cmd, shell=True, cwd=path)
-        # p = subprocess.Popen(cmd, shell=True,cwd=path,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        if timeout:
-            p.wait(timeout=timeout)
-        else:
-            p.wait()
+        p.wait(timeout=timeout)
     except subprocess.TimeoutExpired as e:
         # logger.error('{} - {} - \n{}'.format(self.domain, self.__class__.__name__, e))
         logger.error(traceback.format_exc())
-        kill_process(f_name+get_system())
+        p.kill()
+        # kill_process(f_name+get_system())
     except Exception as e:
         logger.error(traceback.format_exc())
         # logger.error(f'{sys._getframe().f_code.co_name} Reach Set Time and exit')

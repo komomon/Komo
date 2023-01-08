@@ -9,6 +9,8 @@ import fire
 import datetime
 from loguru import logger
 from core.tools.domain import domain_main
+from core.tools.emailcollect import emailcollect_main
+from core.tools.survivaldetect import survivaldetect_main
 from core.tools.finger import finger_main
 from core.tools.sensitiveinfo import sensitiveinfo_main
 from core.tools.vulscan import vulscan_main
@@ -245,10 +247,27 @@ class Komo(object):
     def subdomain(self):
         # self.command += "--{}".format(self.subdomain)
         if self.domains_list:
-            for domain in self.domains_list:
-                domain_main.manager(domain=domain, date=self.date)
+            for ddomain in self.domains_list:
+                domain_main.manager(domain=ddomain, date=self.date)
         else:
             logger.error("[-] Please check --domain or --domains")
+
+    def email(self):#emailcollect
+        if self.domains_list:
+            for ddomain in self.domains_list:
+                emailcollect_main.manager(domain=ddomain, date=self.date).run()
+        else:
+            logger.error("[-] Please check --domain or --domains")
+
+    # 域名存活检查
+    def survival(self):#survivaldetect
+        if self.subdomain:
+            survivaldetect_main.manager(domain=None,subdomain=self.subdomain,subdomains=None,date=self.date).run()
+        elif self.subdomains:
+            survivaldetect_main.manager(domain=None, subdomain=None,
+                                        subdomains=self.subdomains,date=self.date).run()
+        else:
+            logger.error("[-] Please check --subdomain or --subdomains")
 
     def finger(self):
         if self.url:
@@ -338,11 +357,14 @@ class Komo(object):
         '''
         self.attackflag = False
         if self.domains_list:
-            for domain in self.domains_list:
-                domain_main.manager(domain=domain, date=self.date)
-                finger_main.manager(domain=domain, url=None, urlsfile=None, date=self.date)
-                portscan_main.manager(domain=domain, ip=None, ipfile=None, date=self.date)
-                sensitiveinfo_main.manager(domain=domain, url=None, urlsfile=None, attackflag=self.attackflag,
+            for ddomain in self.domains_list:
+                domain_main.manager(domain=ddomain, date=self.date)
+                emailcollect_main.manager(domain=ddomain, date=self.date).run()
+                survivaldetect_main.manager(domain=ddomain, subdomain=None, subdomains=None,
+                                            date=self.date).run()
+                finger_main.manager(domain=ddomain, url=None, urlsfile=None, date=self.date)
+                portscan_main.manager(domain=ddomain, ip=None, ipfile=None, date=self.date)
+                sensitiveinfo_main.manager(domain=ddomain, url=None, urlsfile=None, attackflag=self.attackflag,
                                            date=self.date)
                 # vulscan_main.webmanager(domain=self.domain, url=None, urlsfile=None, date=self.date)
         else:
@@ -351,9 +373,12 @@ class Komo(object):
     def collect1(self):
         # self.attackflag = False
         if self.domains_list:
-            for domain in self.domains_list:
-                domain_main.manager(domain=domain, date=self.date)
-                finger_main.manager(domain=domain, url=None, urlsfile=None, date=self.date)
+            for ddomain in self.domains_list:
+                domain_main.manager(domain=ddomain, date=self.date)
+                emailcollect_main.manager(domain=ddomain, date=self.date).run()
+                survivaldetect_main.manager(domain=ddomain, subdomain=None, subdomains=None,
+                                            date=self.date).run()
+                finger_main.manager(domain=ddomain, url=None, urlsfile=None, date=self.date)
                 # portscan_main.manager(domain=domain, ip=None, ipfile=None, date=self.date)
         else:
             logger.error("[-] Please check --domain or --domains")
@@ -361,10 +386,13 @@ class Komo(object):
     def collect2(self):
         # self.attackflag = False
         if self.domains_list:
-            for domain in self.domains_list:
-                domain_main.manager(domain=domain, date=self.date)
-                finger_main.manager(domain=domain, url=None, urlsfile=None, date=self.date)
-                portscan_main.manager(domain=domain, ip=None, ipfile=None, date=self.date)
+            for ddomain in self.domains_list:
+                domain_main.manager(domain=ddomain, date=self.date)
+                emailcollect_main.manager(domain=ddomain, date=self.date).run()
+                survivaldetect_main.manager(domain=ddomain, subdomain=None, subdomains=None,
+                                            date=self.date).run()
+                finger_main.manager(domain=ddomain, url=None, urlsfile=None, date=self.date)
+                portscan_main.manager(domain=ddomain, ip=None, ipfile=None, date=self.date)
         else:
             logger.error("[-] Please check --domain or --domains")
 
@@ -377,13 +405,16 @@ class Komo(object):
         '''
         self.attackflag = True
         if self.domains_list:
-            for domain in self.domains_list:
-                domain_main.manager(domain=domain, date=self.date)
-                finger_main.manager(domain=domain, urlsfile=None, date=self.date)
-                portscan_main.manager(domain=domain, ip=None, ipfile=None, date=self.date)
-                vulscan_main.webmanager(domain=domain, url=None, urlsfile=None, date=self.date)
-                vulscan_main.hostmanager(domain=domain, ip=None, ipfile=None, date=self.date)
-                sensitiveinfo_main.manager(domain=domain, url=None, urlsfile=None, attackflag=self.attackflag,
+            for ddomain in self.domains_list:
+                domain_main.manager(domain=ddomain, date=self.date)
+                emailcollect_main.manager(domain=ddomain, date=self.date).run()
+                survivaldetect_main.manager(domain=ddomain, subdomain=None, subdomains=None,
+                                            date=self.date).run()
+                finger_main.manager(domain=ddomain, urlsfile=None, date=self.date)
+                portscan_main.manager(domain=ddomain, ip=None, ipfile=None, date=self.date)
+                vulscan_main.webmanager(domain=ddomain, url=None, urlsfile=None, date=self.date)
+                vulscan_main.hostmanager(domain=ddomain, ip=None, ipfile=None, date=self.date)
+                sensitiveinfo_main.manager(domain=ddomain, url=None, urlsfile=None, attackflag=self.attackflag,
                                            date=self.date)
         else:
             logger.error("[-] Please check --domain or --domains")
@@ -399,6 +430,9 @@ class Komo(object):
         if self.subdomain or self.subdomains:
             # for domain in self.domains_list:
             # domain_main.manager(domain=domain, date=self.date)
+            # emailcollect_main.manager(domain=ddomain, date=self.date).run()
+            survivaldetect_main.manager(domain=self.randomstr, subdomain=self.subdomain, subdomains=self.subdomains,
+                                        date=self.date).run()
             finger_main.manager(domain=self.randomstr, urlsfile=None, date=self.date)
             portscan_main.manager(domain=self.randomstr, ip=None, ipfile=None, date=self.date)
             vulscan_main.webmanager(domain=self.randomstr, url=None, urlsfile=None, date=self.date)

@@ -157,16 +157,13 @@ def __subprocess1(cmd, timeout=None):
     # else:
     #     logger.error(f'[-] cmd type error,cmd should be a string or list: {cmd}')
     #     return
+    # 执行外部shell命令， 输出结果存入临时文件中
+    p = subprocess.Popen(cmd, shell=True)
     try:
-        # 执行外部shell命令， 输出结果存入临时文件中
-        # p = subprocess.Popen(cmd, shell=True)
-        p = subprocess.Popen(cmd, shell=True)
-        if timeout:
-            p.wait(timeout=timeout)
-        else:
-            p.wait()
+        p.wait(timeout=timeout)
     except subprocess.TimeoutExpired as e:
         logger.error(f"{cmd[0]} run {timeout}s, Timeout and Exit. Error:{e}")
+        p.kill()
     except Exception as e:
         logger.error(traceback.format_exc())
         # print(traceback.format_exc())
@@ -185,15 +182,11 @@ def __subprocess11(cmd, timeout=None, path=None):
     #     logger.error(f'[-] cmd type error,cmd should be a string or list: {cmd}')
     #     return
     try:
-        # 执行外部shell命令， 输出结果存入临时文件中
-        if timeout:
-            # p = subprocess.run(cmd, shell=True, timeout=int(timeout), cwd=path, stdout=subprocess.PIPE)
-            p = subprocess.run(cmd, shell=True, timeout=int(timeout), cwd=path)
-        else:
-            # p = subprocess.run(cmd, shell=True, cwd=path, stdout=subprocess.PIPE)
-            p = subprocess.run(cmd, shell=True, cwd=path)
+        p = subprocess.run(cmd, shell=True, timeout=int(timeout), cwd=path)
+        # p = subprocess.run(cmd, shell=True, timeout=int(timeout), cwd=path, stdout=subprocess.PIPE)
     except subprocess.TimeoutExpired as e:
         logger.error(f"{cmd[0]} run {timeout}s, Timeout and Exit. Error:{e}")
+
     except Exception as e:
         logger.error(traceback.format_exc())
         # print(traceback.format_exc())
@@ -306,8 +299,9 @@ def webmanager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39")
             os.makedirs(output_folder)
 
         # -as, -automatic-scan         automatic web scan using wappalyzer technology detection to tags mapping
+        # -proxy-url http://192.168.1.1:8080
         cmdstr = f'{pwd}/nuclei/nuclei{suffix}  -l {urlsfile} -t {pwd}/nuclei/pocdata ' \
-                 f'-automatic-scan -s low,medium,high,critical,unknown -no-color -rate-limit 150 -bulk-size 50 -concurrency 100 ' \
+                 f'-automatic-scan -s low,medium,high,critical,unknown -no-color -rate-limit 200 -bulk-size 50 -concurrency 100 ' \
                  f'-silent -stats -si 10 -retries 2 -me {output_folder}'
         logger.info(f"[+] command:{cmdstr}")
         os.system(cmdstr)
