@@ -36,7 +36,7 @@ def create_logfile():
     logger.add(sink='log/runtime.log', level='INFO', encoding='utf-8')
     logger.add(sink='log/error.log', level='ERROR', encoding='utf-8')
 
-
+# 暂未使用
 def get_system():
     # global suffix
     platform = sys.platform
@@ -369,7 +369,8 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         with open(urlsfile, "w", encoding="utf-8") as f:
             f.write(url)
 
-    suffix = get_system()
+    ostype = platform.system().lower()
+    suffix = ".exe" if "windows" == ostype else ""
     root = os.getcwd()
     pwd_and_file = os.path.abspath(__file__)
     pwd = os.path.dirname(pwd_and_file)  # E:\ccode\python\006_lunzi\core\tools\sensitiveinfo
@@ -424,9 +425,9 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
                 # logger.error("Exit!!!")
                 # exit(1)
             proxy = f"http://127.0.0.1:{xray_port}"
-            cmdstr = f"{pwd}/crawlergo/crawlergo{suffix} -c {pwd}/chrome-win/chrome.exe -t 8 -f smart --fuzz-path --robots-path --output-mode json --output-json {output_folder}/{output_filename_prefix}.{tool_name}.json --push-to-proxy {proxy} {target}"
+            cmdstr = f"{pwd}/crawlergo/crawlergo{suffix} -c {pwd}/chrome-{ostype}/chrome{suffix} -t 8 -f smart --fuzz-path --robots-path --output-mode json --output-json {output_folder}/{output_filename_prefix}.{tool_name}.json --push-to-proxy {proxy} {target}"
         else:
-            cmdstr = f"{pwd}/crawlergo/crawlergo{suffix} -c {pwd}/chrome-win/chrome.exe -t 8 -f smart --fuzz-path --robots-path --output-mode json --output-json {output_folder}/{output_filename_prefix}.{tool_name}.json {target}"
+            cmdstr = f"{pwd}/crawlergo/crawlergo{suffix} -c {pwd}/chrome-{ostype}/chrome{suffix} -t 8 -f smart --fuzz-path --robots-path --output-mode json --output-json {output_folder}/{output_filename_prefix}.{tool_name}.json {target}"
 
         logger.info(f"[+] command:{cmdstr}")
         cmd = cmdstr.split(' ')
