@@ -7,7 +7,7 @@ import re
 import subprocess
 import requests
 import platform
-
+import shlex
 import yaml
 from fake_useragent import UserAgent
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
@@ -264,26 +264,20 @@ def __subprocess1(cmd, timeout=None, path=None):
     :return:
     '''
     f_name = inspect.getframeinfo(inspect.currentframe().f_back)[2]
-    # if isinstance(cmd, str):
-    #     cmd = cmd.split(' ')
-    # elif isinstance(cmd, list):
-    #     cmd = cmd
-    # else:
-    #     logger.error(f'[-] cmd type error,cmd should be a string or list: {cmd}')
-    #     return
+    # cmd = shlex.split(cmd)
+    # 执行外部shell命令， 输出结果存入临时文件中
+    # logger.info(f"[+] command:{' '.join(cmd)}")
+    p = subprocess.Popen(cmd, shell=True, cwd=path)
+    # p = subprocess.Popen(cmd, shell=True,cwd=path,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     try:
-        # 执行外部shell命令， 输出结果存入临时文件中
-        # logger.info(f"[+] command:{' '.join(cmd)}")
-        p = subprocess.Popen(cmd, shell=True, cwd=path)
-        # p = subprocess.Popen(cmd, shell=True,cwd=path,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        if timeout:
-            p.wait(timeout=timeout)
-        else:
-            p.wait()
+        # outs, errs = p.communicate(timeout=timeout)
+        p.wait(timeout=timeout)
     except subprocess.TimeoutExpired as e:
         # logger.error('{} - {} - \n{}'.format(self.domain, self.__class__.__name__, e))
         logger.error(traceback.format_exc())
-        kill_process(f_name+get_system())
+        # outs, errs = p.communicate()
+        p.kill()
+        # kill_process(f_name+get_system())
     except Exception as e:
         logger.error(traceback.format_exc())
         # logger.error(f'{sys._getframe().f_code.co_name} Reach Set Time and exit')
@@ -358,10 +352,10 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
     :return:
     '''
     logger.info('-' * 10 + f'start {__file__}' + '-' * 10)
-    # isdomain = False
+    isdomain = False
     # 两种模式,三种情况
     if domain and urlsfile is None and url is None:
-        # isdomain = True
+        isdomain = True
         urlsfile = f"result/{date}/{domain}.subdomains.with.http.txt"
         # output_filename_prefix = domain
     elif urlsfile and domain is None and url is None:
@@ -880,7 +874,8 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
 
     def run():
         # if domain and url is None and urlsfile is None:
-        if len(all_config["domain"]["scanned_targets"]):
+        # if len(all_config["domain"]["scanned_targets"]):
+        if isdomain:
             emailall(domain)
         # urlsfile = f"result/{date}/{domain}.subdomains.with.http.txt"
         with open(urlsfile, "r", encoding="utf-8") as f:
