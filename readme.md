@@ -128,6 +128,8 @@ oneforall等工具的配置，要在初始化之后进入到对应工具目录�
 
 ```
 python3 Komo.py install
+python3 Komo.py  --proxy http://127.0.0.1:10809 install
+python3 Komo.py  --proxy socks5://127.0.0.1:10809 install
 ```
 
 
