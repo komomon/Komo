@@ -108,7 +108,7 @@ download:
       final_name: emailall.py
       tool_main_filename: emailall.py
       topath:
-        - core/tools/emaillcollect/emailall/
+        - core/tools/emailcollect/emailall/
         - emailall/
   survivaldetect:
     httpx:
@@ -120,7 +120,7 @@ download:
       final_name: httpx.exe
       tool_main_filename: httpx.exe
       topath:
-        - core/tools/finger/httpx/
+        - core/tools/survivaldetect/httpx/
         - httpx/
   finger:
     ehole:
@@ -181,13 +181,13 @@ download:
         - core/tools/portscan/naabu/
         - naabu/
   sensitiveinfo:
-    chrome-win:
-      toolname: chrome-win
+    chrome-windows:
+      toolname: chrome-windows
       whetherdownload: True
       link: https://commondatastorage.googleapis.com/chromium-browser-snapshots/Win_x64/1051001/chrome-win.zip
-      downloadfile: chrome-win.zip
-      source_name: chrome-win/
-      final_name: chrome-win/
+      downloadfile: chrome-windows.zip
+      source_name: chrome-windows/
+      final_name: chrome-windows/
       tool_main_filename: chrome.exe
       topath:
         - core/tools/sensitiveinfo/

@@ -313,7 +313,7 @@ def to_xray(urls, attackflag=None,fromurl=None):
     # headers = {
     #     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.80 Safari/537.36 Edg/98.0.1108.43'}
     xrayport = Xray_Port
-    black_list = ['.jpg','.gif', '.png', '.css', '.pdf', '.doc', '.docx', '.xlsx', '.csv']
+    black_list = ['.jpg','.gif', '.png', '.css', '.pdf', '.doc', '.docx', '.xlsx', '.csv','.svg']
     if attackflag:
         if checkport(xrayport):
             for url in urls:
@@ -344,7 +344,13 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
     :param date:
     :return:
     '''
+    global Xray_Port
     logger.info('-' * 10 + f'start {__file__}' + '-' * 10)
+    if attackflag:
+        # 端口没开则直接结束
+        if checkport(Xray_Port) is False:
+            logger.error(f"xray_port {Xray_Port} not open, Exit!")
+            exit(1)
     # isdomain = False
     # 两种模式,三种情况
     if domain and urlsfile is None and url is None:
@@ -412,15 +418,15 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         xray_port = Xray_Port
         if attackflag:
             # 端口没开则直接结束
-            if checkport(xray_port) is False:
-                logger.error(f"xray_port {xray_port} not open, {tool_name} skip")
-                return False
-                # logger.error("Exit!!!")
-                # exit(1)
+            # if checkport(xray_port) is False:
+            #     logger.error(f"xray_port {xray_port} not open, {tool_name} skip")
+            #     return False
+            #     # logger.error("Exit!!!")
+            #     # exit(1)
             proxy = f"http://127.0.0.1:{xray_port}"
-            cmdstr = f"{pwd}/crawlergo/crawlergo{suffix} -c {pwd}/chrome-{ostype}/chrome{suffix} -t 8 -f smart --fuzz-path --robots-path --output-mode json --output-json {output_folder}/{output_filename_prefix}.{tool_name}.json --push-to-proxy {proxy} {target}"
+            cmdstr = f"{pwd}/crawlergo/crawlergo{suffix} -c {pwd}/chrome-{ostype}/chrome{suffix}  -t 8 -f smart --custom-headers {simplejson.dumps(headers)} --fuzz-path --robots-path --output-mode json --output-json {output_folder}/{output_filename_prefix}.{tool_name}.json --push-to-proxy {proxy} {target}"
         else:
-            cmdstr = f"{pwd}/crawlergo/crawlergo{suffix} -c {pwd}/chrome-{ostype}/chrome{suffix} -t 8 -f smart --fuzz-path --robots-path --output-mode json --output-json {output_folder}/{output_filename_prefix}.{tool_name}.json {target}"
+            cmdstr = f"{pwd}/crawlergo/crawlergo{suffix} -c {pwd}/chrome-{ostype}/chrome{suffix} -t 8 -f smart --custom-headers {simplejson.dumps(headers)} --fuzz-path --robots-path --output-mode json --output-json {output_folder}/{output_filename_prefix}.{tool_name}.json {target}"
 
         logger.info(f"[+] command:{cmdstr}")
         cmd = cmdstr.split(' ')
@@ -498,9 +504,9 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
 
         if attackflag:
             # 端口没开则直接结束
-            if checkport(xray_port) is False:
-                logger.error(f"xray_port {xray_port} not open, {tool_name} skip")
-                return False
+            # if checkport(xray_port) is False:
+            #     logger.error(f"xray_port {xray_port} not open, {tool_name} skip")
+            #     return False
             proxy = f"http://127.0.0.1:{xray_port}"
             cmdstr = f"{pwd}/rad/rad{suffix} --target {target} --json-output {output_folder}/{output_filename_prefix}.{tool_name}.json --http-proxy {proxy}"
         else:
@@ -696,7 +702,6 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         # with open(f"{root}/result/{date}/{domain}.links.csv", "a", encoding="utf-8") as f1:
         to_csv(f"result/{date}/{domain}.links.csv", urls_data_tmp_to_csv, mmode='a')
 
-    #
     @logger.catch
     def gau(data1, attackflag=attackflag):
         '''

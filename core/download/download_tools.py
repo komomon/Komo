@@ -65,8 +65,8 @@ class Download:
         if os.path.exists(toolsyaml_path):
             with open(toolsyaml_path, 'r', encoding='utf-8') as f:
                 msg = yaml.load(f, Loader=yaml.FullLoader)['download']
-                classify = ['domain', 'finger', 'portscan', 'sensitiveinfo', 'vulscan']
-                # classify = ['portscan']
+                classify = ['domain','emailcollect','survivaldetect', 'finger', 'portscan', 'sensitiveinfo', 'vulscan']
+                # classify = ['emailcollect','survivaldetect']
                 for i in classify:
                     self.tools_dict.update(msg[i])
                     # {'amass': {'link': 'https://github.com/OWASP/Amass/releases/download/v3.20.0/amass_windows_amd64.zip',
@@ -290,5 +290,5 @@ class Download:
 
 
 if __name__ == '__main__':
-    dd = Download()
+    dd = Download(proxy="http://127.0.0.1:7890")
     dd.run()

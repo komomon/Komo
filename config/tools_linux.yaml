@@ -108,7 +108,7 @@ download:
       final_name: emailall.py
       tool_main_filename: emailall.py
       topath:
-        - core/tools/emaillcollect/emailall/
+        - core/tools/emailcollect/emailall/
         - emailall/
   survivaldetect:
     httpx:

@@ -1,4 +1,5 @@
 import hashlib
+import ipaddress
 import json
 import os
 import random
@@ -67,6 +68,18 @@ def progress_record(date=None, module=None, value=None):
         f.write(json.dumps(log_json))
     return True
     # if module in dict(log_json).keys() and target:
+
+
+def gettargets(target):
+    result_list = []
+    try:
+        net4 = ipaddress.ip_network(target, strict=False)
+        for x in net4.hosts():
+            result_list.append(str(x))
+    except ValueError:
+        result_list.append(target)
+    return result_list
+
 
 
 class Komo(object):
@@ -442,49 +455,31 @@ class Komo(object):
         else:
             logger.error("[-] Please check --subdomain or --subdomains")
 
+    # 扫描+攻击 提供子域名列表,不扫描子域
+    def all3(self):
+        '''
+        python main.py --subdomain aaa.tiqianle.com all3
+        python main.py --subdomains tiqianle.com.txt all3
+        :return:
+        '''
+        self.attackflag = True
+        if self.subdomain or self.subdomains:
+            # for domain in self.domains_list:
+            # domain_main.manager(domain=domain, date=self.date)
+            # emailcollect_main.manager(domain=ddomain, date=self.date).run()
+            survivaldetect_main.manager(domain=self.randomstr, subdomain=self.subdomain, subdomains=self.subdomains,
+                                        date=self.date).run()
+            finger_main.manager(domain=self.randomstr, urlsfile=None, date=self.date)
+            portscan_main.manager(domain=self.randomstr, ip=None, ipfile=None, date=self.date)
+            # vulscan_main.webmanager(domain=self.randomstr, url=None, urlsfile=None, date=self.date)
+            # vulscan_main.hostmanager(domain=self.randomstr, ip=None, ipfile=None, date=self.date)
+            sensitiveinfo_main.manager(domain=self.randomstr, url=None, urlsfile=None, attackflag=self.attackflag,
+                                       date=self.date)
+        else:
+            logger.error("[-] Please check --subdomain or --subdomains")
+
+
+
 
 if __name__ == '__main__':
     fire.Fire(Komo)
-
-# fire.Fire(ctfr)
-# fire.Fire(test1.b)
-# test1.a()
-# fire.Fire(test1.ooo)
-# test1.a()
-# fire.Fire(oneforall.OneForAll)
-
-# class ooo(object):
-#     def __init__(self, target=None, targets=None, brute=None, dns=None, req=None,
-#                  port=None, alive=None, fmt=None, path=None, takeover=None):
-#         self.target = target
-#         self.targets = targets
-#         self.brute = brute
-#         self.dns = dns
-#         self.req = req
-#         self.port = port
-#         self.alive = alive
-#         self.fmt = fmt
-#         self.path = path
-#         self.takeover = takeover
-#         self.domain = str()  # The domain currently being collected
-#         self.domains = set()  # All domains that are to be collected
-#         self.data = list()  # The subdomain results of the current domain
-#         self.datas = list()  # All subdomain results of the domain
-#         self.in_china = None
-#         self.access_internet = False
-#         self.enable_wildcard = False
-#         print(self.target)
-#
-#     def run(self):
-#
-#
-
-
-# os.system("python3 core/test1/test1.py")
-
-
-# domain_main.manager("tiqianle.com", date)
-#
-# test1.yoyo()
-# test1.Yoyo().yoyoketang()
-# test1.sss()
