@@ -15,11 +15,15 @@ tools:
       toolname: subnames_big
     ip2region:
       toolname: ip2region
+  emailcollect:
+    emailall:
+      toolname: emailall
+  survivaldetect:
+    httpx:
+      toolname: httpx
   finger:
     ehole:
       toolname: ehole
-    httpx:
-      toolname: httpx
     webanalyze:
       toolname: webanalyze
   portscan:
@@ -31,14 +35,12 @@ tools:
     naabu:
       toolname: naabu
   sensitiveinfo:
-    chrome-win:
-      toolname: chrome-win
-    emailall:
-      # https://github.com/Taonn/EmailAll/archive/refs/heads/master.zip 修改过
-      toolname: emailall
+    # 如果runtime为空则不限时，如果为0 则跳过该工具执行，如果为指定数字则限时执行
+    chrome:
+      toolname: chrome
     crawlergo:
       toolname: crawlergo
-      runtime: 900
+      runtime:
     rad:
       toolname: rad
       runtime: 900

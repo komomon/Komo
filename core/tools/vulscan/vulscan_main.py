@@ -249,13 +249,13 @@ def request0(req_json):
 # 对web进行扫描
 @logger.catch
 def webmanager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39"):
+    logger.info('\n' + '<' * 18 + f'start {__file__}' + '>' * 18)
     suffix = get_system()
     root = os.getcwd()
     pwd_and_file = os.path.abspath(__file__)
     pwd = os.path.dirname(pwd_and_file)  # E:\ccode\python\006_lunzi\core\tools\vulscan
     # 获取当前目录的前三级目录，即到domain目录下，来寻找exe domain目录下
     grader_father = os.path.abspath(os.path.dirname(pwd_and_file) + os.path.sep + "../..")
-    logger.info('-' * 10 + f'start {__file__}' + '-' * 10)
     # 创建存储子域名工具扫描结果的文件夹
     vulscan_log_folder = f"result/{date}/vulscan_log"
     if os.path.exists(vulscan_log_folder) is False:
@@ -283,7 +283,7 @@ def webmanager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39")
         结果输出目录 {vulscan_log_folder}/{sys._getframe().f_code.co_name}_log
         :return:
         '''
-        logger.info('-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
+        logger.info('<' * 10 + f'start {sys._getframe().f_code.co_name}' + '>' * 10)
 
         # 更新poc库
         # if os.path.exists(f"{pwd}/nuclei/pocdata") is False:
@@ -315,7 +315,7 @@ def webmanager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39")
         输出目录 reports/{domain}.afrog.html
         :return:
         '''
-        logger.info('-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
+        logger.info('<' * 10 + f'start {sys._getframe().f_code.co_name}' + '>' * 10)
         # 更新漏洞库，5天查一次更新一次
         try:
             if whether_update(f"{os.path.expanduser('~')}/afrog-pocs"):
@@ -348,7 +348,7 @@ def webmanager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39")
         输出目录
         :return:
         '''
-        logger.info('-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
+        logger.info('<' * 10 + f'start {sys._getframe().f_code.co_name}' + '>' * 10)
         # 目前只支持urls文件，单个url也是写入文件，然后工具从文件中读取
         if url:
             cmdstr = f'python3 {pwd}/vulmap/vulmap.py -u {url} --output-text {vulscan_log_folder}/{output_filename_prefix}.{sys._getframe().f_code.co_name}.txt'
@@ -369,7 +369,7 @@ def webmanager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39")
         xray 主动扫描
         xray 1.9.1
         '''
-        cprint('-' * 10 + f'start {sys._getframe().f_code.co_name} ...' + '-' * 10, 'green')
+        logger.info('<' * 10 + f'start {sys._getframe().f_code.co_name}' + '>' * 10)
         tool_name = '{pwd}/xray/xray{suffix}'
         ports_list = ['80', '443', '8080', '8009', '8443']
 
@@ -416,7 +416,7 @@ def webmanager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39")
         xray 1.9.1
         :return:
         '''
-        logger.info('-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
+        logger.info('<' * 10 + f'start {sys._getframe().f_code.co_name}' + '>' * 10)
         # pwd_and_file = os.path.abspath(__file__)
         # pwd = os.path.dirname(pwd_and_file)  # E:\ccode\python\006_lunzi\core\tools\domain
 
@@ -433,7 +433,7 @@ def webmanager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39")
 
     # 暂时先不用，发送到xray被动扫描 存在很多遗漏，以后有时间再细测
     def to_xray():
-        logger.info('-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
+        logger.info('<' * 10 + f'start {sys._getframe().f_code.co_name}' + '>' * 10)
         if checkport(7777) is False: return
         # 发送给xray的监听端口
         if isexist(f'result/{date}/{domain}.links.csv') is False: return
@@ -457,7 +457,7 @@ def webmanager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39")
         :return:
         '''
         # if get_system() =="":
-        logger.info('-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
+        logger.info('<' * 10 + f'start {sys._getframe().f_code.co_name}' + '>' * 10)
         ports_str = "21,22,23,25,53,53,69,80,81,88,110,111,111,123,123,135,137,139,161,177,389,427,443,445,465,500,515," \
                     "520,523,548,623,626,636,873,902,1080,1099,1433,1434,1521,1604,1645,1701,1883,1900,2049,2181,2375," \
                     "2379,2425,3128,3306,3389,4730,5060,5222,5351,5353,5432,5555,5601,5672,5683,5900,5938,5984,6000,6379," \
@@ -494,13 +494,13 @@ def webmanager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39")
 # 对ip进行扫描
 @logger.catch
 def hostmanager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
+    logger.info('\n' + '<' * 18 + f'start {__file__}' + '>' * 18)
     suffix = get_system()
     root = os.getcwd()
     pwd_and_file = os.path.abspath(__file__)
     pwd = os.path.dirname(pwd_and_file)  # E:\ccode\python\006_lunzi\core\tools\domain
     # 获取当前目录的前三级目录，即到domain目录下，来寻找exe domain目录下
     grader_father = os.path.abspath(os.path.dirname(pwd_and_file) + os.path.sep + "../..")
-    logger.info('-' * 10 + f'start {__file__}' + '-' * 10)
     # 创建存储子域名工具扫描结果的文件夹
     vulscan_log_folder = f"result/{date}/vulscan_log"
     if os.path.exists(vulscan_log_folder) is False:
@@ -527,7 +527,7 @@ def hostmanager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
         输出目录
         :return:
         '''
-        logger.info('-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
+        logger.info('<' * 10 + f'start {sys._getframe().f_code.co_name}' + '>' * 10)
         if ip:
             cmdstr = f'{os.path.realpath(f"{pwd}/goon/goon{suffix}")} -ip {ip} -ofile {vulscan_log_folder}/{output_filename_prefix}.{sys._getframe().f_code.co_name}.txt'
         elif ipfile:
@@ -559,8 +559,7 @@ def hostmanager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
         输出目录
         :return:
         '''
-        # if get_system() =="":
-        logger.info('-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
+        logger.info('<' * 10 + f'start {sys._getframe().f_code.co_name}' + '>' * 10)
         ports_str = "21,22,23,25,53,53,69,80,81,88,110,111,111,123,123,135,137,139,161,177,389,427,443,445,465,500,515," \
                     "520,523,548,623,626,636,873,902,1080,1099,1433,1434,1521,1604,1645,1701,1883,1900,2049,2181,2375," \
                     "2379,2425,3128,3306,3389,4730,5060,5222,5351,5353,5432,5555,5601,5672,5683,5900,5938,5984,6000,6379," \
@@ -592,8 +591,7 @@ def hostmanager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
         输出目录
         :return:
         '''
-        # if get_system() =="":
-        logger.info('-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
+        logger.info('<' * 10 + f'start {sys._getframe().f_code.co_name}' + '>' * 10)
         ports_str = "21,22,23,25,53,53,69,80,81,88,110,111,111,123,123,135,137,139,161,177,389,427,443,445,465,500,515," \
                     "520,523,548,623,626,636,873,902,1080,1099,1433,1434,1521,1604,1645,1701,1883,1900,2049,2181,2375," \
                     "2379,2425,3128,3306,3389,4730,5060,5222,5351,5353,5432,5555,5601,5672,5683,5900,5938,5984,6000,6379," \

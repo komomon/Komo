@@ -44,6 +44,7 @@ def __subprocess2(cmd):
     # else:
     #     logger.error(f'[-] cmd type error,cmd should be a string or list: {cmd}')
     #     return
+    logger.info(f"[+] command:{cmd}")
     out_temp = tempfile.SpooledTemporaryFile(max_size=10 * 1000, mode='w+b')
     lines = []
     try:
@@ -55,6 +56,7 @@ def __subprocess2(cmd):
         # print(lines)
     except Exception as e:
         logger.error(traceback.format_exc())
+        logger.error(e)
     finally:
         if out_temp:
             out_temp.close()
@@ -114,13 +116,13 @@ def manager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39"):
     不包括单个url的情况
     urlsfile 为子域名，不带http
     '''
+    logger.info('\n'+'<' * 18 + f'start {__file__}' + '>' * 18)
     suffix = get_system()
     root = os.getcwd()
     pwd_and_file = os.path.abspath(__file__)
     pwd = os.path.dirname(pwd_and_file)  # E:\ccode\python\006_lunzi\core\tools\domain
     # 获取当前目录的前三级目录，即到domain目录下，来寻找exe domain目录下
     grader_father = os.path.abspath(os.path.dirname(pwd_and_file) + os.path.sep + "../..")
-    logger.info('-' * 10 + f'start {__file__}' + '-' * 10)
     # 创建存储子域名工具扫描结果的文件夹
     finger_log_folder = f"result/{date}/fingerlog"
     if os.path.exists(finger_log_folder) is False:
@@ -138,71 +140,71 @@ def manager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39"):
     #         f.write(url)
 
     # 生成带http的域名url 和ip文件 result/{date}/{domain}.subdomains_with_http.txt result/{date}/{domain}.subdomains_ips.txt
-    @logger.catch #废弃了迁移到其他模块了
-    def httpx(domain=domain, url=url, file=urlsfile):
-        '''
-        httpx 1.2.4
-        输入是子域名文件，可以带http可以不带，主要为了进行域名探活
-        httpx输出的文件夹名称不能用下划线
-        :return:
-        '''
-        logger.info('-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
-        # output_folder = f"result/{date}/{sys._getframe().f_code.co_name}log"  # result/{date}/httpxlog
-        output_folder = f'{finger_log_folder}/{sys._getframe().f_code.co_name}log'
-        if os.path.exists(output_folder) is False:
-            os.makedirs(output_folder)
-
-        if domain and file is None and url is None:
-            inputfile = f'result/{date}/{domain}.final.subdomains.txt'
-            output_filename_prefix = domain
-            # print(1,domain,file)
-        elif file and domain is None and url is None:
-            inputfile = file
-            # 如果从文件输入则结果以时间为文件名
-            output_filename_prefix = date
-            # domain = date
-            # print(2,domain,file)
-        elif url and domain is None and file is None:
-            # domain = date
-            inputfile = f"temp.{sys._getframe().f_code.co_name}.txt"
-            output_filename_prefix = date
-            # print(3,domain,file)
-            # subdomain_tuple = tldextract.extract(url)
-            # output_filename_prefix = '.'.join(part for part in subdomain_tuple if part)  # www.baidu.com 127_0_0_1
-            with open(inputfile, "w", encoding="utf-8") as f:
-                f.write(url)
-        else:
-            logger.error(f'[-] Please check url or urlfile or domain')
-            exit(1)
-
-        subdomains_with_http = []
-        subdomains_ips_tmp = []
-        subdomains_ips = []
-        cmdstr = f'{pwd}/httpx/httpx{suffix} -l {inputfile} -ip -silent -no-color -csv -o {output_folder}/{output_filename_prefix}.{sys._getframe().f_code.co_name}.csv'
-        logger.info(f"[+] command:{cmdstr}")
-        os.system(cmdstr)
-        logger.info(f"[+] Generate file: {output_folder}/{output_filename_prefix}.{sys._getframe().f_code.co_name}.csv")
-        # 生成带http的url
-        with open(f"{output_folder}/{output_filename_prefix}.{sys._getframe().f_code.co_name}.csv", 'r',
-                  errors='ignore') as f:
-            reader = csv.reader(f)
-            head = next(reader)
-            for row in reader:
-                subdomains_with_http.append(row[8].strip())  # url
-                subdomains_ips_tmp.append(row[18].strip())  # host
-            subdomains_ips = getips(list(set(subdomains_ips_tmp)))
-        # 生成带http的url txt
-        with open(f"result/{date}/{output_filename_prefix}.subdomains.with.http.txt", "w", encoding="utf-8") as f2:
-            f2.writelines("\n".join(subdomains_with_http))
-        logger.info(f"[+] Generate file: result/{date}/{output_filename_prefix}.subdomains.with.http.txt")
-        # 生成子域名对应的ip txt
-        with open(f"result/{date}/{output_filename_prefix}.subdomains.ips.txt", "w", encoding="utf-8") as f3:
-            f3.writelines("\n".join(subdomains_ips))
-        logger.info(f"[+] Generate file: result/{date}/{output_filename_prefix}.subdomains.ips.txt")
-        # 最后移除临时文件
-        if url and domain is None and file is None:
-            if os.path.exists(inputfile):
-                os.remove(inputfile)
+    # @logger.catch #废弃了迁移到其他模块了
+    # def httpx(domain=domain, url=url, file=urlsfile):
+    #     '''
+    #     httpx 1.2.4
+    #     输入是子域名文件，可以带http可以不带，主要为了进行域名探活
+    #     httpx输出的文件夹名称不能用下划线
+    #     :return:
+    #     '''
+    #     logger.info('-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
+    #     # output_folder = f"result/{date}/{sys._getframe().f_code.co_name}log"  # result/{date}/httpxlog
+    #     output_folder = f'{finger_log_folder}/{sys._getframe().f_code.co_name}log'
+    #     if os.path.exists(output_folder) is False:
+    #         os.makedirs(output_folder)
+    #
+    #     if domain and file is None and url is None:
+    #         inputfile = f'result/{date}/{domain}.final.subdomains.txt'
+    #         output_filename_prefix = domain
+    #         # print(1,domain,file)
+    #     elif file and domain is None and url is None:
+    #         inputfile = file
+    #         # 如果从文件输入则结果以时间为文件名
+    #         output_filename_prefix = date
+    #         # domain = date
+    #         # print(2,domain,file)
+    #     elif url and domain is None and file is None:
+    #         # domain = date
+    #         inputfile = f"temp.{sys._getframe().f_code.co_name}.txt"
+    #         output_filename_prefix = date
+    #         # print(3,domain,file)
+    #         # subdomain_tuple = tldextract.extract(url)
+    #         # output_filename_prefix = '.'.join(part for part in subdomain_tuple if part)  # www.baidu.com 127_0_0_1
+    #         with open(inputfile, "w", encoding="utf-8") as f:
+    #             f.write(url)
+    #     else:
+    #         logger.error(f'[-] Please check url or urlfile or domain')
+    #         exit(1)
+    #
+    #     subdomains_with_http = []
+    #     subdomains_ips_tmp = []
+    #     subdomains_ips = []
+    #     cmdstr = f'{pwd}/httpx/httpx{suffix} -l {inputfile} -ip -silent -no-color -csv -o {output_folder}/{output_filename_prefix}.{sys._getframe().f_code.co_name}.csv'
+    #     logger.info(f"[+] command:{cmdstr}")
+    #     os.system(cmdstr)
+    #     logger.info(f"[+] Generate file: {output_folder}/{output_filename_prefix}.{sys._getframe().f_code.co_name}.csv")
+    #     # 生成带http的url
+    #     with open(f"{output_folder}/{output_filename_prefix}.{sys._getframe().f_code.co_name}.csv", 'r',
+    #               errors='ignore') as f:
+    #         reader = csv.reader(f)
+    #         head = next(reader)
+    #         for row in reader:
+    #             subdomains_with_http.append(row[8].strip())  # url
+    #             subdomains_ips_tmp.append(row[18].strip())  # host
+    #         subdomains_ips = getips(list(set(subdomains_ips_tmp)))
+    #     # 生成带http的url txt
+    #     with open(f"result/{date}/{output_filename_prefix}.subdomains.with.http.txt", "w", encoding="utf-8") as f2:
+    #         f2.writelines("\n".join(subdomains_with_http))
+    #     logger.info(f"[+] Generate file: result/{date}/{output_filename_prefix}.subdomains.with.http.txt")
+    #     # 生成子域名对应的ip txt
+    #     with open(f"result/{date}/{output_filename_prefix}.subdomains.ips.txt", "w", encoding="utf-8") as f3:
+    #         f3.writelines("\n".join(subdomains_ips))
+    #     logger.info(f"[+] Generate file: result/{date}/{output_filename_prefix}.subdomains.ips.txt")
+    #     # 最后移除临时文件
+    #     if url and domain is None and file is None:
+    #         if os.path.exists(inputfile):
+    #             os.remove(inputfile)
 
     # 进行指纹识别 result/{date}/ehole_log/{domain}.ehole.xlsx
     @logger.catch
@@ -212,7 +214,7 @@ def manager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39"):
         ehole的输出文件xlsx 文件名只能有一个点,所以如下将多余的.换成了-横线
         :return:
         '''
-        logger.info('-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
+        logger.info('<' * 10 + f'start {sys._getframe().f_code.co_name}' + '>' * 10)
         # 创建该工具的结果文件夹
         # output_folder = f"result/{date}/{sys._getframe().f_code.co_name}_log"
         output_folder = f'{finger_log_folder}/{sys._getframe().f_code.co_name}log'
@@ -254,7 +256,7 @@ def manager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39"):
         # webanalyze.exe -crawl 3 -host testphp.vulnweb.com -output json >> 22.txt
         :return:
         '''
-        logger.info('-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
+        logger.info('<' * 10 + f'start {sys._getframe().f_code.co_name}' + '>' * 10)
         # 创建该工具的结果文件夹
         # output_folder = f"result/{date}/{sys._getframe().f_code.co_name}_log"
         output_folder = f'{finger_log_folder}/{sys._getframe().f_code.co_name}log'

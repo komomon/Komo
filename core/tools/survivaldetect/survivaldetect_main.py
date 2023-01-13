@@ -79,6 +79,7 @@ class manager():
     '''
 
     def __init__(self, domain=None, subdomain=None, subdomains=None, date="2022-09-02-00-01-39"):
+        logger.info('\n' + '<' * 18 + f'start {__file__}' + '>' * 18)
         self.domain = domain
         self.subdomain = subdomain
         self.subdomains = subdomains
@@ -89,7 +90,6 @@ class manager():
         self.pwd = os.path.dirname(self.pwd_and_file)  # E:\ccode\python\006_lunzi\core\tools\domain
         # 获取当前目录的前三级目录，即到domain目录下，来寻找exe domain目录下
         self.grader_father = os.path.abspath(os.path.dirname(self.pwd_and_file) + os.path.sep + "../..")
-        logger.info('-' * 10 + f'start {__file__}' + '-' * 10)
         # 创建存储子域名工具扫描结果的文件夹
         self.module_log_folder = f"result/{date}/survivaldetectlog"
         if os.path.exists(self.module_log_folder) is False:
@@ -104,13 +104,15 @@ class manager():
         httpx输出的文件夹名称不能用下划线
         :return:
         '''
-        logger.info('-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
+        logger.info('<' * 10 + f'start {sys._getframe().f_code.co_name}' + '>' * 10)
+        # logger.info('<' * 10 + f'start {tool_name}' + '>' * 10)
         # output_folder = f"result/{date}/{sys._getframe().f_code.co_name}log"  # result/{date}/httpxlog
         output_folder = f'{self.module_log_folder}/{sys._getframe().f_code.co_name}log'
         if os.path.exists(output_folder) is False:
             os.makedirs(output_folder)
         input_file = ""
         output_filename_prefix = ""
+        print(domain,subdomain,subdomains)
         if domain and subdomain is None and subdomains is None:
             input_file = f'result/{self.date}/{domain}.final.subdomains.txt'
             output_filename_prefix = domain

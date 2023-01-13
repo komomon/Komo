@@ -28,7 +28,7 @@ def makedir0(path):
         logger.info(f'[+] Create {path} success.')
 
 
-def __subprocess1(cmd=None, timeout=None, path=None):
+def __subprocess1111(cmd=None, timeout=None, path=None):
     '''
     rad 不支持结果输出到管道所以stdout=None才可以，即默认不设置
     :param cmd:
@@ -59,7 +59,7 @@ def __subprocess1(cmd=None, timeout=None, path=None):
 
 
 # @logger.catch 基本不用，因为现在有了subprocess.run
-def __subprocess2(cmd):
+def __subprocess2111(cmd):
     # if isinstance(cmd, str):
     #     cmd = cmd.split(' ')
     # elif isinstance(cmd, list):

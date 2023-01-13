@@ -141,26 +141,6 @@ def progress_record(date=None,target=None,module=None,value=None,finished=False)
         return True
 
 
-# 过程记录,暂时弃用
-def progress_record__(date=None,target=None,module=None,finished=False):
-    logfile = f"result/{date}/log/{module}_log.json"
-    if os.path.exists(f"result/{date}/log") is False:
-        os.makedirs(f"result/{date}/log")
-    if finished is False:
-        with open(logfile, 'r', encoding='utf-8') as f1:
-            targets = f1.readlines()
-        # 如果不存在则扫描
-        if target+"\n" not in targets:
-            return False
-        else:
-            return True
-    # 存在则存储跳过
-    else:
-        with open(logfile, 'a', encoding='utf-8') as f1:
-            f1.write(target+"\n")
-        return True
-
-
 def kill_process(processname):
     if 'win32' == sys.platform:
         cmd = f'''for /f "tokens=2 " %a in ('tasklist  /fi "imagename eq {processname}" /nh') do taskkill /f /pid %a'''
@@ -192,26 +172,20 @@ def __subprocess1(cmd, timeout=None, path=None):
     :return:
     '''
     f_name = inspect.getframeinfo(inspect.currentframe().f_back)[2]
-    # if isinstance(cmd, str):
-    #     cmd = cmd.split(' ')
-    # elif isinstance(cmd, list):
-    #     cmd = cmd
-    # else:
-    #     logger.error(f'[-] cmd type error,cmd should be a string or list: {cmd}')
-    #     return
-    # 执行外部shell命令， 输出结果存入临时文件中
-    # logger.info(f"[+] command:{' '.join(cmd)}")
+    logger.info(f"[+] command:{cmd}")
     p = subprocess.Popen(cmd, shell=True, cwd=path)
     # p = subprocess.Popen(cmd, shell=True,cwd=path,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     try:
         p.wait(timeout=timeout)
     except subprocess.TimeoutExpired as e:
         # logger.error('{} - {} - \n{}'.format(self.domain, self.__class__.__name__, e))
-        logger.error(traceback.format_exc())
+        # logger.error(traceback.format_exc())
+        logger.error(e)
         p.kill()
         # kill_process(f_name+get_system())
     except Exception as e:
         logger.error(traceback.format_exc())
+        logger.error(e)
         # logger.error(f'{sys._getframe().f_code.co_name} Reach Set Time and exit')
     finally:
         logger.info(f'{f_name} finished.')
@@ -230,7 +204,7 @@ def __subprocess2(cmd):
     out_temp = tempfile.SpooledTemporaryFile(max_size=10 * 1000, mode='w+b')
     try:
         # cmd = "ls -lh"
-        # logger.info(f"[+] command:{' '.join(cmd)}")
+        logger.info(f"[+] command:{cmd}")
         fileno = out_temp.fileno()
         obj = subprocess.Popen(cmd, stdout=fileno, stderr=fileno, shell=True)
         obj.wait()
@@ -249,6 +223,7 @@ def __subprocess2(cmd):
 # @progress_control(module="domain_scan",date=date)
 @logger.catch
 def manager(domain=None, date="2022-09-02-00-01-39"):
+    logger.info('\n' + '<' * 18 + f'start {__file__}' + '>' * 18)
     subdomains = list()  # 用于存储最后的子域名结果
     subdomains_tmp = list()
     suffix = get_system()
@@ -259,7 +234,6 @@ def manager(domain=None, date="2022-09-02-00-01-39"):
     # 获取当前目录的前三级目录，即到domain目录下，来寻找exe domain目录下
     grader_father = os.path.abspath(os.path.dirname(pwd_and_file) + os.path.sep + "../..")
     # print(grader_father) # E:\ccode\python\006_lunzi\core
-
     # 创建存储子域名工具扫描结果的文件夹
     subdomains_log_folder = f"result/{date}/domain_log"
     if os.path.exists(subdomains_log_folder) is False:
@@ -278,7 +252,7 @@ def manager(domain=None, date="2022-09-02-00-01-39"):
         :return:
         '''
         # global subdomains
-        logger.info('-' * 10 + f'start {str(toolname)}' + '-' * 10)
+        logger.info('<' * 10 + f'start {str(toolname)}' + '>' * 10)
         logger.info(f"[+] command:{cmd}")
         os.system(cmd)
         # __subprocess1(cmd=cmd,timeout=15)

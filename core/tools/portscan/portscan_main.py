@@ -53,6 +53,7 @@ def progress_record(date=None,target=None,module=None,value=None,finished=False)
 # def manager(domain=None,ip=None,ips=None,ipfile=None,date="2022-09-02-00-01-39"):
 @logger.catch
 def manager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
+    logger.info('\n' + '<' * 18 + f'start {__file__}' + '>' * 18)
     suffix = get_system()
     root = os.getcwd()
     pwd_and_file = os.path.abspath(__file__)
@@ -61,7 +62,6 @@ def manager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
     # 获取当前目录的前三级目录，即到domain目录下，来寻找exe domain目录下
     grader_father = os.path.abspath(os.path.dirname(pwd_and_file) + os.path.sep + "../..")
     # print(grader_father) # E:\ccode\python\006_lunzi\core
-
     # 创建存储工具扫描结果的文件夹
     portscan_log_folder = f"result/{date}/portscan_log"
     if os.path.exists(portscan_log_folder) is False:
@@ -91,7 +91,7 @@ def manager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
         naabu 2.1.0
         :return:
         '''
-        logger.info('-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
+        logger.info('<' * 10 + f'start {sys._getframe().f_code.co_name}' + '>' * 10)
         ports_str = "22,80,1433,1521,3389,8009,8080,8443"
         ports_str = "21,22,23,25,53,53,69,80,81,88,110,111,111,123,123,135,137,139,161,177,389,427,443,445,465,500,515," \
                     "520,523,548,623,626,636,873,902,1080,1099,1433,1434,1521,1604,1645,1701,1883,1900,2049,2181,2375," \
@@ -115,7 +115,7 @@ def manager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
         TxPortMap 20211210
         :return:
         '''
-        logger.info('-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
+        logger.info('<' * 10 + f'start {sys._getframe().f_code.co_name}' + '>' * 10)
         ports_str = "22,80,1433,1521,3389,8009,8080,8443"
         ports_str = "21,22,23,25,53,53,69,80,81,88,110,111,111,123,123,135,137,139,161,177,389,427,443,445,465,500,515," \
                     "520,523,548,623,626,636,873,902,1080,1099,1433,1434,1521,1604,1645,1701,1883,1900,2049,2181,2375," \
@@ -136,7 +136,7 @@ def manager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
         dismap 0.4
         :return:
         '''
-        logger.info('-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
+        logger.info('<' * 10 + f'start {sys._getframe().f_code.co_name}' + '>' * 10)
         ports_str = "22,80,1433,1521,3389,8009,8080,8443"
         ports_str = "21,22,23,25,53,53,69,80,81,88,110,111,111,123,123,135,137,139,161,177,389,427,443,445,465,500,515," \
                     "520,523,548,623,626,636,873,902,1080,1099,1433,1434,1521,1604,1645,1701,1883,1900,2049,2181,2375," \
@@ -157,7 +157,7 @@ def manager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
         nmaps 1.0 2020
         :return:
         '''
-        logger.info('-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
+        logger.info('<' * 10 + f'start {sys._getframe().f_code.co_name}' + '>' * 10)
         ports_str = "22,80,1433,1521,3389,8009,8080,8443"
         ports_str = "21,22,23,25,53,53,69,80,81,88,110,111,111,123,123,135,137,139,161,177,389,427,443,445,465,500,515," \
                     "520,523,548,623,626,636,873,902,1080,1099,1433,1434,1521,1604,1645,1701,1883,1900,2049,2181,2375," \

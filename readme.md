@@ -80,12 +80,12 @@ python3 Komo.py  --proxy socks5://127.0.0.1:10809 install
 
 **部分配置讲解**
 
-修改有runtime字段的工具的runtime字段，设置工具的运行时间，如果超时则kill掉，推荐设置600-1200s
+修改有runtime字段的工具的runtime字段，设置工具的运行时间，如果超时则kill掉，推荐设置600-1200s。如果runtime为空则不限时，如果为0 则跳过该工具执行，如果为指定数字则限时执行。推荐crawlergo runtime限时设为空
 
 ```
 crawlergo:
       toolname: crawlergo
-      runtime: 900
+      runtime: 
 rad:
       toolname: rad
       runtime: 900
@@ -472,6 +472,18 @@ target 为domain或date
 
 
 
+### 20230114
+
+修改部分bug
+
+emailall 剥离出来成单独模块了
+
+httpx剥离出来了成了单个模块
+
+新增机制：config.yaml中如果runtime为空则不限时，如果为0 则跳过该工具执行，如果为指定数字则限时执行
+
+
+
 ### 20230106
 
 1、修复linux下子线程执行进入交互shell的bug
@@ -499,6 +511,16 @@ target 为domain或date
 5、修改config.yaml,sensitiveinfo模块的工具运行时间，xray监听端口通过config.yaml配置
 
 6、修改vulsan 模块，子线程不能执行的bug
+
+
+
+
+
+
+
+
+
+
 
 
 

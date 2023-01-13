@@ -65,7 +65,7 @@ class Download:
         if os.path.exists(toolsyaml_path):
             with open(toolsyaml_path, 'r', encoding='utf-8') as f:
                 msg = yaml.load(f, Loader=yaml.FullLoader)['download']
-                classify = ['domain','emailcollect','survivaldetect', 'finger', 'portscan', 'sensitiveinfo', 'vulscan']
+                classify = ['domain', 'emailcollect', 'survivaldetect', 'finger', 'portscan', 'sensitiveinfo',  'vulscan']
                 # classify = ['emailcollect','survivaldetect']
                 for i in classify:
                     self.tools_dict.update(msg[i])

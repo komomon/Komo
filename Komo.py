@@ -444,7 +444,7 @@ class Komo(object):
             # for domain in self.domains_list:
             # domain_main.manager(domain=domain, date=self.date)
             # emailcollect_main.manager(domain=ddomain, date=self.date).run()
-            survivaldetect_main.manager(domain=self.randomstr, subdomain=self.subdomain, subdomains=self.subdomains,
+            survivaldetect_main.manager(domain=self.randomstr, subdomain=None, subdomains=None,
                                         date=self.date).run()
             finger_main.manager(domain=self.randomstr, urlsfile=None, date=self.date)
             portscan_main.manager(domain=self.randomstr, ip=None, ipfile=None, date=self.date)
@@ -467,7 +467,7 @@ class Komo(object):
             # for domain in self.domains_list:
             # domain_main.manager(domain=domain, date=self.date)
             # emailcollect_main.manager(domain=ddomain, date=self.date).run()
-            survivaldetect_main.manager(domain=self.randomstr, subdomain=self.subdomain, subdomains=self.subdomains,
+            survivaldetect_main.manager(domain=self.randomstr, subdomain=None, subdomains=None,
                                         date=self.date).run()
             finger_main.manager(domain=self.randomstr, urlsfile=None, date=self.date)
             portscan_main.manager(domain=self.randomstr, ip=None, ipfile=None, date=self.date)

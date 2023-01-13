@@ -76,7 +76,7 @@ def subprocess111(cmd, timeout=None, path=None):
     f_name = inspect.getframeinfo(inspect.currentframe().f_back)[2]
     # cmd = shlex.split(cmd)
     # 执行外部shell命令， 输出结果存入临时文件中
-    # logger.info(f"[+] command:{' '.join(cmd)}")
+    logger.info(f"[+] command:{cmd}")
     p = subprocess.Popen(cmd, shell=True, cwd=path)
     # p = subprocess.Popen(cmd, shell=True,cwd=path,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     try:
@@ -84,12 +84,12 @@ def subprocess111(cmd, timeout=None, path=None):
         p.wait(timeout=timeout)
     except subprocess.TimeoutExpired as e:
         # logger.error('{} - {} - \n{}'.format(self.domain, self.__class__.__name__, e))
-        logger.error(traceback.format_exc())
-        # outs, errs = p.communicate()
+        logger.error(e)
         p.kill()
         # kill_process(f_name+get_system())
     except Exception as e:
         logger.error(traceback.format_exc())
+        logger.error(e)
         # logger.error(f'{sys._getframe().f_code.co_name} Reach Set Time and exit')
     finally:
         logger.info(f'{f_name} finished.')
@@ -104,7 +104,7 @@ class manager():
     '''
 
     def __init__(self, domain=None, date="2022-09-02-00-01-39"):
-        logger.info('-' * 10 + f'start {__file__}' + '-' * 10)
+        logger.info('\n'+'<' * 18 + f'start {__file__}' + '>' * 18)
         self.domain = domain
         self.date = date
         self.ostype = OSTYPE
@@ -127,7 +127,7 @@ class manager():
         :return:
         '''
         tool_name = str(sys._getframe().f_code.co_name)
-        logger.info('-' * 10 + f'start {tool_name}' + '-' * 10)
+        logger.info('<' * 10 + f'start {tool_name}' + '>' * 10)
         # 创建多个子域名结果输出文件夹
         output_folder = f'{self.module_log_folder}/{tool_name}_log'
         makedir0(output_folder)
@@ -136,8 +136,7 @@ class manager():
         # subdomain = '_'.join(part for part in subdomain_tuple if part)  # www_baidu_com
         output_filename_prefix = subdomain_tuple.domain + '.' + subdomain_tuple.suffix
         cmdstr = f'python3 {self.pwd}/emailall/emailall.py --domain {domain} run'
-        logger.info(f"[+] command:{cmdstr}")
-        create_logfile()
+        # create_logfile()
         subprocess111(cmdstr, timeout=None, path=f"{self.pwd}/{tool_name}")
         # 移动结果文件 \sensitiveinfo\emailall\result\vulweb_com\vulweb.com_All.json
         output_filename_tmp = f"{self.pwd}/{tool_name}/result/{output_filename_prefix.replace('.', '_')}/{output_filename_prefix}_All.json"

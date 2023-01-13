@@ -104,12 +104,12 @@ download:
       whetherdownload: True
       link: https://github.com/komomon/emailall/archive/refs/heads/main.zip
       downloadfile: emailall.zip
-      source_name: emailall.py
-      final_name: emailall.py
+      source_name: emailall-main/
+      final_name: emailall/
       tool_main_filename: emailall.py
       topath:
-        - core/tools/emailcollect/emailall/
-        - emailall/
+        - core/tools/emailcollect/
+        - /
   survivaldetect:
     httpx:
       toolname: httpx
