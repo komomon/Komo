@@ -1,3 +1,4 @@
+import hashlib
 import inspect
 import json
 import os
@@ -30,7 +31,7 @@ def get_system():
 
 
 # 进度记录,基于json
-def progress_record(date=None,target=None,module=None,value=None,finished=False):
+def progress_record_old(date=None, target=None, module=None, value=None, finished=False):
     logfile = f"result/{date}/log.json"
     if os.path.exists(logfile) is False:
         shutil.copy("config/log_template.json", f"result/{date}/log.json")
@@ -40,7 +41,7 @@ def progress_record(date=None,target=None,module=None,value=None,finished=False)
         # 读取log.json 如果是false则扫描，是true则跳过
         if log_json[module] is False:
             return False
-        elif log_json[module] is True:# 即log_json[module] 为true的情况
+        elif log_json[module] is True:  # 即log_json[module] 为true的情况
             return True
     elif finished is True:
         log_json[module] = True
@@ -48,6 +49,51 @@ def progress_record(date=None,target=None,module=None,value=None,finished=False)
             f.write(json.dumps(log_json))
         return True
 
+
+# 进度记录,基于json
+def progress_record(date=None, target=None, module="portscan", value=None, finished=False):
+    target_log = {"domain": False,
+                  "emailcollect": False,
+                  "survivaldetect": False,
+                  "finger": False,
+                  "portscan": False,
+                  "sensitiveinfo": {
+                      "scanned_targets": []
+                  },
+                  "vulscan": {
+                      "webattack": False,
+                      "hostattack": False
+                  }
+                  }
+    logfile = f"result/{date}/log.json"
+    if os.path.exists(logfile) is False:
+        shutil.copy("config/log_template.json", f"result/{date}/log.json")
+    with open(logfile, "r", encoding="utf-8") as f1:
+        log_json = json.loads(f1.read())
+    if finished is False:
+        # 读取log.json 如果是false则扫描，是true则跳过
+        if target not in dict(log_json["target_log"]).keys():
+            log_json["target_log"][target] = target_log
+            with open(logfile, "w", encoding="utf-8") as f:
+                f.write(json.dumps(log_json))
+            return False
+        else:
+            if log_json["target_log"][target][module] is False:
+                return False
+            # elif log_json["target_log"][target][module] is True:  # 即log_json["target_log"][target][module] 为true的情况
+            else:
+                return True
+    elif finished is True:
+        # 如果已经存在对应目标的target_log 字典,则直接修改即可，否则添加target_log 并将domain键值设为true
+        # if target not in dict(log_json["target_log"]).keys():
+        if target in dict(log_json["target_log"]).keys():
+            log_json["target_log"][target][module] = True
+        else:
+            target_log[module] = True
+            log_json["target_log"][target] = target_log
+        with open(logfile, "w", encoding="utf-8") as f:
+            f.write(json.dumps(log_json))
+        return True
 
 
 # def manager(domain=None,ip=None,ips=None,ipfile=None,date="2022-09-02-00-01-39"):
@@ -173,12 +219,13 @@ def manager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
         logger.info(f'[+] {sys._getframe().f_code.co_name} finished,outputfile:{outputfile}')
 
     def run():
-        if progress_record(date=date, module="portscan", finished=False) is False:
+        target = domain if domain else hashlib.md5(bytes(date, encoding='utf-8')).hexdigest()
+        if progress_record(date=date,target=target, module="portscan", finished=False) is False:
             naabu(ip=None, ipfile=ipfile)
             TxPortMap(ip=None, ipfile=ipfile)
             # nmaps(ip=None,ipfile=ipfile)
             # dismap(ip=None,ipfile=ipfile)
-            progress_record(date=date, module="portscan", finished=True)
+            progress_record(date=date,target=target, module="portscan", finished=True)
 
     run()
 

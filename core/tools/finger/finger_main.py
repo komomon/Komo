@@ -1,4 +1,6 @@
 import csv
+import hashlib
+import inspect
 import json
 import re
 import shutil
@@ -6,7 +8,6 @@ import subprocess
 import sys
 import tempfile
 import traceback
-
 
 import fire
 from termcolor import cprint
@@ -35,8 +36,37 @@ def get_system():
         exit(1)
 
 
+def __subprocess1(cmd, timeout=None, path=None):
+    '''
+    rad 不支持结果输出到管道所以stdout=None才可以，即默认不设置
+    :param cmd:
+    :param timeout:
+    :param path:
+    :return:
+    '''
+    f_name = inspect.getframeinfo(inspect.currentframe().f_back)[2]
+    # cmd = shlex.split(cmd)
+    logger.info(f"[+] command:{cmd}")
+    p = subprocess.Popen(cmd, shell=True, cwd=path)
+    # p = subprocess.Popen(cmd, shell=True,cwd=path,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    try:
+        # outs, errs = p.communicate(timeout=timeout)
+        p.wait(timeout=timeout)
+    except subprocess.TimeoutExpired as e:
+        # logger.error('{} - {} - \n{}'.format(self.domain, self.__class__.__name__, e))
+        logger.error(traceback.format_exc())
+        # outs, errs = p.communicate()
+        p.kill()
+        # kill_process(f_name+get_system())
+    except Exception as e:
+        logger.error(traceback.format_exc())
+        # logger.error(f'{sys._getframe().f_code.co_name} Reach Set Time and exit')
+    finally:
+        logger.info(f'{f_name} finished.')
+
+
 # @logger.catch
-def __subprocess2(cmd):
+def __subprocess2(cmd, path=None):
     # if isinstance(cmd, str):
     #     cmd = cmd.split(' ')
     # elif isinstance(cmd, list):
@@ -49,7 +79,7 @@ def __subprocess2(cmd):
     lines = []
     try:
         fileno = out_temp.fileno()
-        obj = subprocess.Popen(cmd, stdout=fileno, stderr=fileno, shell=True)
+        obj = subprocess.Popen(cmd, stdout=fileno, stderr=fileno, shell=True, cwd=path)
         obj.wait()
         out_temp.seek(0)
         lines = out_temp.readlines()
@@ -72,7 +102,7 @@ def isexist(filepath):
 
 
 # 进度记录,基于json
-def progress_record(date=None, target=None, module=None, value=None, finished=False):
+def progress_record_old(date=None, target=None, module=None, value=None, finished=False):
     logfile = f"result/{date}/log.json"
     if os.path.exists(logfile) is False:
         shutil.copy("config/log_template.json", f"result/{date}/log.json")
@@ -86,6 +116,52 @@ def progress_record(date=None, target=None, module=None, value=None, finished=Fa
             return True
     elif finished is True:
         log_json[module] = True
+        with open(logfile, "w", encoding="utf-8") as f:
+            f.write(json.dumps(log_json))
+        return True
+
+
+# 进度记录,基于json
+def progress_record(date=None, target=None, module="finger", value=None, finished=False):
+    target_log = {"domain": False,
+                  "emailcollect": False,
+                  "survivaldetect": False,
+                  "finger": False,
+                  "portscan": False,
+                  "sensitiveinfo": {
+                      "scanned_targets": []
+                  },
+                  "vulscan": {
+                      "webattack": False,
+                      "hostattack": False
+                  }
+                  }
+    logfile = f"result/{date}/log.json"
+    if os.path.exists(logfile) is False:
+        shutil.copy("config/log_template.json", f"result/{date}/log.json")
+    with open(logfile, "r", encoding="utf-8") as f1:
+        log_json = json.loads(f1.read())
+    if finished is False:
+        # 读取log.json 如果是false则扫描，是true则跳过
+        if target not in dict(log_json["target_log"]).keys():
+            log_json["target_log"][target] = target_log
+            with open(logfile, "w", encoding="utf-8") as f:
+                f.write(json.dumps(log_json))
+            return False
+        else:
+            if log_json["target_log"][target][module] is False:
+                return False
+            # elif log_json["target_log"][target][module] is True:  # 即log_json["target_log"][target][module] 为true的情况
+            else:
+                return True
+    elif finished is True:
+        # 如果已经存在对应目标的target_log 字典,则直接修改即可，否则添加target_log 并将domain键值设为true
+        # if target not in dict(log_json["target_log"]).keys():
+        if target in dict(log_json["target_log"]).keys():
+            log_json["target_log"][target][module] = True
+        else:
+            target_log[module] = True
+            log_json["target_log"][target] = target_log
         with open(logfile, "w", encoding="utf-8") as f:
             f.write(json.dumps(log_json))
         return True
@@ -116,7 +192,7 @@ def manager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39"):
     不包括单个url的情况
     urlsfile 为子域名，不带http
     '''
-    logger.info('\n'+'<' * 18 + f'start {__file__}' + '>' * 18)
+    logger.info('\n' + '<' * 18 + f'start {__file__}' + '>' * 18)
     suffix = get_system()
     root = os.getcwd()
     pwd_and_file = os.path.abspath(__file__)
@@ -138,73 +214,6 @@ def manager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39"):
     #     urlsfile = "temp.txt"
     #     with open(urlsfile, "w", encoding="utf-8") as f:
     #         f.write(url)
-
-    # 生成带http的域名url 和ip文件 result/{date}/{domain}.subdomains_with_http.txt result/{date}/{domain}.subdomains_ips.txt
-    # @logger.catch #废弃了迁移到其他模块了
-    # def httpx(domain=domain, url=url, file=urlsfile):
-    #     '''
-    #     httpx 1.2.4
-    #     输入是子域名文件，可以带http可以不带，主要为了进行域名探活
-    #     httpx输出的文件夹名称不能用下划线
-    #     :return:
-    #     '''
-    #     logger.info('-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
-    #     # output_folder = f"result/{date}/{sys._getframe().f_code.co_name}log"  # result/{date}/httpxlog
-    #     output_folder = f'{finger_log_folder}/{sys._getframe().f_code.co_name}log'
-    #     if os.path.exists(output_folder) is False:
-    #         os.makedirs(output_folder)
-    #
-    #     if domain and file is None and url is None:
-    #         inputfile = f'result/{date}/{domain}.final.subdomains.txt'
-    #         output_filename_prefix = domain
-    #         # print(1,domain,file)
-    #     elif file and domain is None and url is None:
-    #         inputfile = file
-    #         # 如果从文件输入则结果以时间为文件名
-    #         output_filename_prefix = date
-    #         # domain = date
-    #         # print(2,domain,file)
-    #     elif url and domain is None and file is None:
-    #         # domain = date
-    #         inputfile = f"temp.{sys._getframe().f_code.co_name}.txt"
-    #         output_filename_prefix = date
-    #         # print(3,domain,file)
-    #         # subdomain_tuple = tldextract.extract(url)
-    #         # output_filename_prefix = '.'.join(part for part in subdomain_tuple if part)  # www.baidu.com 127_0_0_1
-    #         with open(inputfile, "w", encoding="utf-8") as f:
-    #             f.write(url)
-    #     else:
-    #         logger.error(f'[-] Please check url or urlfile or domain')
-    #         exit(1)
-    #
-    #     subdomains_with_http = []
-    #     subdomains_ips_tmp = []
-    #     subdomains_ips = []
-    #     cmdstr = f'{pwd}/httpx/httpx{suffix} -l {inputfile} -ip -silent -no-color -csv -o {output_folder}/{output_filename_prefix}.{sys._getframe().f_code.co_name}.csv'
-    #     logger.info(f"[+] command:{cmdstr}")
-    #     os.system(cmdstr)
-    #     logger.info(f"[+] Generate file: {output_folder}/{output_filename_prefix}.{sys._getframe().f_code.co_name}.csv")
-    #     # 生成带http的url
-    #     with open(f"{output_folder}/{output_filename_prefix}.{sys._getframe().f_code.co_name}.csv", 'r',
-    #               errors='ignore') as f:
-    #         reader = csv.reader(f)
-    #         head = next(reader)
-    #         for row in reader:
-    #             subdomains_with_http.append(row[8].strip())  # url
-    #             subdomains_ips_tmp.append(row[18].strip())  # host
-    #         subdomains_ips = getips(list(set(subdomains_ips_tmp)))
-    #     # 生成带http的url txt
-    #     with open(f"result/{date}/{output_filename_prefix}.subdomains.with.http.txt", "w", encoding="utf-8") as f2:
-    #         f2.writelines("\n".join(subdomains_with_http))
-    #     logger.info(f"[+] Generate file: result/{date}/{output_filename_prefix}.subdomains.with.http.txt")
-    #     # 生成子域名对应的ip txt
-    #     with open(f"result/{date}/{output_filename_prefix}.subdomains.ips.txt", "w", encoding="utf-8") as f3:
-    #         f3.writelines("\n".join(subdomains_ips))
-    #     logger.info(f"[+] Generate file: result/{date}/{output_filename_prefix}.subdomains.ips.txt")
-    #     # 最后移除临时文件
-    #     if url and domain is None and file is None:
-    #         if os.path.exists(inputfile):
-    #             os.remove(inputfile)
 
     # 进行指纹识别 result/{date}/ehole_log/{domain}.ehole.xlsx
     @logger.catch
@@ -251,12 +260,13 @@ def manager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39"):
     def webanalyze(url=url, file=urlsfile):
         '''
         webanalyze 0.3.7
-        不输出文件，只在console 按所需格式打印
+        不输出文件，只在console 按所需格式打印 -apps参数只能使用相对路径，否则会输出找不到json的问题，所以要用子线程重定向
         # webanalyze.exe -apps technologies.json -host http://139.198.21.26/phpmyadmin/  -output csv -crawl 3
         # webanalyze.exe -crawl 3 -host testphp.vulnweb.com -output json >> 22.txt
         :return:
         '''
-        logger.info('<' * 10 + f'start {sys._getframe().f_code.co_name}' + '>' * 10)
+        tool_name = str(sys._getframe().f_code.co_name)
+        logger.info('<' * 10 + f'start {tool_name}' + '>' * 10)
         # 创建该工具的结果文件夹
         # output_folder = f"result/{date}/{sys._getframe().f_code.co_name}_log"
         output_folder = f'{finger_log_folder}/{sys._getframe().f_code.co_name}log'
@@ -281,33 +291,33 @@ def manager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39"):
             logger.error(f'[-] 请检查输入的文件 or domain 是否正确')
             return
         # o {output_folder}/{output_filename}.xlsx -output csv json
-        cmdstr = f'{pwd}/webanalyze/webanalyze{suffix} -apps {pwd}/webanalyze/technologies.json -hosts {inputfile}  -crawl 5 -output csv'  # > {output_folder}/{output_filename}.csv'
+        # cmdstr = f'webanalyze{suffix} -apps technologies.json -hosts {inputfile}  -crawl 5 -output csv'  # > {output_folder}/{output_filename}.csv'
+        cmdstr = f'webanalyze{suffix} -apps technologies.json -hosts {root}/{inputfile}  -crawl 5 -output csv > {root}/{output_folder}/{output_filename}.csv'  # > {output_folder}/{output_filename}.csv'
         # cmdstr = f'{pwd}/webanalyze/webanalyze{suffix} -apps technologies.json -hosts {file}  -output csv -crawl 5'
         logger.info(f"[+] command:{cmdstr}")
         # os.system(cmdstr)
-        cmd = cmdstr.split(' ')
+        # cmd = cmdstr.split(' ')
         # cwd=tool_path,
         # rsp = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         # output = str(rsp.stdout, encoding='utf-8')
         # print(output)
-
-        result1 = __subprocess2(cmd)
-        finger_list = []
-
-        result_str = ''
-        # 对打印结果进行处理，将结果拼成字符串，然后分割存入csv
-        for i in range(7, len(result1)):
-            result_str += result1[i].decode().strip()
-        tmp = re.split('http[s]?://', result_str, flags=re.I)
-        for i in tmp[1:]:
-            tmp2 = re.split('\(.*?s\):', i, 1, re.I)
-            # tmp2 = [domain].extend(tmp2)
-            finger_list.append(tmp2)
-            print(tmp2)
-        # 分割好的写入csv文件
-        with open(f'{output_folder}/{output_filename}.csv', 'w', encoding='utf-8') as f:
-            writer = csv.writer(f)
-            writer.writerows(finger_list)
+        __subprocess1(cmdstr, timeout=None, path=f"{pwd}/{tool_name}")
+        # result1 = __subprocess2(cmdstr, path=f"{pwd}/{tool_name}")
+        # finger_list = []
+        # result_str = ''
+        # # 对打印结果进行处理，将结果拼成字符串，然后分割存入csv
+        # for i in range(7, len(result1)):
+        #     result_str += result1[i].decode().strip()
+        # tmp = re.split('http[s]?://', result_str, flags=re.I)
+        # for i in tmp[1:]:
+        #     tmp2 = re.split('\(.*?s\):', i, 1, re.I)
+        #     # tmp2 = [domain].extend(tmp2)
+        #     finger_list.append(tmp2)
+        #     print(tmp2)
+        # # 分割好的写入csv文件
+        # with open(f'{output_folder}/{output_filename}.csv', 'w', encoding='utf-8') as f:
+        #     writer = csv.writer(f)
+        #     writer.writerows(finger_list)
         logger.info(f"[+] Generate file: {output_folder}/{output_filename}.csv")
 
         # 最后移除临时文件
@@ -316,11 +326,11 @@ def manager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39"):
                 os.remove(inputfile)
 
     def run():
-        if progress_record(date=date, module="finger", finished=False) is False:
-            # httpx(domain=domain, url=url, file=urlsfile)
+        target = domain if domain else hashlib.md5(bytes(date, encoding='utf-8')).hexdigest()
+        if progress_record(date=date, target=target, module="finger", finished=False) is False:
             ehole(url=url, file=urlsfile)
             webanalyze(url=url, file=urlsfile)
-            progress_record(date=date, module="finger", finished=True)
+            progress_record(date=date, target=target, module="finger", finished=True)
 
     run()
 

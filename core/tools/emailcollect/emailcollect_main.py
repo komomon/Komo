@@ -41,8 +41,8 @@ def create_logfile():
     logger.add(sink='log/error.log', level='ERROR', encoding='utf-8')
 
 
-# 进度记录,基于json
-def progress_record(date=None, target=None, module=None, value=None, finished=False):
+# 进度记录,基于json 旧版
+def progress_record_old(date=None, target=None, module=None, value=None, finished=False):
     logfile = f"result/{date}/log.json"
     if os.path.exists(logfile) is False:
         shutil.copy("config/log_template.json", f"result/{date}/log.json")
@@ -61,6 +61,53 @@ def progress_record(date=None, target=None, module=None, value=None, finished=Fa
             with open(logfile, "w", encoding="utf-8") as f:
                 f.write(json.dumps(log_json))
             return True
+
+
+# 进度记录,基于json
+def progress_record(date=None, target=None, module="emailcollect", value=None, finished=False):
+    target_log = {"domain": False,
+                  "emailcollect": False,
+                  "survivaldetect": False,
+                  "finger": False,
+                  "portscan": False,
+                  "sensitiveinfo": {
+                      "scanned_targets": []
+                  },
+                  "vulscan": {
+                      "webattack": False,
+                      "hostattack": False
+                  }
+                  }
+    logfile = f"result/{date}/log.json"
+    if os.path.exists(logfile) is False:
+        shutil.copy("config/log_template.json", f"result/{date}/log.json")
+        # return False
+    with open(logfile, "r", encoding="utf-8") as f1:
+        log_json = json.loads(f1.read())
+    if finished is False:
+        # 读取log.json 如果是false则扫描，是true则跳过
+        if target not in dict(log_json["target_log"]).keys():
+            log_json["target_log"][target] = target_log
+            with open(logfile, "w", encoding="utf-8") as f:
+                f.write(json.dumps(log_json))
+            return False
+        else:
+            if log_json["target_log"][target][module] is False:
+                return False
+            # elif log_json["target_log"][target][module] is True:  # 即log_json["target_log"][target][module] 为true的情况
+            else:
+                return True
+    elif finished is True:
+        # 如果已经存在对应目标的target_log 字典,则直接修改即可，否则添加target_log 并将domain键值设为true
+        # if target not in dict(log_json["target_log"]).keys():
+        if target in dict(log_json["target_log"]).keys():
+            log_json["target_log"][target][module] = True
+        else:
+            target_log[module] = True
+            log_json["target_log"][target] = target_log
+        with open(logfile, "w", encoding="utf-8") as f:
+            f.write(json.dumps(log_json))
+        return True
 
 
 # 启用子进程执行外部shell命令
@@ -149,9 +196,9 @@ class manager():
             logger.error(f'[-] {tool_name} not found {output_filename_tmp} ')
 
     def run(self):
-        if progress_record(date=self.date, module="emailcollect", finished=False) is False:
+        if progress_record(date=self.date, target=self.domain, module="emailcollect", finished=False) is False:
             self.emailall(domain=self.domain)
-            progress_record(date=self.date, module="emailcollect", finished=True)
+            progress_record(date=self.date, target=self.domain, module="emailcollect", finished=True)
         logger.info('-' * 10 + f'finished {sys._getframe().f_code.co_name}' + '-' * 10)
 
 

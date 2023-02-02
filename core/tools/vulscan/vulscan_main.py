@@ -1,4 +1,5 @@
 import csv
+import hashlib
 import inspect
 import json
 import re
@@ -40,7 +41,7 @@ def get_system():
 
 
 # 进度记录,基于json
-def progress_record(date=None, target=None, module=None, submodule=None, value=None, finished=False):
+def progress_record_old(date=None, target=None, module=None, submodule=None, value=None, finished=False):
     logfile = f"result/{date}/log.json"
     if os.path.exists(logfile) is False:
         shutil.copy("config/log_template.json", f"result/{date}/log.json")
@@ -54,6 +55,48 @@ def progress_record(date=None, target=None, module=None, submodule=None, value=N
             return True
     elif finished is True:
         log_json[module][submodule] = True
+        with open(logfile, "w", encoding="utf-8") as f:
+            f.write(json.dumps(log_json))
+        return True
+
+
+# 进度记录,基于json
+def progress_record(date=None, target=None, module="vulscan",submodule=None, value=None, finished=False):
+    target_log = {"domain": False,
+                  "emailcollect": False,
+                  "survivaldetect": False,
+                  "finger": False,
+                  "portscan": False,
+                  "sensitiveinfo": {
+                      "scanned_targets": []
+                  },
+                  "vulscan": {
+                      "webattack": False,
+                      "hostattack": False
+                  }
+                  }
+    logfile = f"result/{date}/log.json"
+    if os.path.exists(logfile) is False:
+        shutil.copy("config/log_template.json", f"result/{date}/log.json")
+        # return False
+    with open(logfile, "r", encoding="utf-8") as f1:
+        log_json = json.loads(f1.read())
+    if finished is False:
+        # 读取log.json 如果是false则扫描，是true则跳过
+        if target not in dict(log_json["target_log"]).keys():
+            log_json["target_log"][target] = target_log
+            with open(logfile, "w", encoding="utf-8") as f:
+                f.write(json.dumps(log_json))
+            return False
+        else:
+            if log_json["target_log"][target][module][submodule] is False:
+                return False
+            # elif log_json["target_log"][target][module][submodule] is True:  # 即log_json[module] 为true的情况
+            else:
+                return True
+    elif finished is True:
+        # 如果已经存在对应目标的target_log 字典,则直接修改即可，否则添加target_log 并将domain键值设为true
+        log_json["target_log"][target][module][submodule] = True
         with open(logfile, "w", encoding="utf-8") as f:
             f.write(json.dumps(log_json))
         return True
@@ -477,7 +520,8 @@ def webmanager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39")
         os.system(cmdstr)
 
     def run():
-        if progress_record(date=date, module="vulscan", submodule="webattack", finished=False) is False:
+        target = domain if domain else hashlib.md5(bytes(date, encoding='utf-8')).hexdigest()
+        if progress_record(date=date, target=target, module="vulscan", submodule="webattack", finished=False) is False:
             # {domain}.subdomain_with_http.txt
             nuclei(urlsfile=urlsfile)
             afrog(urlsfile=urlsfile)
@@ -485,7 +529,7 @@ def webmanager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39")
             # to_xray()
             # 扫描敏感目录和弱口令爆破
             vscan(urlsfile=urlsfile)
-            progress_record(date=date, module="vulscan", submodule="webattack", finished=True)
+            progress_record(date=date, target=target, module="vulscan", submodule="webattack", finished=True)
             logger.info('-' * 10 + f'finished {sys._getframe().f_code.co_name}' + '-' * 10)
 
     run()
@@ -611,12 +655,13 @@ def hostmanager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
         os.system(cmdstr)
 
     def run():
-        if progress_record(date=date, module="vulscan", submodule="hostattack", finished=False) is False:
+        target = domain if domain else hashlib.md5(bytes(date, encoding='utf-8')).hexdigest()
+        if progress_record(date=date,target=target, module="vulscan", submodule="hostattack", finished=False) is False:
             goon(ip=ip, ipfile=ipfile)
             # 暂未使用，主要是会下载chromewin每次执行
             SweetBabyScan(ip=ip, ipfile=ipfile)
             vscan(ip=ip, ipfile=ipfile)
-            progress_record(date=date, module="vulscan", submodule="hostattack", finished=True)
+            progress_record(date=date, target=target, module="vulscan", submodule="hostattack", finished=True)
             logger.info('-' * 10 + f'finished {sys._getframe().f_code.co_name}' + '-' * 10)
 
     run()

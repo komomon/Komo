@@ -1,5 +1,6 @@
 import base64
 import csv
+import hashlib
 import inspect
 import json
 import os
@@ -69,7 +70,7 @@ def getconfig_():
 
 
 # 进度记录,基于json
-def progress_record(date=None, target=None, module=None, submodule=None, value=None, finished=False):
+def progress_record_old(date=None, target=None, module=None, submodule=None, value=None, finished=False):
     logfile = f"result/{date}/log.json"
     if os.path.exists(logfile) is False:
         shutil.copy("config/log_template.json", f"result/{date}/log.json")
@@ -85,6 +86,48 @@ def progress_record(date=None, target=None, module=None, submodule=None, value=N
         # finished flag设置则证明扫描完成
     elif finished is True:
         log_json[module]["scanned_targets"].append(target)
+        with open(logfile, "w", encoding="utf-8") as f:
+            f.write(json.dumps(log_json))
+        return True
+
+
+# 进度记录,基于json
+def progress_record(date=None, target=None, subtarget=None, module="sensitiveinfo", value=None, finished=False):
+    target_log = {"domain": False,
+                  "emailcollect": False,
+                  "survivaldetect": False,
+                  "finger": False,
+                  "portscan": False,
+                  "sensitiveinfo": {
+                      "scanned_targets": []
+                  },
+                  "vulscan": {
+                      "webattack": False,
+                      "hostattack": False
+                  }
+                  }
+    logfile = f"result/{date}/log.json"
+    if os.path.exists(logfile) is False:
+        shutil.copy("config/log_template.json", f"result/{date}/log.json")
+        # return False
+    with open(logfile, "r", encoding="utf-8") as f1:
+        log_json = json.loads(f1.read())
+    if finished is False:
+        # 读取log.json 先判断target_logdict是否存在，不存在则加进去
+        if target not in dict(log_json["target_log"]).keys():
+            log_json["target_log"][target] = target_log
+            with open(logfile, "w", encoding="utf-8") as f:
+                f.write(json.dumps(log_json))
+            return False  # 即未扫描 true为扫描了
+        else:
+            # 检测是否扫瞄过
+            if subtarget in log_json["target_log"][target][module]["scanned_targets"]:
+                return True
+            else:
+                return False
+    elif finished is True:
+        # 如果已经存在对应目标的target_log 字典,则直接修改即可，否则添加target_log 并将domain键值设为true
+        log_json["target_log"][target][module]["scanned_targets"].append(subtarget)
         with open(logfile, "w", encoding="utf-8") as f:
             f.write(json.dumps(log_json))
         return True
@@ -359,14 +402,16 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
     elif urlsfile and domain is None and url is None:
         domain = date
         urlsfile = urlsfile
-        # output_filename_prefix = domain
+        # output_filename_prefix = date
     elif url and domain is None and urlsfile is None:
         domain = '.'.join(part for part in tldextract.extract(url) if part)
         urlsfile = f"temp.sensitiveinfo_main.txt"
-        # output_filename_prefix = domain
+        # output_filename_prefix = '.'.join(part for part in tldextract.extract(url) if part)
         with open(urlsfile, "w", encoding="utf-8") as f:
             f.write(url)
-
+    else:
+        logger.error(f"[-] domain:{domain},urlsfile:{urlsfile},url:{url} 只能一个不为None")
+        exit()
     ostype = platform.system().lower()
     suffix = ".exe" if "windows" == ostype else ""
     root = os.getcwd()
@@ -448,12 +493,12 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
                 # 新方法，和下面的工具统一，新增结果存储到urls_data_tmp_to_csv，然后再存入csv
                 for req in req_list:
                     if req['url'] not in links_set:
-                        del req["headers"]["Spider-Name"]
+                        # del req["headers"]["Spider-Name"]
                         urls_data_tmp_to_csv.append(
                             [tool_name, req['method'], req['url'], json.dumps(req['headers']), req['data']])
                         links_set.add(req['url'])
                     elif req['method'] != "GET":
-                        del req["headers"]["Spider-Name"]
+                        # del req["headers"]["Spider-Name"]
                         urls_data_tmp_to_csv.append(
                             [tool_name, req['method'], req['url'], json.dumps(req['headers']), req['data']])
                 to_csv(f"result/{date}/{domain}.links.csv", urls_data_tmp_to_csv, mmode='a')
@@ -465,7 +510,9 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
                               encoding="utf-8") as f2:
                         for i in sub_domain_list:
                             f2.write(i + "\n")
-                logger.info(f"[+] {tool_name} finished: {target}")
+        else:
+            logger.error(f'{tool_name} not found {output_folder}/{output_filename_prefix}.{tool_name}.json')
+        logger.info(f"[+] {tool_name} finished: {target}")
 
     # 爬取url的link  result/{date}/sensitiveinfo_log/{domain}.{tool_name}.json
     @logger.catch
@@ -526,7 +573,8 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
                       encoding="utf-8", errors='ignore') as f2:
                 # result = json.loads(f2.read())
                 for i in f2.readlines()[1:-1]:
-                    row = simplejson.loads(simplejson.dumps(i.rstrip()))
+                    # row = simplejson.loads(simplejson.dumps(i.rstrip().rstrip(',')))
+                    row = simplejson.loads(i.rstrip().rstrip(','))
                     if row['Method'] == "POST":
                         if 'b64_body' in row.keys():
                             data = [tool_name, row["Method"], row["URL"], json.dumps(row["Header"]),
@@ -564,10 +612,10 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
                     #     # data = row["Method"] + "," + row["URL"] + "," + str(row["Header"]) + "," + base64.b64decode(row["b64_body"])
                     #     urls_data_tmp_to_csv.append(data)
                     #     links_set.add(row["URL"])
-
-        # 存储rad 爬取到的url method headers body
-        # with open(f"{root}/result/{date}/{domain}.links.csv", "a", encoding="utf-8") as f1:
-        to_csv(f"result/{date}/{domain}.links.csv", urls_data_tmp_to_csv, mmode='a')
+            # 存储rad 爬取到的url method headers body
+            to_csv(f"result/{date}/{domain}.links.csv", urls_data_tmp_to_csv, mmode='a')
+        else:
+            logger.error(f'{tool_name} not found {output_folder}/{output_filename_prefix}.{tool_name}.json')
         logger.info(f"[+] {tool_name} finished: {target}")
 
     # URLFinder爬取
@@ -578,6 +626,8 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         urlfinder 的输出结果是domain:port.csv ip:port.csv 如果有port的话
         可以单个url,爬取网站的url,保存完整请求到json文件，并存储一份"method url"的txt
         可以多个url，一个url一个csv 格式子域名.csv
+        结果文件 ：{output_filename}/{output_filename}.json 域名如果有冒号会自动变成中文冒号
+        这个工具可能存在内存越界报错的情况 20230202
         :return: jieguowenjian:new.xxx.com.cn：443.csv 中文冒号
         '''
         tool_name = str(sys._getframe().f_code.co_name)
@@ -592,7 +642,7 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         urls_set_tmp = set()
 
         # 结果文件名 {subdomain}.csv {sensitiveinfo_log_folder}/URLFinder_log/{domain}.{tool_name}.csv
-        cmdstr = f'{pwd}/URLFinder/URLFinder{suffix} -u {target} -s all -m 2 -o {output_folder}'
+        cmdstr = f'{pwd}/URLFinder/URLFinder{suffix} -u {target} -s all -t 50 -m 2 -o {output_folder}'
         logger.info(f"[+] command:{cmdstr}")
         # __subprocess1(cmdstr, timeout=int(all_config['tools']['sensitiveinfo'][tool_name]['runtime']),
         #               path=f"{pwd}/{tool_name}")
@@ -612,34 +662,57 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         # 对结果处理，不在links_set的就存储到link.csv中
         groups_tmp = urlsplit(target)
         output_filename = groups_tmp[1].replace(':', '：')
-        if os.path.exists(f'{output_folder}/{output_filename}.csv'):
-            with open(f'{output_folder}/{output_filename}.csv', 'r', encoding="utf-8", errors='ignore') as f:
-                reader = csv.reader(f)
-                for row in reader:
-                    if len(row) != 0:
-                        if f"URL to {groups_tmp[1].split(':')[0]}" in row[0]:
-                            # num = reader.line_num
-                            break
-                for row in reader:
-                    if len(row) != 0:
-                        if row[1] == "200" and row[0] not in links_set:
-                            # data = f'GET,{row[0]},,'
-                            data = [tool_name, "GET", row[0], "", ""]
-                            urls_data_tmp_to_csv.append(data)
-                            urls_set_tmp.add(row[0])
-                            links_set.add(row[0])  # links_set 增加新的
-                    else:
-                        break  # 在读到空行则说明结果中的子域部分解释，终止
+        # 新版通过json处理
+        if os.path.exists(f'{output_folder}/{output_filename}/{output_filename}.json'):
+            with open(f'{output_folder}/{output_filename}/{output_filename}.json', 'r', encoding="utf-8",
+                      errors='ignore') as f:
+                result = json.loads(f.read())
+                # {"fuzz": [],"info": {}, "js": null,"jsOther": [],"url": [], "urlOther": []}
+                # "url": [{
+                #     "Url": "http://testphp.vulnweb.com:80/Templates/main_dynamic_template.dwt.php",
+                #     "Status": "200",
+                #     "Size": "4697",
+                #     "Title": "Document titleg",
+                #     "Source": "http://testphp.vulnweb.com:80"
+                # }...
+                for i in result["url"]:
+                    if i["Status"] != "404" and i["Url"] not in links_set:
+                        # data = f'GET,{row[0]},,'
+                        data = [tool_name, "GET", i["Url"], "", ""]
+                        # data = [tool_name, "GET", i["Url"], i["Title"], "", ""]
+                        urls_data_tmp_to_csv.append(data)
+                        urls_set_tmp.add(i["Url"])
+                        links_set.add(i["Url"])  # links_set 增加新的
+            # 差集发送给xray,攻击模式端口没,则只收集跳过发送给xray的攻击扫描
+            to_xray(urls_set_tmp, attackflag=attackflag, fromurl=target)
+
+            # 存储rad 爬取到的url method headers body
+            # with open(f"{root}/result/{date}/{domain}.links.csv", "a", encoding="utf-8") as f1:
+            to_csv(f"result/{date}/{domain}.links.csv", urls_data_tmp_to_csv, mmode='a')
         else:
-            logger.error(f'URLFinder not found {output_folder}/{output_filename}.csv')
-
-        # 差集发送给xray,攻击模式端口没,则只收集跳过发送给xray的攻击扫描
-        to_xray(urls_set_tmp, attackflag=attackflag, fromurl=target)
-
-        # 存储rad 爬取到的url method headers body
-        # with open(f"{root}/result/{date}/{domain}.links.csv", "a", encoding="utf-8") as f1:
-        to_csv(f"result/{date}/{domain}.links.csv", urls_data_tmp_to_csv, mmode='a')
-
+            logger.error(f'{tool_name} not found {output_folder}/{output_filename}/{output_filename}.json')
+        logger.info(f"[+] {tool_name} finished: {target}")
+        # 老版通过csv处理的工具
+        # if os.path.exists(f'{output_folder}/{output_filename}/{output_filename}.csv'):
+        #     with open(f'{output_folder}/{output_filename}/{output_filename}.csv', 'r', encoding="utf-8", errors='ignore') as f:
+        #         reader = csv.reader(f)
+        #         for row in reader:
+        #             if len(row) != 0:
+        #                 if f"URL to {groups_tmp[1].split(':')[0]}" in row[0]:
+        #                     # num = reader.line_num
+        #                     break
+        #         for row in reader:
+        #             if len(row) != 0:
+        #                 if row[1] == "200" and row[0] not in links_set:
+        #                     # data = f'GET,{row[0]},,'
+        #                     data = [tool_name, "GET", row[0], "", ""]
+        #                     urls_data_tmp_to_csv.append(data)
+        #                     urls_set_tmp.add(row[0])
+        #                     links_set.add(row[0])  # links_set 增加新的
+        #             else:
+        #                 break  # 在读到空行则说明结果中的子域部分解释，终止
+        # else:
+        #     logger.error(f'URLFinder not found {output_folder}/{output_filename}/{output_filename}.csv')
 
     @logger.catch
     def gospider(data1, attackflag=attackflag):
@@ -695,16 +768,16 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
                         urls_data_tmp_to_csv.append(data)
                         urls_set_tmp.add(url)
                         links_set.add(url)  # links_set 增加新的
+
+            # 差集发送给xray,攻击模式端口没,则只收集跳过发送给xray的攻击扫描
+            to_xray(urls_set_tmp, attackflag=attackflag, fromurl=target)
+
+            # 存储gospider 爬取到的url method headers body
+            # with open(f"{root}/result/{date}/{domain}.links.csv", "a", encoding="utf-8") as f1:
+            to_csv(f"result/{date}/{domain}.links.csv", urls_data_tmp_to_csv, mmode='a')
         else:
             logger.error(f'[-] gospider not found {output_folder}/{output_filename}')
-
-        # 差集发送给xray,攻击模式端口没,则只收集跳过发送给xray的攻击扫描
-        to_xray(urls_set_tmp, attackflag=attackflag, fromurl=target)
-
-        # 存储gospider 爬取到的url method headers body
-        # with open(f"{root}/result/{date}/{domain}.links.csv", "a", encoding="utf-8") as f1:
-        to_csv(f"result/{date}/{domain}.links.csv", urls_data_tmp_to_csv, mmode='a')
-
+        logger.info(f"[+] {tool_name} finished: {target}")
 
     @logger.catch
     def hakrawler(data1, attackflag=attackflag):
@@ -756,7 +829,7 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         # 存储gospider 爬取到的url method headers body
         # with open(f"{root}/result/{date}/{domain}.links.csv", "a", encoding="utf-8") as f1:
         to_csv(f"result/{date}/{domain}.links.csv", urls_data_tmp_to_csv, mmode='a')
-
+        logger.info(f"[+] {tool_name} finished: {target}")
 
     @logger.catch
     def gau(data1, attackflag=attackflag):
@@ -765,6 +838,7 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         gau.exe --subs --retries 2  --timeout 65 --fc 404,302 testphp.vulnweb.com --verbose --o  2.txt
         :param data1: 带不带http,都行
         :param attackflag:
+        输出文件文件名不能带有冒号，否则会输出文件内容失败
         :return:
         '''
         tool_name = str(sys._getframe().f_code.co_name)
@@ -774,14 +848,15 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         output_folder = f'{sensitiveinfo_log_folder}/{tool_name}_log'
         makedir0(output_folder)
 
-        target = urlsplit(data1)[1]
-        # subdomain_tuple = tldextract.extract(target)
-        # subdomain = '.'.join(part for part in subdomain_tuple if part)  # www_baidu_com
+        # target = urlsplit(data1)[1]
+        target = data1
+        subdomain_tuple = tldextract.extract(data1)
+        subdomain = '.'.join(part for part in subdomain_tuple if part)  # www_baidu_com
 
         urls_data_tmp_to_csv = []
         urls_set_tmp = set()
         # 结果文件名 xx_xx_xx 结果是指定文件夹
-        cmdstr = f'{pwd}/gau/gau{suffix} --subs --retries 2 --fc 404,302 --verbose --o {output_folder}/{target}.{tool_name}.txt {target}'
+        cmdstr = f'{pwd}/gau/gau{suffix} --subs --retries 2 --fc 404,302 --verbose --o {output_folder}/{subdomain}.{tool_name}.txt {target}'
         logger.info(f"[+] command:{cmdstr}")
         # __subprocess1(cmdstr, timeout=None, path=f"{pwd}/{tool_name}")
         runtime = all_config['tools']['sensitiveinfo'][tool_name]['runtime']
@@ -796,8 +871,8 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
                 # 跳过该工具执行
                 return False
         logger.info(f"[+] {tool_name} finished: {target}")
-        if os.path.exists(f'{output_folder}/{target}.txt'):
-            with open(f'{output_folder}/{target}.txt', 'r', encoding='utf-8') as f:
+        if os.path.exists(f'{output_folder}/{subdomain}.{tool_name}.txt'):
+            with open(f'{output_folder}/{subdomain}.{tool_name}.txt', 'r', encoding='utf-8') as f:
                 for line in f.readlines():
                     line = line.strip()
                     if line not in links_set:
@@ -805,13 +880,15 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
                         urls_data_tmp_to_csv.append(data)
                         urls_set_tmp.add(line)
                         links_set.add(line)  # links_set 增加新的
+            # 差集发送给xray,攻击模式端口没,则只收集跳过发送给xray的攻击扫描
+            to_xray(urls_set_tmp, attackflag=attackflag, fromurl=target)
 
-        # 差集发送给xray,攻击模式端口没,则只收集跳过发送给xray的攻击扫描
-        to_xray(urls_set_tmp, attackflag=attackflag, fromurl=target)
-
-        # 存储gospider 爬取到的url method headers body
-        # with open(f"{root}/result/{date}/{domain}.links.csv", "a", encoding="utf-8") as f1:
-        to_csv(f"result/{date}/{domain}.links.csv", urls_data_tmp_to_csv, mmode='a')
+            # 存储gospider 爬取到的url method headers body
+            # with open(f"{root}/result/{date}/{domain}.links.csv", "a", encoding="utf-8") as f1:
+            to_csv(f"result/{date}/{domain}.links.csv", urls_data_tmp_to_csv, mmode='a')
+        else:
+            logger.error(f'{tool_name} not found {output_folder}/{subdomain}.{tool_name}.txt')
+        logger.info(f"[+] {tool_name} finished: {target}")
 
     # 暂时先不用，还未完成，带主动性为 dirsearch 200的结果给xray
     @logger.catch
@@ -847,7 +924,6 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         with open(f"result/{date}/{domain}.links.txt", "a", encoding="utf-8") as f1:
             for i in urls_tmp:
                 f1.write(i + "\n")
-
 
     # 暂时先不用，没有代理池，dork文件如何处理也没写完，通过google查询某域名的敏感文件
     @logger.catch
@@ -907,48 +983,19 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
             for i in urls_data_tmp:
                 f1.write(i + "\n")
 
-    @logger.catch  # 废弃了迁移到其他模块了
-    def emailall(data1):
-        '''
-        emailall 20220908  exe路径
-        :param data1:
-        :return:
-        '''
-        tool_name = str(sys._getframe().f_code.co_name)
-        logger.info('-' * 10 + f'start {tool_name}' + '-' * 10)
-        # 创建多个子域名结果输出文件夹
-        output_folder = f'{sensitiveinfo_log_folder}/{tool_name}_log'
-        makedir0(output_folder)
-
-        subdomain_tuple = tldextract.extract(data1)
-        # subdomain = '_'.join(part for part in subdomain_tuple if part)  # www_baidu_com
-        output_filename_prefix = subdomain_tuple.domain + '.' + subdomain_tuple.suffix
-        cmdstr = f'python3 {pwd}/emailall/emailall.py --domain {data1} run'
-        logger.info(f"[+] command:{cmdstr}")
-        # os.system(cmdstr)
-        __subprocess1(cmdstr, timeout=None, path=f"{pwd}/{tool_name}")
-
-        # 移动结果文件 \sensitiveinfo\emailall\result\vulweb_com\vulweb.com_All.json
-        output_filename_tmp = f"{pwd}/{tool_name}/result/{output_filename_prefix.replace('.', '_')}/{output_filename_prefix}_All.json"
-        if os.path.exists(output_filename_tmp):
-            try:
-                shutil.copy(output_filename_tmp, output_folder)
-            except Exception as e:
-                logger.error(traceback.format_exc())
-        else:
-            logger.error(f'[-] {tool_name} not found {output_filename_tmp} ')
-
     def run():
         # if domain and url is None and urlsfile is None:
         # if len(all_config["domain"]["scanned_targets"]):
         # if isdomain:
         #     emailall(domain)
         # urlsfile = f"result/{date}/{domain}.subdomains.with.http.txt"
+        target = domain if domain else hashlib.md5(bytes(date, encoding='utf-8')).hexdigest()
         with open(urlsfile, "r", encoding="utf-8") as f:
             for url in f.readlines():
                 url = url.strip()
                 print(url)
-                if progress_record(date=date, target=url, module="sensitiveinfo", finished=False) is False:
+                if progress_record(date=date, target=target, subtarget=url, module="sensitiveinfo",
+                                   finished=False) is False:
                     crawlergo(url, attackflag=attackflag)
                     rad(url, attackflag=attackflag)
                     hakrawler(url, attackflag=attackflag)
@@ -958,9 +1005,8 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
                     # urlcollector('未完成')
                     links_set.clear()
                     # dirsearch(url.strip())
-                    progress_record(date=date, target=url, module="sensitiveinfo", finished=True)
+                    progress_record(date=date, target=target, subtarget=url, module="sensitiveinfo", finished=True)
         logger.info('-' * 10 + f'finished {sys._getframe().f_code.co_name}' + '-' * 10)
-
 
     run()
 

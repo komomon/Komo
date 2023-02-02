@@ -20,16 +20,17 @@ class CustomDomainTools(Module):
     def do_brute(self):
         #self.subdomains = ['www.baidu.com','abcdef.baidu.com']
         subdomain_tmp = []
-        if os.path.exists("result/temp/"+ self.domain+'.many.tools.subdomain.txt'):
+        other_tools_scan_result_file = "../../../../result/temp/" + self.domain+'.many.tools.subdomain.txt'
+        if os.path.exists(other_tools_scan_result_file):
             # print(cunzai)
-            with open("result/temp/"+ self.domain+'.many.tools.subdomain.txt','r',encoding='utf-8') as f:
+            with open(other_tools_scan_result_file,'r',encoding='utf-8') as f:
                 for line in f.readlines():
                     if line.strip() !="":
                         subdomain_tmp.append(line.strip())
             self.subdomains.update(set(subdomain_tmp))
             # print(self.subdomains)
         else:
-            print("result/temp/"+ self.domain+'.many.tools.subdomain.txt not exist!!!')
+            print(other_tools_scan_result_file,' not exist!!!')
         # fd = open("result/temp/"+ self.domain+'.amass.json')
         # fd.close()
         # 移除临时文件

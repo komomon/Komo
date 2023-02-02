@@ -30,6 +30,17 @@ download:
         - /
 #        - core/tools/domain/amass/
 #        - amass/
+    ctfr:
+      toolname: ctfr
+      whetherdownload: True
+      link: https://github.com/komomon/ctfr/releases/download/0.1/ctfr.zip
+      downloadfile: ctfr.zip
+      source_name: ctfr.py
+      final_name: ctfr.py
+      tool_main_filename: ctfr.py
+      topath:
+        - core/tools/domain/ctfr/
+        - ctfr/
     ksubdomain:
       toolname: ksubdomain
       whetherdownload: True
@@ -125,12 +136,12 @@ download:
   finger:
     ehole:
       toolname: ehole
-      whetherdownload: False
-      link:
-      downloadfile:
-      source_name:
-      final_name:
-      tool_main_filename:
+      whetherdownload: True
+      link: https://github.com/komomon/EHole/releases/download/3.0/ehole.exe
+      downloadfile: ehole.exe
+      source_name: ehole.exe
+      final_name: ehole.exe
+      tool_main_filename: ehole.exe
       topath:
         - core/tools/finger/Ehole/
         - Ehole/

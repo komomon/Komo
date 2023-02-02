@@ -92,7 +92,7 @@ def progress_init(date=None, targets: list = []):
         logger.info(f'[+] Create logjson: {logfile}')
 
 
-# 更新过程记录
+# 更新过程记录 暂未用
 def progress_control(module: str = None, target: str = None, finished: bool = False, date: str = None):
     logfile = f'result/{date}/{date}_log.json'
     if os.path.exists(logfile) is False:
@@ -118,24 +118,48 @@ def progress_control(module: str = None, target: str = None, finished: bool = Fa
     return log_json['scanning_target']
 
 
-
 # 进度记录,基于json
-def progress_record(date=None,target=None,module=None,value=None,finished=False):
+def progress_record(date=None, target=None, module="domain", value=None, finished=False):
+    target_log = {"domain": False,
+                  "emailcollect": False,
+                  "survivaldetect": False,
+                  "finger": False,
+                  "portscan": False,
+                  "sensitiveinfo": {
+                      "scanned_targets": []
+                  },
+                  "vulscan": {
+                      "webattack": False,
+                      "hostattack": False
+                  }
+                  }
     logfile = f"result/{date}/log.json"
     if os.path.exists(logfile) is False:
         shutil.copy("config/log_template.json", f"result/{date}/log.json")
     with open(logfile, 'r', encoding='utf-8') as f1:
         log_json = json.loads(f1.read())
+        # log_dict = dict(log_json)
     # if module in dict(log_json).keys() and target:
     # 先检查是否存在于scanned_targets 不存在则开始扫
     if finished is False:
         if target not in log_json[module]["scanned_targets"]:
+            log_json["target_log"][target] = target_log
+            with open(logfile, "w", encoding="utf-8") as f:
+                f.write(json.dumps(log_json))
             return False
         else:
             return True
-        # finished flag设置则证明扫描完成
+    # finished flag为True 则证明扫描完成
     elif finished is True:
-        log_json[module]["scanned_targets"].append(target)
+        # 多一层校验，扫描完，如果scanned_targets 列表不存在则加进去
+        if target not in log_json[module]["scanned_targets"]:
+            log_json[module]["scanned_targets"].append(target)
+        # 如果已经存在对应目标的target_log 字典,则直接修改即可，否则添加target_log 并将domain键值设为true
+        if target in dict(log_json["target_log"]).keys():
+            log_json["target_log"][target][module] = True
+        else:
+            target_log[module] = True
+            log_json["target_log"][target] = target_log
         with open(logfile, "w", encoding="utf-8") as f:
             f.write(json.dumps(log_json))
         return True
@@ -219,7 +243,6 @@ def __subprocess2(cmd):
     return lines
 
 
-
 # @progress_control(module="domain_scan",date=date)
 @logger.catch
 def manager(domain=None, date="2022-09-02-00-01-39"):
@@ -240,7 +263,6 @@ def manager(domain=None, date="2022-09-02-00-01-39"):
         os.makedirs(subdomains_log_folder)
     if os.path.exists(f"result/temp/") is False:
         os.makedirs(f"result/temp/")
-
 
     # 执行命令
     @logger.catch
@@ -271,7 +293,7 @@ def manager(domain=None, date="2022-09-02-00-01-39"):
     @logger.catch
     def amass():
         '''
-        amass v3.19.3
+        amass v3.21.2
         :return:
         '''
         # cmd = pwd + f'\\\\amass{suffix} enum  -brute -min-for-recursive 2 -d {domain} -json result/{date}/{domain}.amass.json -dir result/{date}/amass_log'
@@ -408,6 +430,7 @@ def manager(domain=None, date="2022-09-02-00-01-39"):
         logger.info(f"[+] command:{cmdstr}")
         # os.system(cmdstr)
         __subprocess1(cmdstr, timeout=None, path=f"{pwd}/{sys._getframe().f_code.co_name}")
+        __subprocess1(cmdstr, timeout=None, path=f"{pwd}/Oneforall")
         # cmd = cmdstr.split(' ')
         # subprocess.Popen(cmd=cmd)
 
@@ -438,19 +461,20 @@ def manager(domain=None, date="2022-09-02-00-01-39"):
         # subdomains_ips = []
         oneforall_output_filename = f"result/{date}/oneforall_log/{domain}.oneforall.csv"
         if os.path.exists(oneforall_output_filename):
-            with open(oneforall_output_filename, 'r') as fd1:
-                reader = csv.reader(fd1)
-                head = next(reader)
-                for row in reader:
-                    subdomains_list.append(row[5])
-                    # subdomains_ips.append(row)
-        subdomains_list = list(set(subdomains_list))
-        for ssubdomain in subdomains_list:
-            # ExtractResult(subdomain='www', domain='worldbank', suffix='org.kg')
-            subdomain_tuple = tldextract.extract(ssubdomain)
-            if domain != subdomain_tuple.domain+'.'+subdomain_tuple.suffix:
-                other_subdomains_list.append(ssubdomain)
-                subdomains_list.remove(ssubdomain)
+            if os.path.getsize(oneforall_output_filename):  # 不为空
+                with open(oneforall_output_filename, 'r') as fd1:
+                    reader = csv.reader(fd1)
+                    head = next(reader)
+                    for row in reader:
+                        subdomains_list.append(row[5])
+                        # subdomains_ips.append(row)
+                subdomains_list = list(set(subdomains_list))
+                for ssubdomain in subdomains_list:
+                    # ExtractResult(subdomain='www', domain='worldbank', suffix='org.kg')
+                    subdomain_tuple = tldextract.extract(ssubdomain)
+                    if domain != subdomain_tuple.domain + '.' + subdomain_tuple.suffix:
+                        other_subdomains_list.append(ssubdomain)
+                        subdomains_list.remove(ssubdomain)
         with open(f"result/{date}/{domain}.final.subdomains.txt", 'w', encoding='utf-8') as fd2:
             fd2.writelines("\n".join(subdomains_list))
         with open(f"result/{date}/{domain}.other.subdomains.txt", 'w', encoding='utf-8') as fd3:
@@ -463,7 +487,7 @@ def manager(domain=None, date="2022-09-02-00-01-39"):
         # progress_control(module='domain_scan',target=domain,date=date)
         # 判断是否泛解析
         if checkPanAnalysis(domain) is False:
-            if progress_record(date=date, target=domain,module="domain",finished=False) is False:
+            if progress_record(date=date, target=domain, module="domain", finished=False) is False:
                 # 调用那些子域名工具
                 amass()
                 # ksubdomain()
@@ -476,7 +500,7 @@ def manager(domain=None, date="2022-09-02-00-01-39"):
                 oneforall()
                 # 整合结果输出最终子域名文件 result/{date}/{domain}_final_subdomains.txt
                 merge_result()
-                progress_record(date=date,target=domain,module="domain",finished=True)
+                progress_record(date=date, target=domain, module="domain", finished=True)
         else:
             logger.error(f"PanAnalysis: {domain}")
         # # 指定开始扫描的目标

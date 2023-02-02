@@ -26,16 +26,5 @@
     "scanning_target": "",
     "scanned_targets": []
   },
-  "emailcollect": false,
-  "survivaldetect": false,
-  "finger": false,
-  "portscan": false,
-  "sensitiveinfo": {
-    "scanning_target": "",
-    "scanned_targets": []
-  },
-  "vulscan": {
-    "webattack": false,
-    "hostattack": false
-  }
+  "target_log": {}
 }

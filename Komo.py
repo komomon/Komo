@@ -29,7 +29,7 @@ blue = '\033[01;34m'
 red = '\033[1;31m'
 end = '\033[0m'
 
-version = 'v1.0'
+version = 'v1.1.1beta'
 message = white + '{' + red + version + ' #dev' + white + '}'
 
 banner = f"""
@@ -106,7 +106,7 @@ class Komo(object):
     collect2    run collection modules :subdomain, survival detection, finger, portscan
         --domain    one domain
         --domains   a domain file
-    subdomain   only collect subdomain
+    sub   only collect subdomain
         --domain    one domain
         --domains   a domains file
     finger      only collect the survival URL and  fingerprint
@@ -140,8 +140,8 @@ class Komo(object):
         python3 Komo.py --domains ./domains.txt collect1
         python3 Komo.py --domain example.com collect2
         python3 Komo.py --domains ./domains.txt collect2
-        python3 Komo.py --domain example.com subdomain
-        python3 Komo.py --domains ./domains.txt subdomain
+        python3 Komo.py --domain example.com sub
+        python3 Komo.py --domains ./domains.txt sub
 
         python3 Komo.py --subdomain aaa.example.com all2
         python3 Komo.py --subdomains ./subdomains.txt all2
@@ -257,7 +257,7 @@ class Komo(object):
         dd.run()
 
     # 只进行子域扫描
-    def subdomain(self):
+    def sub(self):# subdomain
         # self.command += "--{}".format(self.subdomain)
         if self.domains_list:
             for ddomain in self.domains_list:

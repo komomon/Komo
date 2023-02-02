@@ -5,6 +5,7 @@
 
 
 import csv
+import hashlib
 import json
 import re
 import shutil
@@ -28,25 +29,70 @@ def create_logfile():
 
 
 # 进度记录,基于json
-def progress_record(date=None, target=None, module=None, value=None, finished=False):
+def progress_record_old(date=None, target=None, module=None, value=None, finished=False):
     logfile = f"result/{date}/log.json"
     if os.path.exists(logfile) is False:
         shutil.copy("config/log_template.json", f"result/{date}/log.json")
-        return False
-    else:
-        with open(logfile, "r", encoding="utf-8") as f1:
-            log_json = json.loads(f1.read())
-        if finished is False:
-            # 读取log.json 如果是false则扫描，是true则跳过
-            if log_json[module] is False:
-                return False
-            elif log_json[module] is True:  # 即log_json[module] 为true的情况
-                return True
-        elif finished is True:
-            log_json[module] = True
+
+    with open(logfile, "r", encoding="utf-8") as f1:
+        log_json = json.loads(f1.read())
+    if finished is False:
+        # 读取log.json 如果是false则扫描，是true则跳过
+        if log_json[module] is False:
+            return False
+        elif log_json[module] is True:  # 即log_json[module] 为true的情况
+            return True
+    elif finished is True:
+        log_json[module] = True
+        with open(logfile, "w", encoding="utf-8") as f:
+            f.write(json.dumps(log_json))
+        return True
+
+
+# 进度记录,基于json
+def progress_record(date=None, target=None, module="survivaldetect", value=None, finished=False):
+    target_log = {"domain": False,
+                  "emailcollect": False,
+                  "survivaldetect": False,
+                  "finger": False,
+                  "portscan": False,
+                  "sensitiveinfo": {
+                      "scanned_targets": []
+                  },
+                  "vulscan": {
+                      "webattack": False,
+                      "hostattack": False
+                  }
+                  }
+    logfile = f"result/{date}/log.json"
+    if os.path.exists(logfile) is False:
+        shutil.copy("config/log_template.json", f"result/{date}/log.json")
+    with open(logfile, "r", encoding="utf-8") as f1:
+        log_json = json.loads(f1.read())
+    if finished is False:
+        # 读取log.json 如果是false则扫描，是true则跳过
+        if target not in dict(log_json["target_log"]).keys():
+            log_json["target_log"][target] = target_log
             with open(logfile, "w", encoding="utf-8") as f:
                 f.write(json.dumps(log_json))
-            return True
+            return False
+        else:
+            if log_json["target_log"][target][module] is False:
+                return False
+            # elif log_json["target_log"][target][module] is True:  # 即log_json["target_log"][target][module] 为true的情况
+            else:
+                return True
+    elif finished is True:
+        # 如果已经存在对应目标的target_log 字典,则直接修改即可，否则添加target_log 并将domain键值设为true
+        # if target not in dict(log_json["target_log"]).keys():
+        if target in dict(log_json["target_log"]).keys():
+            log_json["target_log"][target][module] = True
+        else:
+            target_log[module] = True
+            log_json["target_log"][target] = target_log
+        with open(logfile, "w", encoding="utf-8") as f:
+            f.write(json.dumps(log_json))
+        return True
 
 
 # 获取ip并去重
@@ -70,6 +116,7 @@ def getips(ipstr_list):
 
 def __aaaa():
     pass
+
 
 @logger.catch
 class manager():
@@ -112,7 +159,7 @@ class manager():
             os.makedirs(output_folder)
         input_file = ""
         output_filename_prefix = ""
-        print(domain,subdomain,subdomains)
+        print(domain, subdomain, subdomains)
         if domain and subdomain is None and subdomains is None:
             input_file = f'result/{self.date}/{domain}.final.subdomains.txt'
             output_filename_prefix = domain
@@ -146,7 +193,8 @@ class manager():
         os.system(cmdstr)
         # 结果处理，生成带http的文件和ip文件
         if os.path.exists(output_file):
-            logger.info(f"[+] Generate file: {output_folder}/{output_filename_prefix}.{sys._getframe().f_code.co_name}.csv")
+            logger.info(
+                f"[+] Generate file: {output_folder}/{output_filename_prefix}.{sys._getframe().f_code.co_name}.csv")
             # 生成带http的url
             with open(f"{output_folder}/{output_filename_prefix}.{sys._getframe().f_code.co_name}.csv", 'r',
                       errors='ignore') as f:
@@ -157,7 +205,8 @@ class manager():
                     subdomains_ips_tmp.append(row[18].strip())  # host
                 subdomains_ips = getips(list(set(subdomains_ips_tmp)))
             # 生成带http的url txt
-            with open(f"result/{self.date}/{output_filename_prefix}.subdomains.with.http.txt", "w", encoding="utf-8") as f2:
+            with open(f"result/{self.date}/{output_filename_prefix}.subdomains.with.http.txt", "w",
+                      encoding="utf-8") as f2:
                 f2.writelines("\n".join(subdomains_with_http))
             logger.info(f"[+] Generate file: result/{self.date}/{output_filename_prefix}.subdomains.with.http.txt")
             # 生成子域名对应的ip txt
@@ -174,10 +223,12 @@ class manager():
 
     # run只为了方便顺序执行和规定流程执行的时候查看进度记录来判断跟进进度。
     def run(self):
-        if progress_record(date=self.date, module="survivaldetect", finished=False) is False:
+        target = self.domain if self.domain else hashlib.md5(bytes(self.date, encoding='utf-8')).hexdigest()
+        if progress_record(date=self.date, target=target, module="survivaldetect", finished=False) is False:
             self.httpx(domain=self.domain, subdomain=self.subdomain, subdomains=self.subdomains)
-            progress_record(date=self.date, module="survivaldetect", finished=True)
+            progress_record(date=self.date, target=target, module="survivaldetect", finished=True)
         logger.info('-' * 10 + f'finished {sys._getframe().f_code.co_name}' + '-' * 10)
+
 
 @logger.catch
 def run(subdomain=None, subdomains=None, date=None):
