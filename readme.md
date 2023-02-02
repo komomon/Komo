@@ -14,6 +14,8 @@ Komo is a comprehensive asset collection and vulnerability scanning tool
 
 ![image-20220927001227577](images/image-20220927001227577.png)
 
+注：如果需要获得最新beta版本请前往[beta分支](https://github.com/komomon/Komo/tree/beta)，该分支更新将比较慢。
+
 ## Intro&&Feature
 
 🚀**Komo**是一个综合资产收集和漏洞扫描工具，并且支持进度记录，通过多种方式对子域进行获取，收集域名，邮箱，子域名存活探测，域名指纹识别，域名反查ip，ip端口扫描，web服务链接爬取并发送给xray扫描，对web服务进行POC扫描，web弱口令扫描，对主机进行主机POC扫描，常见端口弱口令扫描。
