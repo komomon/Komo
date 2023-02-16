@@ -81,7 +81,6 @@ def gettargets(target):
     return result_list
 
 
-
 class Komo(object):
     '''
 
@@ -257,7 +256,7 @@ class Komo(object):
         dd.run()
 
     # 只进行子域扫描
-    def sub(self):# subdomain
+    def sub(self):  # subdomain
         # self.command += "--{}".format(self.subdomain)
         if self.domains_list:
             for ddomain in self.domains_list:
@@ -265,7 +264,7 @@ class Komo(object):
         else:
             logger.error("[-] Please check --domain or --domains")
 
-    def email(self):#emailcollect
+    def email(self):  # emailcollect
         if self.domains_list:
             for ddomain in self.domains_list:
                 emailcollect_main.manager(domain=ddomain, date=self.date).run()
@@ -273,12 +272,12 @@ class Komo(object):
             logger.error("[-] Please check --domain or --domains")
 
     # 域名存活检查
-    def survival(self):#survivaldetect
+    def survival(self):  # survivaldetect
         if self.subdomain:
-            survivaldetect_main.manager(domain=None,subdomain=self.subdomain,subdomains=None,date=self.date).run()
+            survivaldetect_main.manager(domain=None, subdomain=self.subdomain, subdomains=None, date=self.date).run()
         elif self.subdomains:
             survivaldetect_main.manager(domain=None, subdomain=None,
-                                        subdomains=self.subdomains,date=self.date).run()
+                                        subdomains=self.subdomains, date=self.date).run()
         else:
             logger.error("[-] Please check --subdomain or --subdomains")
 
@@ -373,15 +372,28 @@ class Komo(object):
             for ddomain in self.domains_list:
                 domain_main.manager(domain=ddomain, date=self.date)
                 emailcollect_main.manager(domain=ddomain, date=self.date).run()
+                portscan_main.manager(domain=ddomain, ip=None, ipfile=None, date=self.date)
                 survivaldetect_main.manager(domain=ddomain, subdomain=None, subdomains=None,
                                             date=self.date).run()
                 finger_main.manager(domain=ddomain, url=None, urlsfile=None, date=self.date)
-                portscan_main.manager(domain=ddomain, ip=None, ipfile=None, date=self.date)
                 sensitiveinfo_main.manager(domain=ddomain, url=None, urlsfile=None, attackflag=self.attackflag,
                                            date=self.date)
                 # vulscan_main.webmanager(domain=self.domain, url=None, urlsfile=None, date=self.date)
         else:
             logger.error("[-] Please check --domain or --domains")
+
+    # def collect1(self):
+    #     # self.attackflag = False
+    #     if self.domains_list:
+    #         for ddomain in self.domains_list:
+    #             domain_main.manager(domain=ddomain, date=self.date)
+    #             emailcollect_main.manager(domain=ddomain, date=self.date).run()
+    #             survivaldetect_main.manager(domain=ddomain, subdomain=None, subdomains=None,
+    #                                         date=self.date).run()
+    #             finger_main.manager(domain=ddomain, url=None, urlsfile=None, date=self.date)
+    #             # portscan_main.manager(domain=domain, ip=None, ipfile=None, date=self.date)
+    #     else:
+    #         logger.error("[-] Please check --domain or --domains")
 
     def collect1(self):
         # self.attackflag = False
@@ -389,23 +401,11 @@ class Komo(object):
             for ddomain in self.domains_list:
                 domain_main.manager(domain=ddomain, date=self.date)
                 emailcollect_main.manager(domain=ddomain, date=self.date).run()
-                survivaldetect_main.manager(domain=ddomain, subdomain=None, subdomains=None,
-                                            date=self.date).run()
-                finger_main.manager(domain=ddomain, url=None, urlsfile=None, date=self.date)
-                # portscan_main.manager(domain=domain, ip=None, ipfile=None, date=self.date)
-        else:
-            logger.error("[-] Please check --domain or --domains")
-
-    def collect2(self):
-        # self.attackflag = False
-        if self.domains_list:
-            for ddomain in self.domains_list:
-                domain_main.manager(domain=ddomain, date=self.date)
-                emailcollect_main.manager(domain=ddomain, date=self.date).run()
-                survivaldetect_main.manager(domain=ddomain, subdomain=None, subdomains=None,
-                                            date=self.date).run()
-                finger_main.manager(domain=ddomain, url=None, urlsfile=None, date=self.date)
                 portscan_main.manager(domain=ddomain, ip=None, ipfile=None, date=self.date)
+                survivaldetect_main.manager(domain=ddomain, subdomain=None, subdomains=None,
+                                            date=self.date).run()
+                finger_main.manager(domain=ddomain, url=None, urlsfile=None, date=self.date)
+
         else:
             logger.error("[-] Please check --domain or --domains")
 
@@ -421,10 +421,10 @@ class Komo(object):
             for ddomain in self.domains_list:
                 domain_main.manager(domain=ddomain, date=self.date)
                 emailcollect_main.manager(domain=ddomain, date=self.date).run()
+                portscan_main.manager(domain=ddomain, ip=None, ipfile=None, date=self.date)
                 survivaldetect_main.manager(domain=ddomain, subdomain=None, subdomains=None,
                                             date=self.date).run()
                 finger_main.manager(domain=ddomain, urlsfile=None, date=self.date)
-                portscan_main.manager(domain=ddomain, ip=None, ipfile=None, date=self.date)
                 vulscan_main.webmanager(domain=ddomain, url=None, urlsfile=None, date=self.date)
                 vulscan_main.hostmanager(domain=ddomain, ip=None, ipfile=None, date=self.date)
                 sensitiveinfo_main.manager(domain=ddomain, url=None, urlsfile=None, attackflag=self.attackflag,
@@ -444,10 +444,10 @@ class Komo(object):
             # for domain in self.domains_list:
             # domain_main.manager(domain=domain, date=self.date)
             # emailcollect_main.manager(domain=ddomain, date=self.date).run()
+            portscan_main.manager(domain=self.randomstr, ip=None, ipfile=None, date=self.date)
             survivaldetect_main.manager(domain=self.randomstr, subdomain=None, subdomains=None,
                                         date=self.date).run()
             finger_main.manager(domain=self.randomstr, urlsfile=None, date=self.date)
-            portscan_main.manager(domain=self.randomstr, ip=None, ipfile=None, date=self.date)
             vulscan_main.webmanager(domain=self.randomstr, url=None, urlsfile=None, date=self.date)
             vulscan_main.hostmanager(domain=self.randomstr, ip=None, ipfile=None, date=self.date)
             sensitiveinfo_main.manager(domain=self.randomstr, url=None, urlsfile=None, attackflag=self.attackflag,
@@ -467,18 +467,16 @@ class Komo(object):
             # for domain in self.domains_list:
             # domain_main.manager(domain=domain, date=self.date)
             # emailcollect_main.manager(domain=ddomain, date=self.date).run()
+            portscan_main.manager(domain=self.randomstr, ip=None, ipfile=None, date=self.date)
             survivaldetect_main.manager(domain=self.randomstr, subdomain=None, subdomains=None,
                                         date=self.date).run()
             finger_main.manager(domain=self.randomstr, urlsfile=None, date=self.date)
-            portscan_main.manager(domain=self.randomstr, ip=None, ipfile=None, date=self.date)
             # vulscan_main.webmanager(domain=self.randomstr, url=None, urlsfile=None, date=self.date)
             # vulscan_main.hostmanager(domain=self.randomstr, ip=None, ipfile=None, date=self.date)
             sensitiveinfo_main.manager(domain=self.randomstr, url=None, urlsfile=None, attackflag=self.attackflag,
                                        date=self.date)
         else:
             logger.error("[-] Please check --subdomain or --subdomains")
-
-
 
 
 if __name__ == '__main__':

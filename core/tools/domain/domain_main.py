@@ -5,7 +5,9 @@ import csv
 import inspect
 import json
 import os
+import re
 import shutil
+import socket
 import subprocess
 import tempfile
 import traceback
@@ -17,6 +19,8 @@ import sys
 
 # 判断是否是泛解析
 import dns
+import concurrent.futures
+from concurrent.futures import ThreadPoolExecutor
 
 
 def create_logfile():
@@ -434,6 +438,81 @@ def manager(domain=None, date="2022-09-02-00-01-39"):
         # cmd = cmdstr.split(' ')
         # subprocess.Popen(cmd=cmd)
 
+    def domain_cdn_check_old(domain):
+        """
+            if   cdn    return True,domain
+            else        return False,domain
+            """
+        ipcount = 0
+        try:
+            resolver = dns.resolver.Resolver()
+            resolver.nameservers = ['1.1.1.1', '8.8.8.8']
+            domain = domain.strip()
+            a = resolver.resolve(domain, 'A')
+            for index, value in enumerate(a.response.answer):
+                for j in value.items:
+                    if re.search(r'\d+\.\d+\.\d+\.\d+', j.to_text()):
+                        ipcount += 1
+                        if ipcount >= 2:
+                            return True, domain
+                    elif re.search(r'(\w+\.)+', j.to_text()):
+                        cname = j.to_text()[:-1]
+                        p1 = '.'.join(cname.split('.')[-2:])
+                        p2 = '.'.join(domain.split('.')[-2:])
+                        if p1 == p2:
+                            return False, domain
+                        else:
+                            return True, domain
+                    else:
+                        return False, domain
+            if ipcount == 1:
+                return False, domain
+        except Exception as e:
+            return None, domain
+
+    def is_cdn(host):
+        # 返回主机名、主机别名列表、主机IP地址列表
+        # ('www.a.shifen.com', ['www.baidu.com'], ['110.242.68.3', '110.242.68.4'])
+        # print(socket.gethostbyname_ex(host))
+        cname, host_list, ip_list = socket.gethostbyname_ex(host)
+        # ips = socket.gethostbyname_ex(host)[2]
+        if len(ip_list) > 1:
+            return True, host, ip_list
+        else:
+            return False, host, ip_list
+
+    def cdn_check(func=None, urls=None, max_workers=50):
+        nocdn_domain_list = []
+        nocdn_ip_list = []
+        cdn_domain_list = []
+        error_domain_list = []
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            to_do = []
+            for url in urls:
+                obj = executor.submit(func, url)
+                to_do.append(obj)
+        for future in concurrent.futures.as_completed(to_do):
+            iscdn, ddomain, ip_list = future.result()
+            if iscdn is False:
+                nocdn_domain_list.append(ddomain)
+                nocdn_ip_list.append(ip_list[0])
+            elif iscdn is True:
+                cdn_domain_list.append(ddomain)
+            else:
+                error_domain_list.append(ddomain)
+        with open(f"result/{date}/{domain}.nocdn.subdomains.txt", 'a', encoding='utf-8')as f1:
+            f1.writelines("\n".join(nocdn_domain_list))
+        logger.info(f'[+] No CDN subdomains outputfile: result/{date}/{domain}.nocdn.subdomains.txt')
+        with open(f"result/{date}/{domain}.nocdn.ips.txt", 'a', encoding='utf-8')as f2:
+            f2.writelines("\n".join(nocdn_domain_list))
+        logger.info(f'[+] No CDN ips outputfile: result/{date}/{domain}.nocdn.ips.txt')
+        with open(f"result/{date}/{domain}.cdn.subdomains.txt", 'a', encoding='utf-8')as f3:
+            f3.writelines("\n".join(cdn_domain_list))
+        logger.info(f'[+] CDN subdomains outputfile: result/{date}/{domain}.cdn.subdomains.txt')
+        with open(f"result/{date}/{domain}.errorcdn.subdomains.txt", 'a', encoding='utf-8')as f4:
+            f4.writelines("\n".join(error_domain_list))
+        logger.info(f'[+] Check CDN error subdomains outputfile: result/{date}/{domain}.errorcdn.subdomains.txt')
+
     # 整合各个工具扫出的子域名结果,除了oneforall
     @logger.catch
     def merge_other_tools_result():
@@ -442,15 +521,15 @@ def manager(domain=None, date="2022-09-02-00-01-39"):
         :return:
         '''
         # print(subdomains)
-        # if os.path.exists(f"result/{date}/{domain}.many.tools.subdomain.txt"):
+        # if os.path.exists(f"result/{date}/{domain}.many.tools.subdomains.txt"):
         subdomains_list = list(set(subdomains))
-        with open(f"result/{date}/{domain}.many.tools.subdomain.txt", 'w', encoding='utf-8') as fd:
+        with open(f"result/{date}/{domain}.many.tools.subdomains.txt", 'w', encoding='utf-8') as fd:
             fd.writelines("\n".join(subdomains_list))
         logger.info(f'[+] Many tools find subdomains number: {len(subdomains_list)}')
-        logger.info(f'[+] Many tools find subdomains outputfile: result/{date}/{domain}.many.tools.subdomain.txt')
+        logger.info(f'[+] Many tools find subdomains outputfile: result/{date}/{domain}.many.tools.subdomains.txt')
         # 将所有工具的结果cp到/result/temp目录下，供oneforall采集
-        shutil.copy(f"result/{date}/{domain}.many.tools.subdomain.txt",
-                    f"result/temp/{domain}.many.tools.subdomain.txt")
+        shutil.copy(f"result/{date}/{domain}.many.tools.subdomains.txt",
+                    f"result/temp/{domain}.many.tools.subdomains.txt")
         # logger.error(f'result/{date}/{domain}.many.tools.subdomain.txt not exist!!!')
 
     # 将结果合并到一起 result/{date}/{domain}_final_subdomains.txt
@@ -481,13 +560,14 @@ def manager(domain=None, date="2022-09-02-00-01-39"):
             fd3.writelines("\n".join(other_subdomains_list))
         logger.info(f'[+] Final find subdomains number: {len(subdomains_list)}')
         logger.info(f'[+] Final find subdomains outputfile: result/{date}/{domain}.final.subdomains.txt')
+        cdn_check(is_cdn, subdomains_list, max_workers=50)
 
     def run():
         # 指定开始扫描的目标
         # progress_control(module='domain_scan',target=domain,date=date)
-        # 判断是否泛解析
-        if checkPanAnalysis(domain) is False:
-            if progress_record(date=date, target=domain, module="domain", finished=False) is False:
+        if progress_record(date=date, target=domain, module="domain", finished=False) is False:
+            # 判断是否泛解析
+            if checkPanAnalysis(domain) is False:
                 # 调用那些子域名工具
                 amass()
                 # ksubdomain()
@@ -500,11 +580,15 @@ def manager(domain=None, date="2022-09-02-00-01-39"):
                 oneforall()
                 # 整合结果输出最终子域名文件 result/{date}/{domain}_final_subdomains.txt
                 merge_result()
-                progress_record(date=date, target=domain, module="domain", finished=True)
+            else:
+                logger.info(f"[-] PanAnalysis: {domain}")
+                logger.info(f"[+] Skip Scan")
+            progress_record(date=date, target=domain, module="domain", finished=True)
+            logger.info(f'[+] domain scan finished: {domain}')
         else:
-            logger.error(f"PanAnalysis: {domain}")
-        # # 指定开始扫描的目标
-        # progress_control(module='domain_scan',finished=True,date=date)
+            logger.info(f'[+] domain already scanned finished: {domain}')
+            # # 指定开始扫描的目标
+            # progress_control(module='domain_scan',finished=True,date=date)
 
     run()
 

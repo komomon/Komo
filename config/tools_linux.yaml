@@ -299,7 +299,7 @@ download:
     afrog:
       toolname: afrog
       whetherdownload: True
-      link: https://github.com/zan8in/afrog/releases/download/v2.1.1/afrog_2.1.1_linux_amd64.zip
+      link: https://github.com/zan8in/afrog/releases/download/v2.2.1/afrog_2.2.1_linux_amd64.zip
       downloadfile: afrog.zip
       source_name: afrog
       final_name: afrog

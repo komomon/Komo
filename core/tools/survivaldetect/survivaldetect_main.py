@@ -161,7 +161,8 @@ class manager():
         output_filename_prefix = ""
         print(domain, subdomain, subdomains)
         if domain and subdomain is None and subdomains is None:
-            input_file = f'result/{self.date}/{domain}.final.subdomains.txt'
+            # input_file = f'result/{self.date}/{domain}.final.subdomains.txt'
+            input_file = f"result/{self.date}/{domain}.ports.txt"
             output_filename_prefix = domain
         elif subdomains and domain is None and subdomain is None:
             if os.path.exists(subdomains):
@@ -187,7 +188,15 @@ class manager():
         subdomains_ips_tmp = []
         subdomains_ips = []
         output_file = f"{output_folder}/{output_filename_prefix}.{sys._getframe().f_code.co_name}.csv"
-        cmdstr = f'{self.pwd}/httpx/httpx{self.suffix} -l {input_file} -ip -silent -no-color -csv -o {output_file}'
+        # -favicon
+        # -tech-detect	显示基于Wappalyzer数据集的技术
+        # -cname
+        # -cdn	display cdn in use
+        # -x string	request methods to probe, use 'all' to probe all HTTP methods
+        # -ec, -exclude-cdn	skip full port scans for CDNs (only checks for 80,443)
+        # -td, -tech-detect	display technology in use based on wappalyzer dataset
+        # -http-proxy, -proxy string    http proxy to use (eg http://127.0.0.1:8080)
+        cmdstr = f'{self.pwd}/httpx/httpx{self.suffix} -l {input_file} -status-code -title -favicon -ip -no-color -csv -o {output_file}'
         # cmdstr = "ping 127.0.0.1"
         logger.info(f"[+] command:{cmdstr}")
         os.system(cmdstr)
@@ -209,10 +218,10 @@ class manager():
                       encoding="utf-8") as f2:
                 f2.writelines("\n".join(subdomains_with_http))
             logger.info(f"[+] Generate file: result/{self.date}/{output_filename_prefix}.subdomains.with.http.txt")
-            # 生成子域名对应的ip txt
-            with open(f"result/{self.date}/{output_filename_prefix}.subdomains.ips.txt", "w", encoding="utf-8") as f3:
-                f3.writelines("\n".join(subdomains_ips))
-            logger.info(f"[+] Generate file: result/{self.date}/{output_filename_prefix}.subdomains.ips.txt")
+            # # 生成子域名对应的ip txt
+            # with open(f"result/{self.date}/{output_filename_prefix}.subdomains.ips.txt", "w", encoding="utf-8") as f3:
+            #     f3.writelines("\n".join(subdomains_ips))
+            # logger.info(f"[+] Generate file: result/{self.date}/{output_filename_prefix}.subdomains.ips.txt")
             # 最后移除临时文件
             if subdomain and domain is None and subdomains is None:
                 if os.path.exists(input_file):

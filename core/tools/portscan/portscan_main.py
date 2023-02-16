@@ -1,3 +1,4 @@
+import csv
 import hashlib
 import inspect
 import json
@@ -115,7 +116,8 @@ def manager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
 
     # 三种模式
     if domain and ip is None and ipfile is None:
-        ipfile = f'result/{date}/{domain}.subdomains.ips.txt'
+        # ipfile = f'result/{date}/{domain}.subdomains.ips.txt'
+        ipfile = f"result/{date}/{domain}.nocdn.ips.txt"
         output_filename_prefix = domain
     elif ipfile and domain is None and ip is None:
         ipfile = ipfile
@@ -145,15 +147,27 @@ def manager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
                     "7001,7077,8080,8081,8443,8545,8686,9000,9001,9042,9092,9100,9200,9418,9999,11211,11211,27017,33848," \
                     "37777,50000,50070,61616"
         # print(domain,ip,ips,ipfile)
-        outputfile = f'{portscan_log_folder}/{output_filename_prefix}.{sys._getframe().f_code.co_name}.txt'
-        cmdstr = f'{pwd}/naabu/naabu{suffix} -source-ip 8.8.8.8:22 -rate 150 -top-ports 100 -silent -no-color -list {ipfile} -o {outputfile}'
+        # toolname =
+        output_filename = f'{portscan_log_folder}/{output_filename_prefix}.{sys._getframe().f_code.co_name}'
+        # -exclude-cdn, -ec	  skip full port scans for CDN's (only checks for 80,443)
+        # -proxy string		 socks5 proxy (ip[:port] / fqdn[:port]
+        # -proxy-auth string		socks5 proxy authentication (username:password)
+        cmdstr = f'{pwd}/naabu/naabu{suffix} -source-ip 8.8.8.8:22 -rate 600 -top-ports 1000 -silent -no-color -list {ipfile} -csv -o {output_filename}.csv'
         # naabu -list hosts.txt -p - 扫描全部  -exclude-cdn 跳过cdn检测，cdn只检查80 443
         # cmd = pwd + f'/naabu{suffix} -p "{ports_str}" -silent -no-color -scan-all-ips -list result/{date}/{domain}.final.subdomains.txt -o {portscan_log_folder}/{domain}.{sys._getframe().f_code.co_name}.txt'
         # nmap 常见100个端口 -scan-all-ips
         # cmdstr = f'{pwd}/naabu{suffix} -top-ports 100 -silent -no-color -list result/{date}/{domain}.final.subdomains.txt -o {portscan_log_folder}/{domain}.{sys._getframe().f_code.co_name}.txt'
         logger.info(f"[+] command:{cmdstr}")
         os.system(cmdstr)
-        logger.info(f'[+] {sys._getframe().f_code.co_name} finished,outputfile:{outputfile}')
+        logger.info(f'[+] {sys._getframe().f_code.co_name} finished,outputfile:{output_filename}.csv')
+        with open(f"{output_filename}.csv", "r") as f1:
+            reader = csv.reader(f1)
+            head = next(reader)
+            with open(f"result/{date}/{output_filename_prefix}.ports.txt", "w") as f2:
+                for row in reader:
+                    # baidu.com:8080  192.168.1.1:53
+                    lline = f"{row[0]}:{row[2]}" if row[0] else f"{row[1]}:{row[2]}"
+                    f2.write(lline + '\n')
 
     @logger.catch
     def TxPortMap(ip=ip, ipfile=ipfile):
@@ -170,7 +184,7 @@ def manager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
                     "37777,50000,50070,61616"
         outputfile = f'{portscan_log_folder}/{output_filename_prefix}.{sys._getframe().f_code.co_name}.txt'
         # cmdstr = f'{pwd}/TxPortMap/TxPortMap{suffix} -p {ports_str} -nbtscan -l {ipfile} -o {outputfile}'
-        cmdstr = f'{pwd}/TxPortMap/TxPortMap{suffix} -t1000 -nbtscan -l {ipfile} -o {outputfile}'
+        cmdstr = f'{pwd}/TxPortMap/TxPortMap{suffix} -t1000 -nbtscan -ep 25,110 -l {ipfile} -o {outputfile}'
         logger.info(f"[+] command:{cmdstr}")
         os.system(cmdstr)
         logger.info(f'[+] {sys._getframe().f_code.co_name} finished,outputfile:{outputfile}')
@@ -220,12 +234,12 @@ def manager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
 
     def run():
         target = domain if domain else hashlib.md5(bytes(date, encoding='utf-8')).hexdigest()
-        if progress_record(date=date,target=target, module="portscan", finished=False) is False:
+        if progress_record(date=date, target=target, module="portscan", finished=False) is False:
             naabu(ip=None, ipfile=ipfile)
             TxPortMap(ip=None, ipfile=ipfile)
             # nmaps(ip=None,ipfile=ipfile)
             # dismap(ip=None,ipfile=ipfile)
-            progress_record(date=date,target=target, module="portscan", finished=True)
+            progress_record(date=date, target=target, module="portscan", finished=True)
 
     run()
 

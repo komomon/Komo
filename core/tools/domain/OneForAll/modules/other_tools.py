@@ -20,7 +20,7 @@ class CustomDomainTools(Module):
     def do_brute(self):
         #self.subdomains = ['www.baidu.com','abcdef.baidu.com']
         subdomain_tmp = []
-        other_tools_scan_result_file = "../../../../result/temp/" + self.domain+'.many.tools.subdomain.txt'
+        other_tools_scan_result_file = "../../../../result/temp/" + self.domain+'.many.tools.subdomains.txt'
         if os.path.exists(other_tools_scan_result_file):
             # print(cunzai)
             with open(other_tools_scan_result_file,'r',encoding='utf-8') as f:

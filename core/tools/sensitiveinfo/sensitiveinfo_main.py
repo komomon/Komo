@@ -320,12 +320,13 @@ def __subprocess1(cmd, timeout=None, path=None):
         logger.error(traceback.format_exc())
         # outs, errs = p.communicate()
         p.kill()
-        # kill_process(f_name+get_system())
+        kill_process(f_name + get_system())
     except Exception as e:
         logger.error(traceback.format_exc())
         # logger.error(f'{sys._getframe().f_code.co_name} Reach Set Time and exit')
     finally:
         logger.info(f'{f_name} finished.')
+        kill_process(f_name + get_system())
 
 
 # @logger.catch
@@ -356,6 +357,9 @@ def to_xray(urls, attackflag=None, fromurl=None):
     #     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.80 Safari/537.36 Edg/98.0.1108.43'}
     xrayport = Xray_Port
     black_list = ['.jpg', '.gif', '.png', '.css', '.pdf', '.doc', '.docx', '.xlsx', '.csv', '.svg']
+    # domain_suffix = tldextract.extract(fromurl)  # 通过域名后缀是否为空判断给的domain是domain 还是randomstr
+    # ExtractResult(subdomain='', domain='sdadadadawdawd', suffix='')
+    # ExtractResult(subdomain='ss', domain='sss', suffix='com')
     if attackflag:
         if checkport(xrayport):
             for url in urls:
@@ -363,7 +367,7 @@ def to_xray(urls, attackflag=None, fromurl=None):
                 splitresult = urlsplit(url)
                 ssubdomain = splitresult.netloc
                 uri = splitresult.path
-                # 只发送给xray要爬去的网站的url
+                # 只发送给xray要爬取的网站的url
                 if urlsplit(fromurl).netloc == ssubdomain:
                     if os.path.splitext(uri)[1] not in black_list:
                         request0({"method": "GET", "url": url, "headers": "", "data": ""})
@@ -563,8 +567,8 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
             else:
                 # 跳过该工具执行
                 return False
-        __subprocess1(cmdstr, timeout=int(all_config['tools']['sensitiveinfo'][tool_name]['runtime']),
-                      path=f"{pwd}/{tool_name}")
+        # __subprocess1(cmdstr, timeout=int(all_config['tools']['sensitiveinfo'][tool_name]['runtime']),
+        #               path=f"{pwd}/{tool_name}")
 
         urls_data_tmp_to_csv = []  # 存储urldata四个字段的列表
         # 从rad结果中获取url,不存在url的则写入csv和links_set
@@ -657,7 +661,7 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
             else:
                 # 跳过该工具执行
                 return False
-        logger.info(f"[+] {tool_name} finished: {target}")
+        # logger.info(f"[+] {tool_name} finished: {target}")
 
         # 对结果处理，不在links_set的就存储到link.csv中
         groups_tmp = urlsplit(target)
@@ -755,7 +759,7 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
             else:
                 # 跳过该工具执行
                 return False
-        logger.info(f"[+] {tool_name} finished: {target}")
+        # logger.info(f"[+] {tool_name} finished: {target}")
         # 对结果处理，不在links_set的就存储到link.csv中
         if os.path.exists(f'{output_folder}/{output_filename}'):
             with open(f'{output_folder}/{output_filename}', 'r', encoding="utf-8", errors='ignore') as f:
@@ -839,6 +843,7 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         :param data1: 带不带http,都行
         :param attackflag:
         输出文件文件名不能带有冒号，否则会输出文件内容失败
+        https://github.com/xnl-h4ck3r/waymore
         :return:
         '''
         tool_name = str(sys._getframe().f_code.co_name)
@@ -870,7 +875,7 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
             else:
                 # 跳过该工具执行
                 return False
-        logger.info(f"[+] {tool_name} finished: {target}")
+        # logger.info(f"[+] {tool_name} finished: {target}")
         if os.path.exists(f'{output_folder}/{subdomain}.{tool_name}.txt'):
             with open(f'{output_folder}/{subdomain}.{tool_name}.txt', 'r', encoding='utf-8') as f:
                 for line in f.readlines():
