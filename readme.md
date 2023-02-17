@@ -16,7 +16,7 @@ Komo is a comprehensive asset collection and vulnerability scanning tool
 
 ## Intro&&Feature
 
-🚀**Komo**是一个综合资产收集和漏洞扫描工具，并且支持进度记录，通过多种方式对子域进行获取，收集域名，邮箱，子域名存活探测，域名指纹识别，域名反查ip，ip端口扫描，web服务链接爬取并发送给xray扫描，对web服务进行POC扫描，web弱口令扫描，对主机进行主机POC扫描，常见端口弱口令扫描。
+🚀**Komo**是一个综合资产收集和漏洞扫描工具，并且支持进度记录，通过多种方式对子域进行获取，收集域名，邮箱，根据域名反查ip，域名cdn识别，域名及同ip其他http服务存活探测，域名及同ip其他http服务指纹识别，ip端口扫描，端口指纹识别，web服务链接爬取并发送给xray扫描，对web服务进行POC扫描，web弱口令扫描，对主机进行主机漏洞POC扫描，常见端口弱口令扫描。
 
 🚋**Komo**集成了**oneforall**，**subfinder**，**ksubdomain**，**amass**，**ctfr**，**emailall**，**httpx**，**naabu**，**TxPortMap**，**ehole**，**goon3**，**crawlergo**，**rad**，**hakrawler**，**gau**，**gospider**，**URLfinder**，**vscan**，**nuclei**，**afrog**，**vulmap**，**SweetBabyScan**，**xray**等**20**多款工具，全自动化、智能化工具。本工具依托各工具特色，进行模块化构建。
 
@@ -34,7 +34,7 @@ Komo is a comprehensive asset collection and vulnerability scanning tool
 
 Komo的目的为了一键化，便捷性，可移植性，便于打点和红队外围渗透工作，所以将基于模块化开发，所有工具都汇总到统一接口，以便于下一个模块调用和后续某模块新增工具。**==如果你有好的工具和改进建议，可以添加下面的公众号群聊来沟通==**。
 
-~~Komo的每个模块可以单独拿出来直接使用，每个模块下面都有一个main，注意工具下载到对应目录下即可。~~
+~~Komo的每个模块可以单独拿出来直接使用，每个模块下面都有一个main，工具下载到对应目录下即可。~~ 目前komo改为一个整体，使用install会自动下载所需工具。
 
 Komo可以自动下载所需的所有工具，不用使用者自己下载每个工具，使用`python3 Komo.py install` 即可，同时也便于移动，**这保证了Komo的体积足够精简**。
 
@@ -44,7 +44,7 @@ Komo目前已经适配window、linux。
 
 ## Project structure
 
-![流程图](images/流程图.jpg)
+![流程图](images/流程图2.jpg)
 
 
 
@@ -148,7 +148,7 @@ python3 Komo.py  --proxy socks5://127.0.0.1:10809 install
 
 输入：域名/域名文件
 
-功能：多种方式收集域名，收集域名，邮箱，域名存活探测，域名反查ip，域名指纹识别，ip端口扫描，web服务链接爬取，将爬取的链接发送给xray进行扫描，POC漏洞扫描，反查的ip进行其他端口漏洞扫描，弱口令扫描
+功能：多种方式收集域名，收集邮箱，域名反查ip，域名cdn识别，域名及同ip其他http服务存活探测，域名及同ip其他http服务指纹识别，ip端口扫描，web服务链接爬取，将爬取的链接发送给xray进行扫描，POC漏洞扫描，反查的ip进行其他端口漏洞扫描，弱口令扫描
 
 ```python
 python3 Komo.py --domain example.com all
@@ -167,7 +167,25 @@ xray.exe webscan --listen 127.0.0.1:7777 --html-output 1.html
 
 输入：子域名/子域名文件
 
-功能：提供子域名，不扫描子域，域名存活探测，域名反查ip，域名指纹识别，ip端口扫描，web服务链接爬取，将爬取的链接发送给xray进行扫描，POC漏洞扫描，反查的ip进行其他端口漏洞扫描，弱口令扫描
+功能：提供子域名，不进行子域名收集，进行域名反查ip，域名cdn识别，域名及同ip其他http服务存活探测，域名及同ip其他http服务指纹识别，ip端口扫描，web服务链接爬取，将爬取的链接发送给xray进行扫描，POC漏洞扫描，反查的ip进行其他端口漏洞扫描，弱口令扫描
+
+```python
+python3 Komo.py --subdomain aaa.example.com all2
+python3 Komo.py --subdomains ./subdomains.txt all2
+```
+
+**注意：记得使用该模式之前先启动xray，否则webattack不能完全扫描**
+
+```
+xray.exe webscan --listen 127.0.0.1:7777 --html-output 1.html
+```
+
+
+#### all3
+
+输入：子域名/子域名文件
+
+功能：提供子域名，不进行子域名收集，进行域名反查ip，域名cdn识别，域名及同ip其他http服务存活探测，域名及同ip其他http服务指纹识别，ip端口扫描，web服务链接爬取，将爬取的链接发送给xray进行扫描。
 
 ```python
 python3 Komo.py --subdomain aaa.example.com all2
@@ -182,11 +200,13 @@ xray.exe webscan --listen 127.0.0.1:7777 --html-output 1.html
 
 
 
+
+
 #### collect
 
 输入：域名/域名文件
 
-功能：全方位资产收集，多种方式收集域名，收集域名，邮箱，域名存活探测，域名反查ip，域名指纹识别，ip端口扫描，web服务链接爬取
+功能：全方位资产收集，多种方式收集域名，收集域名，邮箱，域名反查ip，域名cdn识别，域名及同ip其他http服务存活探测，域名及同ip其他http服务指纹识别，ip端口扫描，多种工具web服务链接爬取(crawlergo rad gau等等)
 
 ```python
 python3 Komo.py --domain example.com collect
@@ -197,7 +217,7 @@ python3 Komo.py --domains ./domains.txt collect
 
 输入：域名/域名文件
 
-功能：只资产收集，多种方式收集域名，收集域名，域名存活探测，域名反查ip，域名指纹识别
+功能：只资产收集，多种方式收集域名，收集邮箱，域名反查ip，域名cdn识别，非CDN ip端口扫描，域名及同ip其他http服务存活探测，域名及同ip其他http服务指纹识别
 
 功能比collect 少了端口扫描，web链接爬取
 
@@ -206,7 +226,7 @@ python3 Komo.py --domain example.com collect1
 python3 Komo.py --domains ./domains.txt collect1
 ```
 
-#### collect2
+#### collect2 暂不使用
 
 输入：域名/域名文件
 
@@ -236,18 +256,7 @@ python3 Komo.py --domain example.com subdomain
 python3 Komo.py --domains ./domains.txt subdomain
 ```
 
-#### finger
-
-输入：url/url文件
-
-功能：对收集到的域名或域名文件进行存活探测和指纹识别（Ehole+wapplyzer）
-
-```python
-python3 Komo.py --url http://example.com finger
-python3 Komo.py --urls ./urls.txt finger
-```
-
-#### **portscan**
+#### portscan
 
 输入：ip/ip文件
 
@@ -263,6 +272,18 @@ python3 Komo.py --urls ./urls.txt finger
 python3 Komo.py --ip 1.1.1.1 portscan
 python3 Komo.py --ips ./ips.txt portscan
 ```
+
+#### finger
+
+输入：url/url文件
+
+功能：对收集到的域名或域名文件进行存活探测和指纹识别（Ehole+wapplyzer）
+
+```python
+python3 Komo.py --url http://example.com finger
+python3 Komo.py --urls ./urls.txt finger
+```
+
 
 
 
@@ -293,6 +314,25 @@ python3 Komo.py --urls ./urls.txt webattack
 ```
 xray.exe webscan --listen 127.0.0.1:7777 --html-output 1.html
 ```
+
+#### webattack1
+
+输入：url/url文件
+
+功能：对url进行爬取，然后发送给xray进行扫描
+
+```python
+python3 Komo.py --url http://example.com webattack
+python3 Komo.py --urls ./urls.txt webattack
+```
+
+**注意：记得使用该模式之前先启动xray，否则webattack不能完全扫描**
+
+```
+xray.exe webscan --listen 127.0.0.1:7777 --html-output 1.html
+```
+
+
 
 #### webattack2
 
@@ -333,11 +373,13 @@ python3 Komo.py --ips ./ips.txt hostattack
 
     mode:
     install     Download the required tools
-    	--proxy Set proxy
-    all         all scan and attack:subdomain, survival detection, finger, portscan, email collect, sensitive(crawl urls), pocscan, Weak password scanning, to_xray
+    all         all scan and attack:subdomain, survival detection, finger, portscan, email collect, sensitive(crawl urls), to_xray, pocscan, Weak password scanning
         --domain    one domain
         --domains   a domain file
-    all2        run scan and attack except domain collection: survival detection, finger, portscan, email collect, sensitive(crawl urls), pocscan, Weak password scanning, to_xray
+    all2        run scan and attack except domain collection: survival detection, finger, portscan, email collect, sensitive(crawl urls), to_xray, pocscan, Weak password scanning
+        --subdomain    one subdomain
+        --subdomains   a subdomain file
+    all3        run scan and attack except domain collection: survival detection, finger, portscan, email collect, sensitive(crawl urls),  to_xray
         --subdomain    one subdomain
         --subdomains   a subdomain file
     collect     run all collection modules :subdomain, survival detection, finger, port, email collect, sensitive(crawl urls), pocscan, to_xray
@@ -346,10 +388,10 @@ python3 Komo.py --ips ./ips.txt hostattack
     collect1    run collection modules :subdomain, survival detection, finger
         --domain    one domain
         --domains   a domain file
-    collect2    run collection modules :subdomain, survival detection, finger, portscan
-        --domain    one domain
-        --domains   a domain file
-    subdomain   only collect subdomain
+    #collect2    run collection modules :subdomain, survival detection, finger, portscan
+    #    --domain    one domain
+    #    --domains   a domain file
+    sub   only collect subdomain
         --domain    one domain
         --domains   a domains file
     finger      only collect the survival URL and  fingerprint
@@ -362,6 +404,9 @@ python3 Komo.py --ips ./ips.txt hostattack
         --url       one url
         --urls      an urls file
     webattack   only attack web from url or urls: pocscan, Weak password scanning, crawl urls to xray
+        --url       one url
+        --urls      an urls file
+    webattack1   only attack web from url or urls: Weak password scanning, crawl urls to xray
         --url       one url
         --urls      an urls file
     webattack2  only poc scan from url or urls: pocscan, Weak password scanning
@@ -383,8 +428,8 @@ python3 Komo.py --ips ./ips.txt hostattack
         python3 Komo.py --domains ./domains.txt collect1
         python3 Komo.py --domain example.com collect2
         python3 Komo.py --domains ./domains.txt collect2
-        python3 Komo.py --domain example.com subdomain
-        python3 Komo.py --domains ./domains.txt subdomain
+        python3 Komo.py --domain example.com sub
+        python3 Komo.py --domains ./domains.txt sub
 
         python3 Komo.py --subdomain aaa.example.com all2
         python3 Komo.py --subdomains ./subdomains.txt all2
@@ -402,6 +447,7 @@ python3 Komo.py --ips ./ips.txt hostattack
         python3 Komo.py --ips ./domains.txt portscan
         python3 Komo.py --ip example.com hostattack
         python3 Komo.py --ips ./domains.txt hostattack
+
 ```
 
 
@@ -412,29 +458,45 @@ Komo会将输出结果记录到result/{date} 目录下
 
 该目录下会有多个文件夹，分别对应各个模块的输出:
 
-> domain_log
+> domain_log  存储amass subfinder ctfr等工具的扫描结果
 >
-> fingerlog
+> oneforall_log 存储最终子域名的扫描结果。其他工具会结果传递给oneforall进行整合和指纹识别
 >
-> portscan_log
+> email_log     存储[emailall修改版](https://github.com/komomon/emailall)邮箱收集结果
 >
-> sensitive_log
+> fingerlog     存储ehole，webanalyze的web服务指纹的扫描结果
 >
-> vulscan_log
+> portscan_log  存储 naabu TxPortMap的端口扫描结果
+>
+> sensitive_log 存储crawlergo rad hakrawler gospider URLFinder gau的url连接爬取结果
+>
+> vulscan_log   存储web服务poc的扫描结果和主机漏洞，常见弱口令扫描的结果(nuclei afrog vulmap vscan goon SweetBabyScan)
 
 result/{date} 根目录下会有输出结果文件：
 
-target 为domain或date
+target 为domain或date或randomstr
 
 > {target}.final.subdomains.txt 最终找到的所有子域名
 >
-> {target}.links.csv 多个工具爬取到的所有link
->
 > {target}.many.tools.subdomains.txt 除oneforall之外的其他子域名收集工具收集到的域名
 >
-> {target}.subdomains.ips.txt 域名反查的ip
+> {target}.ports.txt 端口扫描结果,端口指纹的请到result/{date}/portscan_log/{target}.TxPortMap.txt查看
+    
+> {domain}.nocdn.subdomains.txt 无cdn子域名文件
+>
+> {domain}.nocdn.ips.txt 无cdn子域名对应ip文件
+>
+> {domain}.cdn.subdomains.txt 有cdn子域名文件
+>
+> {domain}.errorcdn.subdomains.txt cdn判断错误的子域名文件
+>
+> ~~{target}.subdomains.ips.txt 域名反查的ip~~
 >
 > {target}.subdomains.with.http.txt 存活的子域名并且带http(s)
+>
+> {target}.links.csv 多个工具爬取到的所有link
+>
+> 其他文件请到对应结果目录下查找
 
 
 
@@ -469,6 +531,22 @@ target 为domain或date
 
 
 ## 更新日志
+
+
+### 20230217
+
+1、逻辑优化，先端口扫描在探活域名和http服务是否存活，解决httpx只扫描80 443端口，忽略掉其他端口有web服务的问题。
+2、默认修改为扫描常用的1000个端口
+3、增加新的结果文件：
+    端口文件result/{date}/{target}.ports.txt（result/{date}/{output_filename_prefix}.ports.txt）
+    端口指纹的请到result/{date}/portscan_log/{target}.TxPortMap.txt查看
+    取消掉 result/{self.date}/{output_filename_prefix}.subdomains.ips.txt
+    增加无cdn子域名文件，result/{date}/{domain}.nocdn.subdomains.txt
+    增加无cdn子域名对应ip文件，result/{date}/{domain}.nocdn.ips.txt
+    增加有cdn子域名文件，result/{date}/{domain}.cdn.subdomains.txt
+    增加cdn判断错误的子域名文件，result/{date}/{domain}.errorcdn.subdomains.txt
+        
+4、取消collect2 collect2变为collect1
 
 
 
@@ -511,15 +589,6 @@ httpx剥离出来了成了单个模块
 5、修改config.yaml,sensitiveinfo模块的工具运行时间，xray监听端口通过config.yaml配置
 
 6、修改vulsan 模块，子线程不能执行的bug
-
-
-
-
-
-
-
-
-
 
 
 
