@@ -29,7 +29,7 @@ blue = '\033[01;34m'
 red = '\033[1;31m'
 end = '\033[0m'
 
-version = 'v1.1.1beta'
+version = 'v1.2.0beta'
 message = white + '{' + red + version + ' #dev' + white + '}'
 
 banner = f"""
@@ -90,10 +90,13 @@ class Komo(object):
 
     mode:
     install     Download the required tools
-    all         all scan and attack:subdomain, survival detection, finger, portscan, email collect, sensitive(crawl urls), pocscan, Weak password scanning, to_xray
+    all         all scan and attack:subdomain, survival detection, finger, portscan, email collect, sensitive(crawl urls), to_xray, pocscan, Weak password scanning
         --domain    one domain
         --domains   a domain file
-    all2        run scan and attack except domain collection: survival detection, finger, portscan, email collect, sensitive(crawl urls), pocscan, Weak password scanning, to_xray
+    all2        run scan and attack except domain collection: survival detection, finger, portscan, email collect, sensitive(crawl urls), to_xray, pocscan, Weak password scanning
+        --subdomain    one subdomain
+        --subdomains   a subdomain file
+    all3        run scan and attack except domain collection: survival detection, finger, portscan, email collect, sensitive(crawl urls),  to_xray
         --subdomain    one subdomain
         --subdomains   a subdomain file
     collect     run all collection modules :subdomain, survival detection, finger, port, email collect, sensitive(crawl urls), pocscan, to_xray
@@ -102,9 +105,9 @@ class Komo(object):
     collect1    run collection modules :subdomain, survival detection, finger
         --domain    one domain
         --domains   a domain file
-    collect2    run collection modules :subdomain, survival detection, finger, portscan
-        --domain    one domain
-        --domains   a domain file
+    #collect2    run collection modules :subdomain, survival detection, finger, portscan
+    #    --domain    one domain
+    #    --domains   a domain file
     sub   only collect subdomain
         --domain    one domain
         --domains   a domains file
@@ -118,6 +121,9 @@ class Komo(object):
         --url       one url
         --urls      an urls file
     webattack   only attack web from url or urls: pocscan, Weak password scanning, crawl urls to xray
+        --url       one url
+        --urls      an urls file
+    webattack1   only attack web from url or urls: Weak password scanning, crawl urls to xray
         --url       one url
         --urls      an urls file
     webattack2  only poc scan from url or urls: pocscan, Weak password scanning

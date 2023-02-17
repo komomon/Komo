@@ -117,7 +117,8 @@ def manager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
     # 三种模式
     if domain and ip is None and ipfile is None:
         # ipfile = f'result/{date}/{domain}.subdomains.ips.txt'
-        ipfile = f"result/{date}/{domain}.nocdn.ips.txt"
+        #ipfile = f"result/{date}/{domain}.nocdn.ips.txt"
+        ipfile = f"result/{date}/{domain}.final.subdomains.txt"
         output_filename_prefix = domain
     elif ipfile and domain is None and ip is None:
         ipfile = ipfile
@@ -136,8 +137,9 @@ def manager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
     @logger.catch
     def naabu(ip=ip, ipfile=ipfile):
         '''
-        naabu 2.1.0
+        naabu 2.1.1
         :return:
+        windows下  naabu 不能进行主机存活扫描 不支持-sn参数，所以不能用naabu进行c段扫描，每个ip都扫描1000个端口太浪费时间了
         '''
         logger.info('<' * 10 + f'start {sys._getframe().f_code.co_name}' + '>' * 10)
         ports_str = "22,80,1433,1521,3389,8009,8080,8443"
@@ -155,7 +157,7 @@ def manager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
         # -exclude-cdn, -ec	  skip full port scans for CDN's (only checks for 80,443)
         # -proxy string		 socks5 proxy (ip[:port] / fqdn[:port]
         # -proxy-auth string		socks5 proxy authentication (username:password)
-        cmdstr = f'{pwd}/naabu/naabu{suffix} -source-ip 8.8.8.8:22 -rate 600 -top-ports 1000 -silent -no-color -list {ipfile} -csv -o {output_filename}.csv'
+        cmdstr = f'{pwd}/naabu/naabu{suffix} -source-ip 8.8.8.8:22 -rate 1000 -top-ports 1000 -silent -no-color -list {ipfile} -csv -o {output_filename}.csv'
         # naabu -list hosts.txt -p - 扫描全部  -exclude-cdn 跳过cdn检测，cdn只检查80 443
         # cmd = pwd + f'/naabu{suffix} -p "{ports_str}" -silent -no-color -scan-all-ips -list result/{date}/{domain}.final.subdomains.txt -o {portscan_log_folder}/{domain}.{sys._getframe().f_code.co_name}.txt'
         # nmap 常见100个端口 -scan-all-ips
@@ -163,14 +165,15 @@ def manager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
         logger.info(f"[+] command:{cmdstr}")
         os.system(cmdstr)
         logger.info(f'[+] {sys._getframe().f_code.co_name} finished,outputfile:{output_filename}.csv')
-        # with open(f"{output_filename}.csv", "r") as f1:
-        #     reader = csv.reader(f1)
-        #     head = next(reader)
-        #     with open(f"result/{date}/{output_filename_prefix}.ports.txt", "w") as f2:
-        #         for row in reader:
-			# baidu.com:8080  192.168.1.1:53
-        #             lline = f"{row[0]}:{row[2]}" if row[0] else f"{row[1]}:{row[2]}"
-        #             f2.write(lline + '\n')
+        with open(f"{output_filename}.csv", "r") as f1:
+            reader = csv.reader(f1)
+            head = next(reader)
+            with open(f"result/{date}/{output_filename_prefix}.ports.txt", "w") as f2:
+                for row in reader:
+                    # baidu.com:8080  192.168.1.1:53
+                    lline = f"{row[0]}:{row[2]}" if row[0] else f"{row[1]}:{row[2]}"
+                    f2.write(lline + '\n')
+        logger.info(f'[+] [+] IP and port outputfile: result/{date}/{output_filename_prefix}.ports.txt')
 
     @logger.catch
     def TxPortMap(ip=ip, ipfile=ipfile):
@@ -191,12 +194,12 @@ def manager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
         logger.info(f"[+] command:{cmdstr}")
         os.system(cmdstr)
         logger.info(f'[+] {sys._getframe().f_code.co_name} finished,outputfile:{outputfile}')
-        with open(f"{outputfile}.csv", "r") as f1:
-            with open(f"result/{date}/{output_filename_prefix}.ports.txt", "w") as f2:
-                for lline in f1.read():
-                    lline = lline.strip().split()[0]
-                    f2.write(lline + '\n')
-        logger.info(f'[+] [+] IP and port outputfile: result/{date}/{output_filename_prefix}.ports.txt')
+        # with open(f"{outputfile}", "r") as f1:
+        #     with open(f"result/{date}/{output_filename_prefix}.ports.txt", "w") as f2:
+        #         for lline in f1.read():
+        #             lline = lline.strip().split()[0]
+        #             f2.write(lline + '\n')
+        # logger.info(f'[+] [+] IP and port outputfile: result/{date}/{output_filename_prefix}.ports.txt')
 
     # win不可用先剔除
     @logger.catch
@@ -244,7 +247,7 @@ def manager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
     def run():
         target = domain if domain else hashlib.md5(bytes(date, encoding='utf-8')).hexdigest()
         if progress_record(date=date, target=target, module="portscan", finished=False) is False:
-            # naabu(ip=None, ipfile=ipfile)
+            naabu(ip=None, ipfile=ipfile)
             TxPortMap(ip=None, ipfile=ipfile)
             # nmaps(ip=None,ipfile=ipfile)
             # dismap(ip=None,ipfile=ipfile)
