@@ -61,7 +61,7 @@ def progress_record_old(date=None, target=None, module=None, submodule=None, val
 
 
 # 进度记录,基于json
-def progress_record(date=None, target=None, module="vulscan",submodule=None, value=None, finished=False):
+def progress_record(date=None, target=None, module="vulscan", submodule=None, value=None, finished=False):
     target_log = {"domain": False,
                   "emailcollect": False,
                   "survivaldetect": False,
@@ -306,20 +306,20 @@ def webmanager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39")
 
     # 两种模式,三种情况
     if domain and urlsfile is None and url is None:
-        urlsfile = f"result/{date}/{domain}.subdomains.with.http.txt"
+        input_file = f"result/{date}/{domain}.subdomains.with.http.txt"
         output_filename_prefix = domain
     elif domain is None and urlsfile and url is None:
+        input_file = urlsfile
         output_filename_prefix = date
-        urlsfile = urlsfile
     elif domain is None and urlsfile is None and url:
+        input_file = f"temp.vulscan.txt"
         subdomain_tuple = tldextract.extract(url)
         output_filename_prefix = '.'.join(part for part in subdomain_tuple if part)  # www_baidu_com 127_0_0_1
-        urlsfile = f"temp.{sys._getframe().f_code.co_name}.txt"
-        with open(urlsfile, "w", encoding="utf-8") as f:
+        with open(input_file, "w", encoding="utf-8") as f:
             f.write(url)
 
     @logger.catch
-    def nuclei(urlsfile=urlsfile):
+    def nuclei(urlsfile=input_file):
         '''
         nuclei 2.6.5
         linux下 nuclei 不支持Popen子线程执行不管shell参数为True还是False
@@ -352,7 +352,7 @@ def webmanager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39")
 
     # result/{date}/{domain}.subdomains_with_http.txt result/{date}/{domain}.subdomains_ips.txt
     @logger.catch
-    def afrog(urlsfile=urlsfile):
+    def afrog(urlsfile=input_file):
         '''
         afrog 输出默认带一层reports  reports\E:\ccode\python\006_lunzi\core\tools\vulscan\vulweb.com.afrog.html:
         输出目录 reports/{domain}.afrog.html
@@ -384,7 +384,7 @@ def webmanager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39")
 
     # 目前只支持urls文件，单个url也是写入文件，然后工具从文件中读取
     @logger.catch
-    def vulmap(url=url, urlsfile=urlsfile):
+    def vulmap(url=url, urlsfile=input_file):
         '''
         vulmap v0.9 可对 webapps 进行漏洞扫描, 并且具备漏洞利用功能, 目前支持的 webapps 包括 activemq, flink, shiro, solr,
         struts2, tomcat, unomi, drupal, elasticsearch, fastjson, jenkins, nexus, weblogic, jboss, spring, thinkphp
@@ -490,7 +490,7 @@ def webmanager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39")
 
     # 目前只支持urls文件，单个url也是写入文件，然后工具从文件中读取
     @logger.catch
-    def vscan(urlsfile=urlsfile):
+    def vscan(urlsfile=input_file):
         '''
         vscan v2.1 改自nabbu，进行端口扫描，端口指纹识别，和简单的端口服务爆破
         说白了也是一个web扫描，移植的naabu,在naabu的基础上添加了一些功能，当使用-top-ports的时候
@@ -521,18 +521,41 @@ def webmanager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39")
 
     def run():
         target = domain if domain else hashlib.md5(bytes(date, encoding='utf-8')).hexdigest()
+        # 先判断目标是否存在，如果存在判断该目标的要扫描的urls文件是否存在，大小是否为空，如果不为空则扫描
         if progress_record(date=date, target=target, module="vulscan", submodule="webattack", finished=False) is False:
-            # {domain}.subdomain_with_http.txt
-            nuclei(urlsfile=urlsfile)
-            afrog(urlsfile=urlsfile)
-            vulmap(urlsfile=urlsfile)
-            # to_xray()
-            # 扫描敏感目录和弱口令爆破
-            vscan(urlsfile=urlsfile)
-            progress_record(date=date, target=target, module="vulscan", submodule="webattack", finished=True)
-            logger.info('-' * 10 + f'finished {sys._getframe().f_code.co_name}' + '-' * 10)
+            if os.path.exists(input_file):
+                if os.path.getsize(input_file):
+                    # {domain}.subdomain_with_http.txt
+                    nuclei(urlsfile=input_file)
+                    afrog(urlsfile=input_file)
+                    vulmap(urlsfile=input_file)
+                    # to_xray()
+                    # 扫描敏感目录和弱口令爆破
+                    vscan(urlsfile=input_file)
+                    progress_record(date=date, target=target, module="vulscan", submodule="webattack", finished=True)
+                else:
+                    logger.error(f"[+] {input_file} size is 0, Skip vulscan module!")
+            else:
+                logger.error(f"[+] {input_file} not found, Skip vulscan module!")
+        logger.info('-' * 10 + f'finished {sys._getframe().f_code.co_name}' + '-' * 10)
+
+
+    # def run():
+    #     target = domain if domain else hashlib.md5(bytes(date, encoding='utf-8')).hexdigest()
+    #     # 先判断目标是否存在，如果存在判断该目标的要扫描的urls文件是否存在，大小是否为空，如果不为空则扫描
+    #     if progress_record(date=date, target=target, module="vulscan", submodule="webattack", finished=False) is False:
+    #         # {domain}.subdomain_with_http.txt
+    #         nuclei(urlsfile=input_file)
+    #         afrog(urlsfile=input_file)
+    #         vulmap(urlsfile=input_file)
+    #         # to_xray()
+    #         # 扫描敏感目录和弱口令爆破
+    #         vscan(urlsfile=input_file)
+    #         progress_record(date=date, target=target, module="vulscan", submodule="webattack", finished=True)
+    #     logger.info('-' * 10 + f'finished {sys._getframe().f_code.co_name}' + '-' * 10)
 
     run()
+
 
 
 # 对ip进行扫描
@@ -554,6 +577,9 @@ def hostmanager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
     if domain and ipfile is None and ip is None:
         ipfile = f"result/{date}/{domain}.subdomains.ips.txt"
         output_filename_prefix = domain
+        if os.path.exists(ipfile) is False or os.path.getsize(ipfile) is False:
+            logger.info(f"[+] {ipfile} not found, exit!")
+            return False
     elif domain is None and ipfile and ip is None:
         ipfile = ipfile
         output_filename_prefix = ip
@@ -656,7 +682,7 @@ def hostmanager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
 
     def run():
         target = domain if domain else hashlib.md5(bytes(date, encoding='utf-8')).hexdigest()
-        if progress_record(date=date,target=target, module="vulscan", submodule="hostattack", finished=False) is False:
+        if progress_record(date=date, target=target, module="vulscan", submodule="hostattack", finished=False) is False:
             goon(ip=ip, ipfile=ipfile)
             # 暂未使用，主要是会下载chromewin每次执行
             SweetBabyScan(ip=ip, ipfile=ipfile)

@@ -1,5 +1,7 @@
 import inspect
+import json
 import os
+import shutil
 import subprocess
 import shlex
 # 启用子进程执行外部shell命令
@@ -82,3 +84,27 @@ def __subprocess2111(cmd):
         if out_temp:
             out_temp.close()
     return lines
+
+
+def progress_file_record(date=None, filename="domain", value=None):
+    '''
+    记录结果文件名称
+    :param date:
+    :param filename:
+    :param value: 传输绝对路径
+    :return:
+    "file": {
+    "many_tools_subdomain_file": {"filename": "","filesize": 0,"isexist": false},
+    '''
+    logfile = f"result/{date}/log.json"
+    if os.path.exists(logfile) is False:
+        shutil.copy("config/log_template.json", f"result/{date}/log.json")
+    with open(logfile, 'r', encoding='utf-8') as f1:
+        log_json = json.loads(f1.read())
+        # log_dict = dict(log_json)
+    if os.path.exists(value):
+        log_json["file"][filename]["filename"] = value
+        log_json["file"][filename]["filesize"] = os.path.getsize(value)
+        log_json["file"][filename]["isexist"] = True
+    with open(logfile, "w", encoding="utf-8") as f:
+        f.write(json.dumps(log_json))

@@ -214,6 +214,25 @@ def manager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39"):
     #     urlsfile = "temp.txt"
     #     with open(urlsfile, "w", encoding="utf-8") as f:
     #         f.write(url)
+    # 确定输入文件
+    if domain and urlsfile is None and url is None:
+        input_file = f'result/{date}/{domain}.subdomains.with.http.txt'
+        # ehole的输出文件xlsx 文件名只能有一个点,所以如下将多余的.换成了-横线
+        output_filename_prefix = domain.replace(".",
+                                                "-")  # f'{domain.replace(".", "-")}-{sys._getframe().f_code.co_name}'
+    elif urlsfile and domain is None and url is None:
+        input_file = urlsfile
+        # 如果从文件输入则结果以时间为文件名
+        output_filename_prefix = date
+    elif url and domain is None and urlsfile is None:
+        # domain = date
+        input_file = f"temp.finger.txt"
+        output_filename_prefix = date
+        with open(input_file, "w", encoding="utf-8") as f:
+            f.write(url)
+    else:
+        logger.error(f'[-] 请检查输入的文件 or domain 是否正确')
+        return
 
     # 进行指纹识别 result/{date}/ehole_log/{domain}.ehole.xlsx
     @logger.catch
@@ -230,31 +249,35 @@ def manager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39"):
         if os.path.exists(output_folder) is False:
             os.makedirs(output_folder)
 
-        if domain and file is None and url is None:
-            inputfile = f'result/{date}/{domain}.subdomains.with.http.txt'
-            output_filename = f'{domain.replace(".", "-")}-{sys._getframe().f_code.co_name}'
-        elif file and domain is None and url is None:
-            inputfile = file
-            # 如果从文件输入则结果以时间为文件名
-            output_filename = date
-        elif url and domain is None and file is None:
-            # domain = date
-            output_filename = date
-            inputfile = f"temp.{sys._getframe().f_code.co_name}.txt"
-            with open(urlsfile, "w", encoding="utf-8") as f:
-                f.write(url)
-        else:
-            logger.error(f'[-] 请检查输入的文件 or domain 是否正确')
-            return
+        # if domain and file is None and url is None:
+        #     input_file = f'result/{date}/{domain}.subdomains.with.http.txt'
+        #     output_filename = f'{domain.replace(".", "-")}-{sys._getframe().f_code.co_name}'
+        #     # if os.path.exists(input_file) is False or os.path.getsize(input_file) is False:
+        #     #     logger.info(f"[+] {input_file} not found, exit!")
+        #     #     return False
+        # elif file and domain is None and url is None:
+        #     input_file = file
+        #     # 如果从文件输入则结果以时间为文件名
+        #     output_filename = date
+        # elif url and domain is None and file is None:
+        #     # domain = date
+        #     output_filename = date
+        #     input_file = f"temp.{sys._getframe().f_code.co_name}.txt"
+        #     with open(urlsfile, "w", encoding="utf-8") as f:
+        #         f.write(url)
+        # else:
+        #     logger.error(f'[-] 请检查输入的文件 or domain 是否正确')
+        #     return
         # cmd = f'{pwd}/Ehole/ehole{suffix} finger  -l result/{date}/{domain}.subdomains_with_http.txt -o result/{date}/ehole_log/{domain.replace(".", "-")}-ehole.xlsx'
-        cmd = f'{pwd}/Ehole/ehole{suffix} finger  -l {inputfile} -o {output_folder}/{output_filename}.xlsx'
+        output_file = f"{output_folder}/{output_filename_prefix}-{sys._getframe().f_code.co_name}.xlsx"
+        cmd = f'{pwd}/Ehole/ehole{suffix} finger  -l {input_file} -o {output_file}'
         logger.info(f"[+] command:{cmd}")
         os.system(cmd)
-        logger.info(f"[+] Generate file: {output_folder}/{output_filename}.xlsx")
-        # 最后移除临时文件
-        if url and domain is None and file is None:
-            if os.path.exists(inputfile):
-                os.remove(inputfile)
+        logger.info(f"[+] Generate file: {output_file}")
+        # # 最后移除临时文件
+        # if url and domain is None and file is None:
+        #     if os.path.exists(input_file):
+        #         os.remove(input_file)
 
     @logger.catch
     def webanalyze(url=url, file=urlsfile):
@@ -273,26 +296,27 @@ def manager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39"):
         if os.path.exists(output_folder) is False:
             os.makedirs(output_folder)
 
-        if domain and file is None and url is None:
-            inputfile = f'result/{date}/{domain}.subdomains.with.http.txt'
-            output_filename = f'{domain}.{sys._getframe().f_code.co_name}'
-        elif file and domain is None and url is None:
-            inputfile = file
-            # 如果从文件输入则结果以时间为文件名
-            output_filename = date
-            # domain = date
-        elif url and domain is None and file is None:
-            # domain = date
-            output_filename = date
-            inputfile = f"temp.{sys._getframe().f_code.co_name}.txt"
-            with open(urlsfile, "w", encoding="utf-8") as f:
-                f.write(url)
-        else:
-            logger.error(f'[-] 请检查输入的文件 or domain 是否正确')
-            return
+        # if domain and file is None and url is None:
+        #     input_file = f'result/{date}/{domain}.subdomains.with.http.txt'
+        #     output_filename = f'{domain}.{sys._getframe().f_code.co_name}'
+        # elif file and domain is None and url is None:
+        #     input_file = file
+        #     # 如果从文件输入则结果以时间为文件名
+        #     output_filename = date
+        #     # domain = date
+        # elif url and domain is None and file is None:
+        #     # domain = date
+        #     output_filename = date
+        #     input_file = f"temp.{sys._getframe().f_code.co_name}.txt"
+        #     with open(urlsfile, "w", encoding="utf-8") as f:
+        #         f.write(url)
+        # else:
+        #     logger.error(f'[-] 请检查输入的文件 or domain 是否正确')
+        #     return
+        output_file = f"{output_folder}/{output_filename_prefix}-{sys._getframe().f_code.co_name}.csv"
         # o {output_folder}/{output_filename}.xlsx -output csv json
-        # cmdstr = f'webanalyze{suffix} -apps technologies.json -hosts {inputfile}  -crawl 5 -output csv'  # > {output_folder}/{output_filename}.csv'
-        cmdstr = f'webanalyze{suffix} -apps technologies.json -hosts {root}/{inputfile}  -crawl 5 -output csv > {root}/{output_folder}/{output_filename}.csv'  # > {output_folder}/{output_filename}.csv'
+        # cmdstr = f'webanalyze{suffix} -apps technologies.json -hosts {input_file}  -crawl 5 -output csv'  # > {output_folder}/{output_filename}.csv'
+        cmdstr = f'webanalyze{suffix} -apps technologies.json -hosts {root}/{input_file}  -crawl 5 -output csv > {root}/{output_file}'  # > {output_folder}/{output_filename}.csv'
         # cmdstr = f'{pwd}/webanalyze/webanalyze{suffix} -apps technologies.json -hosts {file}  -output csv -crawl 5'
         logger.info(f"[+] command:{cmdstr}")
         # os.system(cmdstr)
@@ -318,19 +342,29 @@ def manager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39"):
         # with open(f'{output_folder}/{output_filename}.csv', 'w', encoding='utf-8') as f:
         #     writer = csv.writer(f)
         #     writer.writerows(finger_list)
-        logger.info(f"[+] Generate file: {output_folder}/{output_filename}.csv")
-
-        # 最后移除临时文件
-        if url and domain is None and file is None:
-            if os.path.exists(inputfile):
-                os.remove(inputfile)
+        logger.info(f"[+] Generate file: {output_file}")
 
     def run():
         target = domain if domain else hashlib.md5(bytes(date, encoding='utf-8')).hexdigest()
         if progress_record(date=date, target=target, module="finger", finished=False) is False:
-            ehole(url=url, file=urlsfile)
-            webanalyze(url=url, file=urlsfile)
+            # 如何存在所需的文件则扫描，否则不扫描
+            if os.path.exists(input_file):
+                if os.path.getsize(input_file):
+                    ehole(url=url, file=input_file)
+                    webanalyze(url=url, file=input_file)
+                else:
+                    logger.error(f"[+] {input_file} size is 0, Skip finger module!")
+            else:
+                logger.error(f"[+] {input_file} not found, Skip finger module!")
             progress_record(date=date, target=target, module="finger", finished=True)
+            # if exit_flag: exit(1)
+
+    # def run():
+    #     target = domain if domain else hashlib.md5(bytes(date, encoding='utf-8')).hexdigest()
+    #     if progress_record(date=date, target=target, module="finger", finished=False) is False:
+    #         ehole(url=url, file=input_file)
+    #         webanalyze(url=url, file=input_file)
+    #         progress_record(date=date, target=target, module="finger", finished=True)
 
     run()
 

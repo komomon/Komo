@@ -14,13 +14,19 @@
     "date": ""
   },
   "file": {
-    "domain": "",
-    "domain_file": "",
-    "subdomain": "",
-    "subdomain_file": "",
-    "port_file": "",
-    "links_file": "",
-    "ip_file": ""
+    "domain_file": {"filename": "Not used temporarily","filesize": 0,"isexist": false},
+    "many_tools_subdomain_file": {"filename": "","filesize": 0,"isexist": false},
+    "subdomain_file": {"filename": "","filesize": 0,"isexist": false},
+    "nocdn_subdomain_file": {"filename": "","filesize": 0,"isexist": false},
+    "nocdn_ip_file": {"filename": "","filesize": 0,"isexist": false},
+    "cdn_subdomain_file": {"filename": "","filesize": 0,"isexist": false},
+    "errorcdn_subdomains_file": {"filename": "","filesize": 0,"isexist": false},
+    "other_subdomain_file": {"filename": "","filesize": 0,"isexist": false},
+    "email_file": {"filename": "","filesize": 0,"isexist": false},
+    "port_file": {"filename": "","filesize": 0,"isexist": false},
+    "subdomain_with_http_file": {"filename": "","filesize": 0,"isexist": false},
+    "links_file": {"filename": "Not used temporarily","filesize": 0,"isexist": false},
+    "ip_file": {"filename": "Not used temporarily","filesize": 0,"isexist": false}
   },
   "domain": {
     "scanning_target": "",

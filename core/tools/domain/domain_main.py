@@ -11,7 +11,7 @@ import socket
 import subprocess
 import tempfile
 import traceback
-
+from common.functions import *
 import fire
 import tldextract
 from loguru import logger
@@ -502,15 +502,19 @@ def manager(domain=None, date="2022-09-02-00-01-39"):
                 error_domain_list.append(ddomain)
         with open(f"result/{date}/{domain}.nocdn.subdomains.txt", 'a', encoding='utf-8')as f1:
             f1.writelines("\n".join(nocdn_domain_list))
+        progress_file_record(date=date,filename="nocdn_subdomain_file",value=f"result/{date}/{domain}.nocdn.subdomains.txt")
         logger.info(f'[+] No CDN subdomains outputfile: result/{date}/{domain}.nocdn.subdomains.txt')
         with open(f"result/{date}/{domain}.nocdn.ips.txt", 'a', encoding='utf-8')as f2:
             f2.writelines("\n".join(nocdn_domain_list))
+        progress_file_record(date=date, filename="nocdn_ip_file", value=f"result/{date}/{domain}.nocdn.ips.txt")
         logger.info(f'[+] No CDN ips outputfile: result/{date}/{domain}.nocdn.ips.txt')
         with open(f"result/{date}/{domain}.cdn.subdomains.txt", 'a', encoding='utf-8')as f3:
             f3.writelines("\n".join(cdn_domain_list))
+        progress_file_record(date=date,filename="cdn_subdomain_file",value=f"result/{date}/{domain}.cdn.subdomains.txt")
         logger.info(f'[+] CDN subdomains outputfile: result/{date}/{domain}.cdn.subdomains.txt')
         with open(f"result/{date}/{domain}.errorcdn.subdomains.txt", 'a', encoding='utf-8')as f4:
             f4.writelines("\n".join(error_domain_list))
+        progress_file_record(date=date, filename="errorcdn_subdomains_file", value=f"result/{date}/{domain}.errorcdn.subdomains.txt")
         logger.info(f'[+] Check CDN error subdomains outputfile: result/{date}/{domain}.errorcdn.subdomains.txt')
 
     # 整合各个工具扫出的子域名结果,除了oneforall
@@ -525,6 +529,8 @@ def manager(domain=None, date="2022-09-02-00-01-39"):
         subdomains_list = list(set(subdomains))
         with open(f"result/{date}/{domain}.many.tools.subdomains.txt", 'w', encoding='utf-8') as fd:
             fd.writelines("\n".join(subdomains_list))
+        progress_file_record(date=date, filename="many_tools_subdomain_file",
+                             value=f"result/{date}/{domain}.many.tools.subdomains.txt")
         logger.info(f'[+] Many tools find subdomains number: {len(subdomains_list)}')
         logger.info(f'[+] Many tools find subdomains outputfile: result/{date}/{domain}.many.tools.subdomains.txt')
         # 将所有工具的结果cp到/result/temp目录下，供oneforall采集
@@ -556,8 +562,12 @@ def manager(domain=None, date="2022-09-02-00-01-39"):
                         subdomains_list.remove(ssubdomain)
         with open(f"result/{date}/{domain}.final.subdomains.txt", 'w', encoding='utf-8') as fd2:
             fd2.writelines("\n".join(subdomains_list))
+        progress_file_record(date=date, filename="subdomain_file",
+                             value=f"result/{date}/{domain}.final.subdomains.txt")
         with open(f"result/{date}/{domain}.other.subdomains.txt", 'w', encoding='utf-8') as fd3:
             fd3.writelines("\n".join(other_subdomains_list))
+        progress_file_record(date=date, filename="other_subdomain_file",
+                             value=f"result/{date}/{domain}.other.subdomains.txt")
         logger.info(f'[+] Final find subdomains number: {len(subdomains_list)}')
         logger.info(f'[+] Final find subdomains outputfile: result/{date}/{domain}.final.subdomains.txt')
         cdn_check(is_cdn, subdomains_list, max_workers=50)

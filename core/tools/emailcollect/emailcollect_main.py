@@ -163,7 +163,7 @@ class manager():
         self.grader_father = os.path.abspath(os.path.dirname(self.pwd_and_file) + os.path.sep + "../..")
         # print(grader_father) # E:\ccode\python\006_lunzi\core
         # 创建存储工具扫描结果的文件夹
-        self.module_log_folder = f"{self.root}/result/{date}/emailcollect_log"
+        self.module_log_folder = f"{self.root}/result/{self.date}/emailcollect_log"
         makedir0(self.module_log_folder)
 
     @logger.catch
@@ -190,6 +190,9 @@ class manager():
         if os.path.exists(output_filename_tmp):
             try:
                 shutil.move(output_filename_tmp, output_folder)
+                # 记录文件
+                progress_file_record(date=self.date, filename="email_file",
+                                     value=f"result/{self.date}/emailcollect_log/{tool_name}_log/{output_filename_prefix}_All.json")
             except Exception as e:
                 logger.error(traceback.format_exc())
         else:

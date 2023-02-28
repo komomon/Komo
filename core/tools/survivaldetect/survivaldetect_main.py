@@ -142,6 +142,37 @@ class manager():
         if os.path.exists(self.module_log_folder) is False:
             os.makedirs(self.module_log_folder)
 
+        # 匹配输入文件
+        self.input_file = ""
+        self.output_filename_prefix = ""
+        # print(domain, subdomain, subdomains)
+        if self.domain and self.subdomain is None and self.subdomains is None:
+            # input_file = f'result/{self.date}/{domain}.final.subdomains.txt'
+            self.input_file = f"result/{self.date}/{self.domain}.ports.txt"
+            self.output_filename_prefix = domain
+            if os.path.exists(self.input_file) is False or os.path.getsize(self.input_file) is False:
+                logger.info(f"[+] {self.input_file} not found, exit!")
+                # return False
+        elif self.subdomains and self.domain is None and self.subdomain is None:
+            if os.path.exists(self.subdomains):
+                self.input_file = self.subdomains
+                # 如果从文件输入则结果以时间为文件名
+                self.output_filename_prefix = self.date
+            else:
+                logger.error(f'{self.subdomains} not found!')
+                exit(1)
+        elif self.subdomain and self.domain is None and self.subdomains is None:
+            self.input_file = f"temp.subdomains.txt"
+            self.output_filename_prefix = self.date
+            # print(3,domain,file)
+            # subdomain_tuple = tldextract.extract(url)
+            # output_filename_prefix = '.'.join(part for part in subdomain_tuple if part)  # www.baidu.com 127_0_0_1
+            with open(self.input_file, "w", encoding="utf-8") as f:
+                f.write(self.subdomain)
+        else:
+            logger.error(f'[-] Please check subdomain or subdomains or domain')
+            exit(1)
+
     # 生成带http的域名url 和ip文件 result/{date}/{domain}.subdomains_with_http.txt result/{date}/{domain}.subdomains_ips.txt
     @logger.catch
     def httpx(self, domain=None, subdomain=None, subdomains=None):
@@ -157,37 +188,40 @@ class manager():
         output_folder = f'{self.module_log_folder}/{sys._getframe().f_code.co_name}log'
         if os.path.exists(output_folder) is False:
             os.makedirs(output_folder)
-        input_file = ""
-        output_filename_prefix = ""
-        print(domain, subdomain, subdomains)
-        if domain and subdomain is None and subdomains is None:
-            # input_file = f'result/{self.date}/{domain}.final.subdomains.txt'
-            input_file = f"result/{self.date}/{domain}.ports.txt"
-            output_filename_prefix = domain
-        elif subdomains and domain is None and subdomain is None:
-            if os.path.exists(subdomains):
-                input_file = subdomains
-                # 如果从文件输入则结果以时间为文件名
-                output_filename_prefix = self.date
-            else:
-                logger.error(f'{subdomains} not found!')
-                exit(1)
-        elif subdomain and domain is None and subdomains is None:
-            input_file = f"temp.{sys._getframe().f_code.co_name}.txt"
-            output_filename_prefix = self.date
-            # print(3,domain,file)
-            # subdomain_tuple = tldextract.extract(url)
-            # output_filename_prefix = '.'.join(part for part in subdomain_tuple if part)  # www.baidu.com 127_0_0_1
-            with open(input_file, "w", encoding="utf-8") as f:
-                f.write(subdomain)
-        else:
-            logger.error(f'[-] Please check subdomain or subdomains or domain')
-            exit(1)
+        # input_file = ""
+        # output_filename_prefix = ""
+        # print(domain, subdomain, subdomains)
+        # if domain and subdomain is None and subdomains is None:
+        #     # input_file = f'result/{self.date}/{domain}.final.subdomains.txt'
+        #     input_file = f"result/{self.date}/{domain}.ports.txt"
+        #     output_filename_prefix = domain
+        #     if os.path.exists(input_file) is False or os.path.getsize(input_file) is False:
+        #         logger.info(f"[+] {input_file} not found, exit!")
+        #         return False
+        # elif subdomains and domain is None and subdomain is None:
+        #     if os.path.exists(subdomains):
+        #         input_file = subdomains
+        #         # 如果从文件输入则结果以时间为文件名
+        #         output_filename_prefix = self.date
+        #     else:
+        #         logger.error(f'{subdomains} not found!')
+        #         exit(1)
+        # elif subdomain and domain is None and subdomains is None:
+        #     input_file = f"temp.{sys._getframe().f_code.co_name}.txt"
+        #     output_filename_prefix = self.date
+        #     # print(3,domain,file)
+        #     # subdomain_tuple = tldextract.extract(url)
+        #     # output_filename_prefix = '.'.join(part for part in subdomain_tuple if part)  # www.baidu.com 127_0_0_1
+        #     with open(input_file, "w", encoding="utf-8") as f:
+        #         f.write(subdomain)
+        # else:
+        #     logger.error(f'[-] Please check subdomain or subdomains or domain')
+        #     exit(1)
 
         subdomains_with_http = []
         subdomains_ips_tmp = []
         subdomains_ips = []
-        output_file = f"{output_folder}/{output_filename_prefix}.{sys._getframe().f_code.co_name}.csv"
+        output_file = f"{output_folder}/{self.output_filename_prefix}.{sys._getframe().f_code.co_name}.csv"
         # -favicon
         # -tech-detect	显示基于Wappalyzer数据集的技术
         # -cname
@@ -196,16 +230,16 @@ class manager():
         # -ec, -exclude-cdn	skip full port scans for CDNs (only checks for 80,443)
         # -td, -tech-detect	display technology in use based on wappalyzer dataset
         # -http-proxy, -proxy string    http proxy to use (eg http://127.0.0.1:8080)
-        cmdstr = f'{self.pwd}/httpx/httpx{self.suffix} -l {input_file} -status-code -title -favicon -ip -no-color -csv -o {output_file}'
+        cmdstr = f'{self.pwd}/httpx/httpx{self.suffix} -l {self.input_file} -status-code -title -favicon -ip -no-color -csv -o {output_file}'
         # cmdstr = "ping 127.0.0.1"
         logger.info(f"[+] command:{cmdstr}")
         os.system(cmdstr)
         # 结果处理，生成带http的文件和ip文件
         if os.path.exists(output_file):
             logger.info(
-                f"[+] Generate file: {output_folder}/{output_filename_prefix}.{sys._getframe().f_code.co_name}.csv")
+                f"[+] Generate file: {output_folder}/{self.output_filename_prefix}.{sys._getframe().f_code.co_name}.csv")
             # 生成带http的url
-            with open(f"{output_folder}/{output_filename_prefix}.{sys._getframe().f_code.co_name}.csv", 'r',
+            with open(f"{output_folder}/{self.output_filename_prefix}.{sys._getframe().f_code.co_name}.csv", 'r',
                       errors='ignore') as f:
                 reader = csv.reader(f)
                 head = next(reader)
@@ -214,18 +248,20 @@ class manager():
                     subdomains_ips_tmp.append(row[18].strip())  # host
                 subdomains_ips = getips(list(set(subdomains_ips_tmp)))
             # 生成带http的url txt
-            with open(f"result/{self.date}/{output_filename_prefix}.subdomains.with.http.txt", "w",
+            with open(f"result/{self.date}/{self.output_filename_prefix}.subdomains.with.http.txt", "w",
                       encoding="utf-8") as f2:
                 f2.writelines("\n".join(subdomains_with_http))
-            logger.info(f"[+] Generate file: result/{self.date}/{output_filename_prefix}.subdomains.with.http.txt")
+            logger.info(f"[+] Generate file: result/{self.date}/{self.output_filename_prefix}.subdomains.with.http.txt")
+            progress_file_record(date=self.date, filename="subdomain_with_http_file",
+                                 value=f"result/{self.date}/{self.output_filename_prefix}.subdomains.with.http.txt")
             # # 生成子域名对应的ip txt
             # with open(f"result/{self.date}/{output_filename_prefix}.subdomains.ips.txt", "w", encoding="utf-8") as f3:
             #     f3.writelines("\n".join(subdomains_ips))
             # logger.info(f"[+] Generate file: result/{self.date}/{output_filename_prefix}.subdomains.ips.txt")
             # 最后移除临时文件
-            if subdomain and domain is None and subdomains is None:
-                if os.path.exists(input_file):
-                    os.remove(input_file)
+            # if subdomain and domain is None and subdomains is None:
+            #     if os.path.exists(self.input_file):
+            #         os.remove(self.input_file)
         else:
             logger.error(f"[+] {output_file} does not exist.")
             exit(1)
@@ -234,9 +270,23 @@ class manager():
     def run(self):
         target = self.domain if self.domain else hashlib.md5(bytes(self.date, encoding='utf-8')).hexdigest()
         if progress_record(date=self.date, target=target, module="survivaldetect", finished=False) is False:
-            self.httpx(domain=self.domain, subdomain=self.subdomain, subdomains=self.subdomains)
+            # 如何存在所需的文件则扫描，否则不扫描
+            if os.path.exists(self.input_file):
+                if os.path.getsize(self.input_file):
+                    self.httpx(domain=self.domain, subdomain=self.subdomain, subdomains=self.subdomains)
+                else:
+                    logger.error(f"[+] {self.input_file} size is 0, Skip survivaldetect module!")
+            else:
+                logger.error(f"[+] {self.input_file} not found, Skip survivaldetect module!")
             progress_record(date=self.date, target=target, module="survivaldetect", finished=True)
         logger.info('-' * 10 + f'finished {sys._getframe().f_code.co_name}' + '-' * 10)
+        # if exit_flag: exit(1)
+    # def run(self):
+    #     target = self.domain if self.domain else hashlib.md5(bytes(self.date, encoding='utf-8')).hexdigest()
+    #     if progress_record(date=self.date, target=target, module="survivaldetect", finished=False) is False:
+    #         self.httpx(domain=self.domain, subdomain=self.subdomain, subdomains=self.subdomains)
+    #         progress_record(date=self.date, target=target, module="survivaldetect", finished=True)
+    #     logger.info('-' * 10 + f'finished {sys._getframe().f_code.co_name}' + '-' * 10)
 
 
 @logger.catch

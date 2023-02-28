@@ -9,6 +9,7 @@ import sys
 import dns
 import fire
 from loguru import logger
+from common.functions import *
 
 
 def create_logfile():
@@ -117,7 +118,7 @@ def manager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
     # 三种模式
     if domain and ip is None and ipfile is None:
         # ipfile = f'result/{date}/{domain}.subdomains.ips.txt'
-        #ipfile = f"result/{date}/{domain}.nocdn.ips.txt"
+        # ipfile = f"result/{date}/{domain}.nocdn.ips.txt"
         ipfile = f"result/{date}/{domain}.final.subdomains.txt"
         output_filename_prefix = domain
     elif ipfile and domain is None and ip is None:
@@ -165,15 +166,18 @@ def manager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
         logger.info(f"[+] command:{cmdstr}")
         os.system(cmdstr)
         logger.info(f'[+] {sys._getframe().f_code.co_name} finished,outputfile:{output_filename}.csv')
-        with open(f"{output_filename}.csv", "r") as f1:
-            reader = csv.reader(f1)
-            head = next(reader)
-            with open(f"result/{date}/{output_filename_prefix}.ports.txt", "w") as f2:
-                for row in reader:
-                    # baidu.com:8080  192.168.1.1:53
-                    lline = f"{row[0]}:{row[2]}" if row[0] else f"{row[1]}:{row[2]}"
-                    f2.write(lline + '\n')
-        logger.info(f'[+] [+] IP and port outputfile: result/{date}/{output_filename_prefix}.ports.txt')
+        if os.path.exists(f"{output_filename}.csv"):
+            with open(f"{output_filename}.csv", "r") as f1:
+                reader = csv.reader(f1)
+                head = next(reader)
+                with open(f"result/{date}/{output_filename_prefix}.ports.txt", "w") as f2:
+                    for row in reader:
+                        # baidu.com:8080  192.168.1.1:53
+                        lline = f"{row[0]}:{row[2]}" if row[0] else f"{row[1]}:{row[2]}"
+                        f2.write(lline + '\n')
+            logger.info(f'[+] [+] IP and port outputfile: result/{date}/{output_filename_prefix}.ports.txt')
+        progress_file_record(date=date, filename="port_file",
+                                 value=f"result/{date}/{output_filename_prefix}.ports.txt")
 
     @logger.catch
     def TxPortMap(ip=ip, ipfile=ipfile):
@@ -194,6 +198,8 @@ def manager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
         logger.info(f"[+] command:{cmdstr}")
         os.system(cmdstr)
         logger.info(f'[+] {sys._getframe().f_code.co_name} finished,outputfile:{outputfile}')
+        progress_file_record(date=date, filename="subdomain_file",
+                             value=f"result/{date}/{domain}.final.subdomains.txt")
         # with open(f"{outputfile}", "r") as f1:
         #     with open(f"result/{date}/{output_filename_prefix}.ports.txt", "w") as f2:
         #         for lline in f1.read():
@@ -247,11 +253,30 @@ def manager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
     def run():
         target = domain if domain else hashlib.md5(bytes(date, encoding='utf-8')).hexdigest()
         if progress_record(date=date, target=target, module="portscan", finished=False) is False:
-            naabu(ip=None, ipfile=ipfile)
-            TxPortMap(ip=None, ipfile=ipfile)
-            # nmaps(ip=None,ipfile=ipfile)
-            # dismap(ip=None,ipfile=ipfile)
+            # 如何存在我所需的文件则扫描，否则不扫描
+            if os.path.exists(ipfile):
+                if os.path.getsize(ipfile):
+                    naabu(ip=None, ipfile=ipfile)
+                    TxPortMap(ip=None, ipfile=ipfile)
+                    # nmaps(ip=None,ipfile=ipfile)
+                    # dismap(ip=None,ipfile=ipfile)
+                else:
+                    logger.error(f"[+] {ipfile} size is 0, Skip portscan module!")
+            else:
+                logger.error(f"[+] {ipfile} not found, Skip portscan module!")
             progress_record(date=date, target=target, module="portscan", finished=True)
+
+    # def run():
+    #     exit_flag = False
+    #     target = domain if domain else hashlib.md5(bytes(date, encoding='utf-8')).hexdigest()
+    #     if progress_record(date=date, target=target, module="portscan", finished=False) is False:
+    #         naabu(ip=None, ipfile=ipfile)
+    #         TxPortMap(ip=None, ipfile=ipfile)
+    #         # nmaps(ip=None,ipfile=ipfile)
+    #         # dismap(ip=None,ipfile=ipfile)
+    #         logger.error(f"[+] {ipfile} size is 0, exit!")
+    #         logger.error(f"[+] {ipfile} not found, exit!")
+    #         progress_record(date=date, target=target, module="portscan", finished=True)
 
     run()
 

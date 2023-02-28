@@ -398,20 +398,26 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
             logger.error(f"xray_port {Xray_Port} not open, Exit!")
             exit(1)
     # isdomain = False
+    # output_filename_prefix = "abcd"
     # 两种模式,三种情况
     if domain and urlsfile is None and url is None:
         # isdomain = True
-        urlsfile = f"result/{date}/{domain}.subdomains.with.http.txt"
+        input_file = f"result/{date}/{domain}.subdomains.with.http.txt"
         # output_filename_prefix = domain
+        # if os.path.exists(input_file) is False or os.path.getsize(input_file) is False:
+        #     logger.info(f"[+] {input_file} not found, exit!")
+        #     return False
     elif urlsfile and domain is None and url is None:
         domain = date
-        urlsfile = urlsfile
+        input_file = urlsfile
         # output_filename_prefix = date
     elif url and domain is None and urlsfile is None:
-        domain = '.'.join(part for part in tldextract.extract(url) if part)
-        urlsfile = f"temp.sensitiveinfo_main.txt"
+        # domain = '.'.join(part for part in tldextract.extract(url) if part)
+        domain = date
+        input_file = f"temp.sensitiveinfo.txt"
+        # output_filename_prefix = date
         # output_filename_prefix = '.'.join(part for part in tldextract.extract(url) if part)
-        with open(urlsfile, "w", encoding="utf-8") as f:
+        with open(input_file, "w", encoding="utf-8") as f:
             f.write(url)
     else:
         logger.error(f"[-] domain:{domain},urlsfile:{urlsfile},url:{url} 只能一个不为None")
@@ -801,7 +807,8 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
 
         target = data1
         subdomain_tuple = tldextract.extract(target)
-        subdomain = '.'.join(part for part in subdomain_tuple if part)  # www_baidu_com
+        output_filename_prefix = sudomain = '.'.join(part for part in subdomain_tuple if part)  # www_baidu_com
+
         urls_data_tmp_to_csv = []
         urls_set_tmp = set()
         # 结果文件名 xx_xx_xx 结果是指定文件夹
@@ -825,7 +832,7 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         to_xray(urls_set_tmp, attackflag=attackflag, fromurl=target)
 
         # 对结果处理,新增的,不是扫描的全部结果,是剔除links_set之后的url,将结果存储到txt中
-        with open(f'{output_folder}/{subdomain}.{tool_name}.txt', 'w', encoding='utf-8',
+        with open(f'{output_folder}/{output_filename_prefix}.{tool_name}.txt', 'w', encoding='utf-8',
                   errors='ignore') as f:
             for i in urls_set_tmp:
                 f.write(i + '\n')
@@ -856,12 +863,12 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         # target = urlsplit(data1)[1]
         target = data1
         subdomain_tuple = tldextract.extract(data1)
-        subdomain = '.'.join(part for part in subdomain_tuple if part)  # www_baidu_com
+        output_filename_prefix = subdomain = '.'.join(part for part in subdomain_tuple if part)  # www_baidu_com
 
         urls_data_tmp_to_csv = []
         urls_set_tmp = set()
         # 结果文件名 xx_xx_xx 结果是指定文件夹
-        cmdstr = f'{pwd}/gau/gau{suffix} --subs --retries 2 --fc 404,302 --verbose --o {output_folder}/{subdomain}.{tool_name}.txt {target}'
+        cmdstr = f'{pwd}/gau/gau{suffix} --subs --retries 2 --fc 404,302 --verbose --o {output_folder}/{output_filename_prefix}.{tool_name}.txt {target}'
         logger.info(f"[+] command:{cmdstr}")
         # __subprocess1(cmdstr, timeout=None, path=f"{pwd}/{tool_name}")
         runtime = all_config['tools']['sensitiveinfo'][tool_name]['runtime']
@@ -876,8 +883,8 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
                 # 跳过该工具执行
                 return False
         # logger.info(f"[+] {tool_name} finished: {target}")
-        if os.path.exists(f'{output_folder}/{subdomain}.{tool_name}.txt'):
-            with open(f'{output_folder}/{subdomain}.{tool_name}.txt', 'r', encoding='utf-8') as f:
+        if os.path.exists(f'{output_folder}/{output_filename_prefix}.{tool_name}.txt'):
+            with open(f'{output_folder}/{output_filename_prefix}.{tool_name}.txt', 'r', encoding='utf-8') as f:
                 for line in f.readlines():
                     line = line.strip()
                     if line not in links_set:
@@ -892,7 +899,7 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
             # with open(f"{root}/result/{date}/{domain}.links.csv", "a", encoding="utf-8") as f1:
             to_csv(f"result/{date}/{domain}.links.csv", urls_data_tmp_to_csv, mmode='a')
         else:
-            logger.error(f'{tool_name} not found {output_folder}/{subdomain}.{tool_name}.txt')
+            logger.error(f'{tool_name} not found {output_folder}/{output_filename_prefix}.{tool_name}.txt')
         logger.info(f"[+] {tool_name} finished: {target}")
 
     # 暂时先不用，还未完成，带主动性为 dirsearch 200的结果给xray
@@ -952,7 +959,7 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
 
         target = data1
         subdomain_tuple = tldextract.extract(data1)
-        subdomain = '.'.join(part for part in subdomain_tuple if part)  # www_baidu_com
+        output_filename_prefix = subdomain = '.'.join(part for part in subdomain_tuple if part)  # www_baidu_com
         urls_data_tmp = []
         urls_set_tmp = set()
         # 结果文件名 xx_xx_xx 结果是指定文件夹
@@ -978,7 +985,7 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
                     else:
                         logger.error(f"xray not running on {Xray_Port}! skip to xray attack!")
         # 对结果处理,将结果存储到txt中
-        with open(f'{output_folder}/{subdomain}.txt', 'w', encoding='utf-8', errors='ignore') as f:
+        with open(f'{output_folder}/{output_filename_prefix}.txt', 'w', encoding='utf-8', errors='ignore') as f:
             for i in urls_set_tmp:
                 f.write(i + '\n')
 
@@ -989,29 +996,54 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
                 f1.write(i + "\n")
 
     def run():
-        # if domain and url is None and urlsfile is None:
-        # if len(all_config["domain"]["scanned_targets"]):
-        # if isdomain:
-        #     emailall(domain)
-        # urlsfile = f"result/{date}/{domain}.subdomains.with.http.txt"
+        # input_file = f"result/{date}/{domain}.subdomains.with.http.txt"
         target = domain if domain else hashlib.md5(bytes(date, encoding='utf-8')).hexdigest()
-        with open(urlsfile, "r", encoding="utf-8") as f:
-            for url in f.readlines():
-                url = url.strip()
-                print(url)
-                if progress_record(date=date, target=target, subtarget=url, module="sensitiveinfo",
-                                   finished=False) is False:
-                    crawlergo(url, attackflag=attackflag)
-                    rad(url, attackflag=attackflag)
-                    hakrawler(url, attackflag=attackflag)
-                    gospider(url, attackflag=attackflag)
-                    gau(url, attackflag=attackflag)
-                    URLFinder(url, attackflag=attackflag)
-                    # urlcollector('未完成')
-                    links_set.clear()
-                    # dirsearch(url.strip())
-                    progress_record(date=date, target=target, subtarget=url, module="sensitiveinfo", finished=True)
+        # 如何存在所需的文件则扫描，否则不扫描
+        if os.path.exists(input_file):
+            if os.path.getsize(input_file):
+                with open(input_file, "r", encoding="utf-8") as f:
+                    for url in f.readlines():
+                        url = url.strip()
+                        print(url)
+                        if progress_record(date=date, target=target, subtarget=url, module="sensitiveinfo",
+                                           finished=False) is False:
+                            crawlergo(url, attackflag=attackflag)
+                            rad(url, attackflag=attackflag)
+                            hakrawler(url, attackflag=attackflag)
+                            gospider(url, attackflag=attackflag)
+                            gau(url, attackflag=attackflag)
+                            URLFinder(url, attackflag=attackflag)
+                            # urlcollector('未完成')
+                            links_set.clear()
+                            # dirsearch(url.strip())
+                            progress_record(date=date, target=target, subtarget=url, module="sensitiveinfo", finished=True)
+            else:
+                logger.error(f"[+] {input_file} size is 0, Skip sensitiveinfo module!")
+        else:
+            # progress_record(date=date, target=target, subtarget="finished", module="sensitiveinfo", finished=True)
+            logger.error(f"[+] {input_file} not found, Skip sensitiveinfo module!")
         logger.info('-' * 10 + f'finished {sys._getframe().f_code.co_name}' + '-' * 10)
+
+    # def run():
+    #     # input_file = f"result/{date}/{domain}.subdomains.with.http.txt"
+    #     target = domain if domain else hashlib.md5(bytes(date, encoding='utf-8')).hexdigest()
+    #     with open(input_file, "r", encoding="utf-8") as f:
+    #         for url in f.readlines():
+    #             url = url.strip()
+    #             print(url)
+    #             if progress_record(date=date, target=target, subtarget=url, module="sensitiveinfo",
+    #                                finished=False) is False:
+    #                 crawlergo(url, attackflag=attackflag)
+    #                 rad(url, attackflag=attackflag)
+    #                 hakrawler(url, attackflag=attackflag)
+    #                 gospider(url, attackflag=attackflag)
+    #                 gau(url, attackflag=attackflag)
+    #                 URLFinder(url, attackflag=attackflag)
+    #                 # urlcollector('未完成')
+    #                 links_set.clear()
+    #                 # dirsearch(url.strip())
+    #                 progress_record(date=date, target=target, subtarget=url, module="sensitiveinfo", finished=True)
+    #     logger.info('-' * 10 + f'finished {sys._getframe().f_code.co_name}' + '-' * 10)
 
     run()
 
