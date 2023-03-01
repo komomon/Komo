@@ -13,7 +13,7 @@ import subprocess
 import sys
 import tempfile
 import traceback
-
+from urllib.parse import urlparse
 import fire
 from termcolor import cprint
 import os
@@ -244,7 +244,9 @@ class manager():
                 reader = csv.reader(f)
                 head = next(reader)
                 for row in reader:
-                    subdomains_with_http.append(row[8].strip())  # url
+                    obj = urlparse(row[8].strip())
+                    # ParseResult(scheme='https', netloc='www.google.com:8080', path='/search', params='', query='newwindow=1&biw=1091&bih=763', fragment='')
+                    subdomains_with_http.append(f"{obj.scheme}://{obj.netloc}")  # url
                     subdomains_ips_tmp.append(row[18].strip())  # host
                 subdomains_ips = getips(list(set(subdomains_ips_tmp)))
             # 生成带http的url txt

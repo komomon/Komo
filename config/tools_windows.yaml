@@ -183,7 +183,7 @@ download:
     naabu:
       toolname: naabu
       whetherdownload: True
-      link: https://github.com/projectdiscovery/naabu/releases/download/v2.1.1/naabu_2.1.1_windows_amd64.zip
+      link: https://github.com/projectdiscovery/naabu/releases/download/v2.1.2/naabu_2.1.2_windows_amd64.zip
       downloadfile: naabu.zip
       source_name: naabu.exe
       final_name: naabu.exe
@@ -287,9 +287,9 @@ download:
     URLFinder:
       toolname: URLFinder
       whetherdownload: True
-      link: https://github.com/pingc0y/URLFinder/blob/master/URLFinder-windows-amd64.exe?raw=true
-      downloadfile: URLFinder.exe
-      source_name: URLFinder.exe
+      link: hhttps://github.com/pingc0y/URLFinder/releases/download/2023.2.21/URLFinder-windows-amd64.zip
+      downloadfile: URLFinder.zip
+      source_name: URLFinder-windows-amd64.exe
       final_name: URLFinder.exe
       tool_main_filename: URLFinder.exe
       topath:

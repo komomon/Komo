@@ -158,7 +158,7 @@ def manager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
         # -exclude-cdn, -ec	  skip full port scans for CDN's (only checks for 80,443)
         # -proxy string		 socks5 proxy (ip[:port] / fqdn[:port]
         # -proxy-auth string		socks5 proxy authentication (username:password)
-        cmdstr = f'{pwd}/naabu/naabu{suffix} -source-ip 8.8.8.8:22 -rate 1000 -top-ports 1000 -silent -no-color -list {ipfile} -csv -o {output_filename}.csv'
+        cmdstr = f'{pwd}/naabu/naabu{suffix} -source-ip 8.8.8.8:22 -rate 1000 -top-ports 1000 -exclude-cdn -no-color -list {ipfile} -csv -o {output_filename}.csv'
         # naabu -list hosts.txt -p - 扫描全部  -exclude-cdn 跳过cdn检测，cdn只检查80 443
         # cmd = pwd + f'/naabu{suffix} -p "{ports_str}" -silent -no-color -scan-all-ips -list result/{date}/{domain}.final.subdomains.txt -o {portscan_log_folder}/{domain}.{sys._getframe().f_code.co_name}.txt'
         # nmap 常见100个端口 -scan-all-ips

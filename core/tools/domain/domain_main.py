@@ -473,13 +473,17 @@ def manager(domain=None, date="2022-09-02-00-01-39"):
     def is_cdn(host):
         # 返回主机名、主机别名列表、主机IP地址列表
         # ('www.a.shifen.com', ['www.baidu.com'], ['110.242.68.3', '110.242.68.4'])
-        # print(socket.gethostbyname_ex(host))
-        cname, host_list, ip_list = socket.gethostbyname_ex(host)
-        # ips = socket.gethostbyname_ex(host)[2]
-        if len(ip_list) > 1:
-            return True, host, ip_list
-        else:
-            return False, host, ip_list
+        # 测试url answer.zeekrlife.com aliyunwaf ('dk8vu6urrr35bnqltf6w2uyqcnpnuxo6.yundunwaf5.com', ['answer.zeekrlife.com'], ['59.110.246.20']
+        # www.google.com  host_list 为空 ('www.google.com', [], ['162.125.80.5'])
+        try:
+            cname, host_list, ip_list = socket.gethostbyname_ex(host)
+            # ips = socket.gethostbyname_ex(host)[2]
+            if len(ip_list) > 1 or cname != host_list[0] if len(host_list) else False:
+                return True, True, host, ip_list    # isalive iscdn
+            else:
+                return True, False, host, ip_list
+        except Exception as e:
+            return False, False, None, None
 
     def cdn_check(func=None, urls=None, max_workers=50):
         nocdn_domain_list = []
@@ -492,14 +496,15 @@ def manager(domain=None, date="2022-09-02-00-01-39"):
                 obj = executor.submit(func, url)
                 to_do.append(obj)
         for future in concurrent.futures.as_completed(to_do):
-            iscdn, ddomain, ip_list = future.result()
-            if iscdn is False:
-                nocdn_domain_list.append(ddomain)
-                nocdn_ip_list.append(ip_list[0])
-            elif iscdn is True:
-                cdn_domain_list.append(ddomain)
-            else:
-                error_domain_list.append(ddomain)
+            isalive, iscdn, ddomain, ip_list = future.result()
+            if isalive:
+                if iscdn is False:
+                    nocdn_domain_list.append(ddomain)
+                    nocdn_ip_list.append(ip_list[0])
+                elif iscdn is True:
+                    cdn_domain_list.append(ddomain)
+                else:
+                    error_domain_list.append(ddomain)
         with open(f"result/{date}/{domain}.nocdn.subdomains.txt", 'a', encoding='utf-8')as f1:
             f1.writelines("\n".join(nocdn_domain_list))
         progress_file_record(date=date,filename="nocdn_subdomain_file",value=f"result/{date}/{domain}.nocdn.subdomains.txt")

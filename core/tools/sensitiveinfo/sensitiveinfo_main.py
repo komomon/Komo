@@ -317,7 +317,8 @@ def __subprocess1(cmd, timeout=None, path=None):
         p.wait(timeout=timeout)
     except subprocess.TimeoutExpired as e:
         # logger.error('{} - {} - \n{}'.format(self.domain, self.__class__.__name__, e))
-        logger.error(traceback.format_exc())
+        # logger.error(traceback.format_exc())
+        logger.error(f"[-] Subprocess Timeout: Command: {cmd}")
         # outs, errs = p.communicate()
         p.kill()
         kill_process(f_name + get_system())
@@ -521,6 +522,7 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
                         for i in sub_domain_list:
                             f2.write(i + "\n")
         else:
+            logger.error(f"[+] current command:{cmdstr}")
             logger.error(f'{tool_name} not found {output_folder}/{output_filename_prefix}.{tool_name}.json')
         logger.info(f"[+] {tool_name} finished: {target}")
 
@@ -685,14 +687,15 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
                 #     "Title": "Document titleg",
                 #     "Source": "http://testphp.vulnweb.com:80"
                 # }...
-                for i in result["url"]:
-                    if i["Status"] != "404" and i["Url"] not in links_set:
-                        # data = f'GET,{row[0]},,'
-                        data = [tool_name, "GET", i["Url"], "", ""]
-                        # data = [tool_name, "GET", i["Url"], i["Title"], "", ""]
-                        urls_data_tmp_to_csv.append(data)
-                        urls_set_tmp.add(i["Url"])
-                        links_set.add(i["Url"])  # links_set 增加新的
+                if result["url"]:# 有时候未看则值为Null None 导致类型错误
+                    for i in result["url"]:
+                        if i["Status"] != "404" and i["Url"] not in links_set:
+                            # data = f'GET,{row[0]},,'
+                            data = [tool_name, "GET", i["Url"], "", ""]
+                            # data = [tool_name, "GET", i["Url"], i["Title"], "", ""]
+                            urls_data_tmp_to_csv.append(data)
+                            urls_set_tmp.add(i["Url"])
+                            links_set.add(i["Url"])  # links_set 增加新的
             # 差集发送给xray,攻击模式端口没,则只收集跳过发送给xray的攻击扫描
             to_xray(urls_set_tmp, attackflag=attackflag, fromurl=target)
 
@@ -700,7 +703,8 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
             # with open(f"{root}/result/{date}/{domain}.links.csv", "a", encoding="utf-8") as f1:
             to_csv(f"result/{date}/{domain}.links.csv", urls_data_tmp_to_csv, mmode='a')
         else:
-            logger.error(f'{tool_name} not found {output_folder}/{output_filename}/{output_filename}.json')
+            logger.error(f"[-] Current Command: {cmdstr}")
+            logger.error(f'[-] {tool_name} not found {output_folder}/{output_filename}/{output_filename}.json')
         logger.info(f"[+] {tool_name} finished: {target}")
         # 老版通过csv处理的工具
         # if os.path.exists(f'{output_folder}/{output_filename}/{output_filename}.csv'):
