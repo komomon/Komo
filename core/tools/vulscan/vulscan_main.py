@@ -304,6 +304,7 @@ def webmanager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39")
     if os.path.exists(vulscan_log_folder) is False:
         os.makedirs(vulscan_log_folder)
 
+    input_file = ""
     # 两种模式,三种情况
     if domain and urlsfile is None and url is None:
         input_file = f"result/{date}/{domain}.subdomains.with.http.txt"
@@ -312,11 +313,14 @@ def webmanager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39")
         input_file = urlsfile
         output_filename_prefix = date
     elif domain is None and urlsfile is None and url:
-        input_file = f"temp.vulscan.txt"
+        input_file = f"temp.vulscan.webscan.txt"
         subdomain_tuple = tldextract.extract(url)
         output_filename_prefix = '.'.join(part for part in subdomain_tuple if part)  # www_baidu_com 127_0_0_1
         with open(input_file, "w", encoding="utf-8") as f:
             f.write(url)
+    else:
+        logger.error(f"[-] domain:{domain},urlsfile:{urlsfile},url:{url} 只能一个不为None")
+        exit()
 
     @logger.catch
     def nuclei(urlsfile=input_file):
@@ -534,9 +538,9 @@ def webmanager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39")
                     vscan(urlsfile=input_file)
                     progress_record(date=date, target=target, module="vulscan", submodule="webattack", finished=True)
                 else:
-                    logger.error(f"[+] {input_file} size is 0, Skip vulscan module!")
+                    logger.error(f"[+] {input_file} size is 0, Skip vulscan webscan module!")
             else:
-                logger.error(f"[+] {input_file} not found, Skip vulscan module!")
+                logger.error(f"[+] {input_file} not found, Skip vulscan webscan module!")
         logger.info('-' * 10 + f'finished {sys._getframe().f_code.co_name}' + '-' * 10)
 
 
@@ -575,23 +579,24 @@ def hostmanager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
 
     # 两种模式,三种情况
     if domain and ipfile is None and ip is None:
-        ipfile = f"result/{date}/{domain}.subdomains.ips.txt"
+        input_file = f"result/{date}/{domain}.subdomains.ips.txt"
         output_filename_prefix = domain
-        if os.path.exists(ipfile) is False or os.path.getsize(ipfile) is False:
-            logger.info(f"[+] {ipfile} not found, exit!")
-            return False
     elif domain is None and ipfile and ip is None:
-        ipfile = ipfile
+        input_file = ipfile
         output_filename_prefix = ip
     elif domain is None and ipfile is None and ip:
-        ipfile = f"temp.{sys._getframe().f_code.co_name}.txt"
+        # input_file = f"temp.{sys._getframe().f_code.co_name}.txt"
+        input_file = f"temp.vulscan.hostscan.txt"
         output_filename_prefix = date
-        with open(ipfile, "w", encoding="utf-8") as f:
+        with open(input_file, "w", encoding="utf-8") as f:
             f.write(ip)
+    else:
+        logger.error(f"[-] domain:{domain},ip:{ip},ipfile:{ipfile} 只能一个不为None")
+        exit()
 
     # ip参数支持c段，直接使用其他工具测也可以
     @logger.catch
-    def goon(ip=ip, ipfile=ipfile):
+    def goon(ip=ip, ipfile=input_file):
         '''
         goon v3.5 使用goon 进行端口扫描，端口指纹识别，和简单的端口服务爆破
         输出目录
@@ -611,7 +616,7 @@ def hostmanager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
 
     # 只是为了统一 -host参数可以为单ip cidr 也可以为文件
     @logger.catch
-    def SweetBabyScan(ip=ip, ipfile=ipfile):
+    def SweetBabyScan(ip=ip, ipfile=input_file):
         '''
         SweetBabyScan v0.1.0
         目前输出文件-oe -ot 参数不可用，指定不生效，对原文件进行了修改默认进行截屏，改成了false 在编译的。
@@ -650,7 +655,7 @@ def hostmanager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
 
     # ip参数支持c段，直接使用其他工具测也可以
     @logger.catch
-    def vscan(ip=ip, ipfile=ipfile):
+    def vscan(ip=ip, ipfile=input_file):
         '''
         vscan v2.1
         zhuyi:由于权限要求，不能使用子线程执行，只能使用主线程执行即os.system执行
@@ -683,12 +688,18 @@ def hostmanager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
     def run():
         target = domain if domain else hashlib.md5(bytes(date, encoding='utf-8')).hexdigest()
         if progress_record(date=date, target=target, module="vulscan", submodule="hostattack", finished=False) is False:
-            goon(ip=ip, ipfile=ipfile)
-            # 暂未使用，主要是会下载chromewin每次执行
-            SweetBabyScan(ip=ip, ipfile=ipfile)
-            vscan(ip=ip, ipfile=ipfile)
-            progress_record(date=date, target=target, module="vulscan", submodule="hostattack", finished=True)
-            logger.info('-' * 10 + f'finished {sys._getframe().f_code.co_name}' + '-' * 10)
+            if os.path.exists(input_file):
+                if os.path.getsize(input_file):
+                    goon(ip=ip, ipfile=input_file)
+                    # 暂未使用，主要是会下载chromewin每次执行
+                    SweetBabyScan(ip=ip, ipfile=input_file)
+                    vscan(ip=ip, ipfile=input_file)
+                    progress_record(date=date, target=target, module="vulscan", submodule="hostattack", finished=True)
+                else:
+                    logger.error(f"[+] {input_file} size is 0, Skip vulscan webscan module!")
+            else:
+                logger.error(f"[+] {input_file} not found, Skip vulscan webscan module!")
+        logger.info('-' * 10 + f'finished {sys._getframe().f_code.co_name}' + '-' * 10)
 
     run()
 

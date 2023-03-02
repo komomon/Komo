@@ -308,13 +308,17 @@ def manager(domain=None, date="2022-09-02-00-01-39"):
         cmdstr = f'{pwd}/amass/amass{suffix} enum -active -brute -max-depth 3 -d {domain} -json {output_filename}'  # 三层有点慢
         # cmdstr = f'{pwd}/amass/amass{suffix} enum -active -brute -d {domain} -json {output_filename}'
         runcmd(sys._getframe().f_code.co_name, cmdstr, "")
-        # 输出文件内容不只是域名的话则需要自行处理，提取子域名，然后转储
-        with open(output_filename, 'r', encoding='utf-8') as fd:
-            for line in fd.readlines():
-                amass_data = json.loads(line.strip())
-                if 'name' in amass_data:
-                    subdomains_tmp.append(amass_data['name'])
-        subdomains.extend(list(set(subdomains_tmp)))
+        if os.path.exists(output_filename):
+            # 输出文件内容不只是域名的话则需要自行处理，提取子域名，然后转储
+            with open(output_filename, 'r', encoding='utf-8') as fd:
+                for line in fd.readlines():
+                    amass_data = json.loads(line.strip())
+                    if 'name' in amass_data:
+                        subdomains_tmp.append(amass_data['name'])
+            subdomains.extend(list(set(subdomains_tmp)))
+        else:
+            logger.error(f"Current Command: {cmdstr}")
+            logger.error(f"[-] {output_filename} not found")
         # print(subdomains)
 
     # 调用ksubdomain 结果输出到txt
