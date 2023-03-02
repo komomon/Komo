@@ -197,7 +197,7 @@ download:
       whetherdownload: True
       link: https://commondatastorage.googleapis.com/chromium-browser-snapshots/Win_x64/1051001/chrome-win.zip
       downloadfile: chrome-windows.zip
-      source_name: chrome-windows/
+      source_name: chrome-win/
       final_name: chrome-windows/
       tool_main_filename: chrome.exe
       topath:

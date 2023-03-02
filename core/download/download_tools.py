@@ -61,12 +61,13 @@ class Download:
     def getconfig(self):
         # ostype = platform.system().lower() #get_system()
         toolsyaml_path = f"{self.rootpath}/config/tools_{self.ostype}.yaml"
-        # toolsyaml_path = "tools_linux.yaml"
+        # toolsyaml_path = "tools_windows.yaml"
         if os.path.exists(toolsyaml_path):
             with open(toolsyaml_path, 'r', encoding='utf-8') as f:
                 msg = yaml.load(f, Loader=yaml.FullLoader)['download']
                 classify = ['domain', 'emailcollect', 'survivaldetect', 'finger', 'portscan', 'sensitiveinfo',  'vulscan']
-                # classify = ['emailcollect','survivaldetect']
+                # classify = ['sensitiveinfo']
+                # xuanze_downloadtools = ['crawlergo']
                 for i in classify:
                     self.tools_dict.update(msg[i])
                     # {'amass': {'link': 'https://github.com/OWASP/Amass/releases/download/v3.20.0/amass_windows_amd64.zip',
@@ -206,9 +207,12 @@ class Download:
     def tools_init(self):
         if os.path.exists(f"core/tools/vulscan/vulmap/module/licenses"):
             if os.path.exists(f"core/tools/vulscan/vulmap/module/licenses/licenses.txt") is False:
-                shutil.copy("config/supplementary_files/vulmap/licenses.txt",
-                            "core/tools/vulscan/vulmap/module/licenses")
-                logger.info(f"[+] {self.rootpath}/core/tools/vulscan/vulmap/vulmap.py initialization is complete")
+                if os.path.exists("config/supplementary_files/vulmap/licenses.txt"):
+                    shutil.copy("config/supplementary_files/vulmap/licenses.txt",
+                                "core/tools/vulscan/vulmap/module/licenses")
+                    logger.info(f"[+] {self.rootpath}/core/tools/vulscan/vulmap/vulmap.py initialization is complete")
+                else:
+                    logger.error(f"[-] config/supplementary_files/vulmap/licenses.txt not exist,initialization is failed")
         if os.path.exists(f"core/tools/vulscan/goon/goon{self.suffix}"):
             os.system(os.path.realpath(f"{self.rootpath}/core/tools/vulscan/goon/goon{self.suffix}"))
             logger.info(f"[+] {self.rootpath}/core/tools/vulscan/goon/goon{self.suffix} initialization is complete")
