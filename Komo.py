@@ -261,6 +261,10 @@ class Komo(object):
         dd = download_tools.Download(proxy=self.proxy)
         dd.run()
 
+    # @staticmethod
+    # def end():
+    #     logger.info(f"[+] All scan finished,the result folder: result/{date}\n")
+
     # 只进行子域扫描
     def sub(self):  # subdomain
         # self.command += "--{}".format(self.subdomain)

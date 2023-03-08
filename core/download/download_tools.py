@@ -119,6 +119,12 @@ class Download:
                     'http': self.proxy,
                     'https': self.proxy
                 }
+                try:
+                    status_code = requests.get(url, headers=headers).status_code
+                    if status_code == 200:
+                        url = f"https://ghproxy.com/{url}"
+                except:
+                    pass
                 response = requests.get(url, headers=headers, proxies=proxies, stream=True)
                 # response = requests.get(url, headers=headers, stream=True)
                 handle = open(target_filename, "wb")

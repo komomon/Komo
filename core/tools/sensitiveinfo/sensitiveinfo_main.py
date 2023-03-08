@@ -15,7 +15,7 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 import sys
-from urllib.parse import urlsplit
+from urllib.parse import urlsplit,urlparse
 import tempfile
 import time
 import traceback
@@ -196,6 +196,73 @@ def to_csv(filename, data: list, mmode='a'):
             writer.writerow(row)
 
 
+# 打印脚本跑出了几个新的子域名，并返回最新最全的子域名列表  传递两个列表，old是前面收集好的子域名，new是刚跑完的脚本收集的子域名，进行比较.
+# def printGetNewSubdomains(old_subdomains, new_subdomains):
+#     if len(old_subdomains) > 0:
+#         newSubdomains = list(set(new_subdomains) - set(old_subdomains))
+#         print('[new :{}] {}'.format(len(newSubdomains), newSubdomains))
+#     return list(set(new_subdomains + old_subdomains))
+
+# @logger.catch
+def request0(req_json):
+    proxy_port = Xray_Port
+    proxies = {
+        'http': f'http://127.0.0.1:{proxy_port}',
+        'https': f'http://127.0.0.1:{proxy_port}'
+    }
+    # ua = UserAgent()
+    # headers = {'User-Agent': ua.random}
+    black_status_code = [400, 403, 404, 500, 501, 503]
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36"}
+    method0 = req_json['method']
+    urls0 = req_json['url']
+    headers0 = json.loads(req_json['headers']) if str(
+        req_json['headers']).strip() != "" else headers if "headers" in req_json.keys() else ""
+    data0 = req_json['data'] if "data" in req_json.keys() else ""
+    try:
+        if (method0 == 'GET'):
+            a = requests.get(urls0, headers=headers0, timeout=15, verify=False)
+            if a.status_code not in black_status_code:
+                a = requests.get(urls0, headers=headers0, proxies=proxies, timeout=15, verify=False)
+            # opt2File(urls0)
+        elif (method0 == 'POST'):
+            a = requests.post(urls0, headers=headers0, data=data0, timeout=15, verify=False)
+            if a.status_code not in black_status_code:
+                a = requests.post(urls0, headers=headers0, data=data0, proxies=proxies, timeout=15, verify=False)
+            # opt2File(urls0)
+    except:
+        pass
+
+
+# 废弃 将请求发给xray
+@logger.catch
+def to_xray(urls, attackflag=None, fromurl=None):
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.80 Safari/537.36 Edg/98.0.1108.43'
+    }
+    xrayport = Xray_Port
+    # black_list = ['.jpg', '.gif', '.png', '.css', '.pdf', '.doc', '.docx', '.xlsx', '.csv', '.svg']
+    black_list = ['.jpg', '.gif', '.png', '.css', '.svg']
+    # domain_suffix = tldextract.extract(fromurl)  # 通过域名后缀是否为空判断给的domain是domain 还是randomstr
+    # ExtractResult(subdomain='', domain='sdadadadawdawd', suffix='')
+    # ExtractResult(subdomain='ss', domain='sss', suffix='com')
+    if attackflag:
+        if checkport(xrayport):
+            for url in urls:
+                # SplitResult(scheme='https', netloc='ss.sss.com:8080', path='/dad/da/ddsad', query='a=a&b=123', fragment='')
+                splitresult = urlsplit(url)
+                ssubdomain = splitresult.netloc
+                uri = splitresult.path
+                # 只发送给xray要爬取的网站的url
+                if urlsplit(fromurl).netloc == ssubdomain:
+                    if os.path.splitext(uri)[1] not in black_list:
+                        request0({"method": "GET", "url": url, "headers": "", "data": ""})
+                # links_set.add(url)
+        else:
+            logger.error(f"xray not running on {xrayport}! skip to xray attack!")
+
+
 # @logger.catch
 def checkport(port):
     if port < 1024 or 65535 < port:
@@ -236,40 +303,6 @@ def kill_process(processname):
         return False
 
     # os.system(cmd)
-
-
-# 打印脚本跑出了几个新的子域名，并返回最新最全的子域名列表  传递两个列表，old是前面收集好的子域名，new是刚跑完的脚本收集的子域名，进行比较.
-# def printGetNewSubdomains(old_subdomains, new_subdomains):
-#     if len(old_subdomains) > 0:
-#         newSubdomains = list(set(new_subdomains) - set(old_subdomains))
-#         print('[new :{}] {}'.format(len(newSubdomains), newSubdomains))
-#     return list(set(new_subdomains + old_subdomains))
-
-# @logger.catch
-def request0(req_json):
-    proxy_port = Xray_Port
-    proxies = {
-        'http': f'http://127.0.0.1:{proxy_port}',
-        'https': f'http://127.0.0.1:{proxy_port}'
-    }
-    ua = UserAgent()
-    headers = {'User-Agent': ua.random}
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36"}
-    method0 = req_json['method']
-    urls0 = req_json['url']
-    headers0 = json.loads(req_json['headers']) if str(
-        req_json['headers']).strip() != "" else headers if "headers" in req_json.keys() else ""
-    data0 = req_json['data'] if "data" in req_json.keys() else ""
-    try:
-        if (method0 == 'GET'):
-            a = requests.get(urls0, headers=headers0, proxies=proxies, timeout=15, verify=False)
-            # opt2File(urls0)
-        elif (method0 == 'POST'):
-            a = requests.post(urls0, headers=headers0, data=data0, proxies=proxies, timeout=15, verify=False)
-            # opt2File(urls0)
-    except:
-        pass
 
 
 # 启用子进程执行外部shell命令,目前未使用
@@ -349,32 +382,6 @@ def __subprocess2(cmd):
         if out_temp:
             out_temp.close()
     return lines
-
-
-# 废弃 将请求发给xray
-@logger.catch
-def to_xray(urls, attackflag=None, fromurl=None):
-    # headers = {
-    #     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.80 Safari/537.36 Edg/98.0.1108.43'}
-    xrayport = Xray_Port
-    black_list = ['.jpg', '.gif', '.png', '.css', '.pdf', '.doc', '.docx', '.xlsx', '.csv', '.svg']
-    # domain_suffix = tldextract.extract(fromurl)  # 通过域名后缀是否为空判断给的domain是domain 还是randomstr
-    # ExtractResult(subdomain='', domain='sdadadadawdawd', suffix='')
-    # ExtractResult(subdomain='ss', domain='sss', suffix='com')
-    if attackflag:
-        if checkport(xrayport):
-            for url in urls:
-                # SplitResult(scheme='https', netloc='ss.sss.com', path='/dad/da/ddsad', query='a=a&b=123', fragment='')
-                splitresult = urlsplit(url)
-                ssubdomain = splitresult.netloc
-                uri = splitresult.path
-                # 只发送给xray要爬取的网站的url
-                if urlsplit(fromurl).netloc == ssubdomain:
-                    if os.path.splitext(uri)[1] not in black_list:
-                        request0({"method": "GET", "url": url, "headers": "", "data": ""})
-                # links_set.add(url)
-        else:
-            logger.error(f"xray not running on {xrayport}! skip to xray attack!")
 
 
 @logger.catch
@@ -458,8 +465,10 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
 
         target = data1
         # ExtractResult(subdomain='www', domain='worldbank', suffix='org.kg')
-        subdomain_tuple = tldextract.extract(data1)
-        output_filename_prefix = '.'.join(part for part in subdomain_tuple if part)
+        # subdomain_tuple = tldextract.extract(data1)
+        # output_filename_prefix = '.'.join(part for part in subdomain_tuple if part)
+        urlobj = urlsplit(target)
+        output_filename_prefix = urlobj.netloc.replace(':',"_") #www.baidu.com_8080
         # cmd = [".\crawlergo.exe", "-c", ".\chrome-win\chrome.exe", "-t","20", "-f", "smart", "--fuzz-path", "--output-mode", "json", target]
         # --fuzz-path  --robots-path --max-tab-count Number, -t Number 默认8
         #  --push-to-proxy待接收爬虫结果的监听地址，通常是被动扫描器的监听地址。（默认值：空）
@@ -542,8 +551,10 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         makedir0(output_folder)
         xray_port = Xray_Port
         target = data1
-        subdomain_tuple = tldextract.extract(data1)
-        output_filename_prefix = '.'.join(part for part in subdomain_tuple if part)
+        # subdomain_tuple = tldextract.extract(data1)
+        # output_filename_prefix = '.'.join(part for part in subdomain_tuple if part)
+        urlobj = urlparse(target)
+        output_filename_prefix = urlobj.netloc.replace(':', "_")  # www.baidu.com_8080
         # cmd = ["rad.exe", "--http-proxy", "http://127.0.0.1:7777", "--target", target]
         # 提前删除结果文件，否则rad报错，结果文件已存在
         print(f"{output_folder}/{output_filename_prefix}.{tool_name}.json")
@@ -673,7 +684,7 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
 
         # 对结果处理，不在links_set的就存储到link.csv中
         groups_tmp = urlsplit(target)
-        output_filename = groups_tmp[1].replace(':', '：')
+        output_filename = groups_tmp.netloc.replace(':', '：')
         # 新版通过json处理
         if os.path.exists(f'{output_folder}/{output_filename}/{output_filename}.json'):
             with open(f'{output_folder}/{output_filename}/{output_filename}.json', 'r', encoding="utf-8",
@@ -687,7 +698,7 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
                 #     "Title": "Document titleg",
                 #     "Source": "http://testphp.vulnweb.com:80"
                 # }...
-                if result["url"]:# 有时候未看则值为Null None 导致类型错误
+                if result["url"]:  # 有时候未看则值为Null None 导致类型错误
                     for i in result["url"]:
                         if i["Status"] != "404" and i["Url"] not in links_set:
                             # data = f'GET,{row[0]},,'
@@ -749,12 +760,14 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
             logger.error(f"{tool_name} can't run: {target} Exclude http or https")
             return
         subdomain_tuple = tldextract.extract(target)
-        output_filename = '.'.join(part for part in subdomain_tuple if part).replace('.',
+        output_filename1 = '.'.join(part for part in subdomain_tuple if part).replace('.',
                                                                                      '_')  # www_baidu_com 127_0_0_1
+        urlobj = urlparse(target)
+        output_filename2 = urlobj.netloc.replace(':', "_")  # www.baidu.com_8080
         urls_data_tmp_to_csv = []
         urls_set_tmp = set()
         # 结果文件名 xx_xx_xx 结果是指定文件夹 --include-other-source Also include other-source's urls (still crawl and request)
-        cmdstr = f'{pwd}/gospider/gospider{suffix} -s {target} --threads 10 --depth 2 --js --subs --sitemap --robots --other-source --include-subs --quiet --output {output_folder}'
+        cmdstr = f'{pwd}/gospider/gospider{suffix} -s {target} --threads 10 --depth 3 --js --subs --sitemap --robots --other-source --include-subs --quiet --output {output_folder}'
         logger.info(f"[+] command:{cmdstr}")
         # __subprocess1(cmdstr, timeout=int(all_config['tools']['sensitiveinfo'][tool_name]['runtime']),
         #               path=f"{pwd}/{tool_name}")
@@ -771,17 +784,18 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
                 return False
         # logger.info(f"[+] {tool_name} finished: {target}")
         # 对结果处理，不在links_set的就存储到link.csv中
-        if os.path.exists(f'{output_folder}/{output_filename}'):
-            with open(f'{output_folder}/{output_filename}', 'r', encoding="utf-8", errors='ignore') as f:
+        if os.path.exists(f'{output_folder}/{output_filename1}'):
+            with open(f'{output_folder}/{output_filename1}', 'r', encoding="utf-8", errors='ignore') as f:
                 for line in f.readlines():
                     line = line.strip()
-                    url = re.sub('.*? - ', '', line)
-                    if url not in links_set:
+                    url = re.sub('.* - http', 'http', line)
+                    if url not in links_set and url:# 不为空行
                         # data = f'GET,{url},,'
                         data = [tool_name, "GET", url, "", ""]
                         urls_data_tmp_to_csv.append(data)
                         urls_set_tmp.add(url)
                         links_set.add(url)  # links_set 增加新的
+            os.rename(f'{output_folder}/{output_filename1}',f'{output_folder}/{output_filename2}')
 
             # 差集发送给xray,攻击模式端口没,则只收集跳过发送给xray的攻击扫描
             to_xray(urls_set_tmp, attackflag=attackflag, fromurl=target)
@@ -790,7 +804,7 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
             # with open(f"{root}/result/{date}/{domain}.links.csv", "a", encoding="utf-8") as f1:
             to_csv(f"result/{date}/{domain}.links.csv", urls_data_tmp_to_csv, mmode='a')
         else:
-            logger.error(f'[-] gospider not found {output_folder}/{output_filename}')
+            logger.error(f'[-] gospider not found {output_folder}/{output_filename1}')
         logger.info(f"[+] {tool_name} finished: {target}")
 
     @logger.catch
@@ -810,8 +824,10 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         makedir0(output_folder)
 
         target = data1
-        subdomain_tuple = tldextract.extract(target)
-        output_filename_prefix = sudomain = '.'.join(part for part in subdomain_tuple if part)  # www_baidu_com
+        # subdomain_tuple = tldextract.extract(target)
+        # output_filename_prefix = sudomain = '.'.join(part for part in subdomain_tuple if part)  # www_baidu_com
+        urlobj = urlparse(target)
+        output_filename_prefix = urlobj.netloc.replace(':', "_")  # www.baidu.com_8080
 
         urls_data_tmp_to_csv = []
         urls_set_tmp = set()
@@ -866,8 +882,10 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
 
         # target = urlsplit(data1)[1]
         target = data1
-        subdomain_tuple = tldextract.extract(data1)
-        output_filename_prefix = subdomain = '.'.join(part for part in subdomain_tuple if part)  # www_baidu_com
+        # subdomain_tuple = tldextract.extract(data1)
+        # output_filename_prefix = subdomain = '.'.join(part for part in subdomain_tuple if part)  # www_baidu_com
+        urlobj = urlparse(target)
+        output_filename_prefix = urlobj.netloc.replace(':', "_")  # www.baidu.com_8080
 
         urls_data_tmp_to_csv = []
         urls_set_tmp = set()
@@ -962,8 +980,11 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
         makedir0(output_folder)
 
         target = data1
-        subdomain_tuple = tldextract.extract(data1)
-        output_filename_prefix = subdomain = '.'.join(part for part in subdomain_tuple if part)  # www_baidu_com
+        # subdomain_tuple = tldextract.extract(data1)
+        # output_filename_prefix = subdomain = '.'.join(part for part in subdomain_tuple if part)  # www_baidu_com
+        urlobj = urlparse(target)
+        output_filename_prefix = urlobj.netloc.replace(':', "_")  # www.baidu.com_8080
+
         urls_data_tmp = []
         urls_set_tmp = set()
         # 结果文件名 xx_xx_xx 结果是指定文件夹
@@ -1012,15 +1033,16 @@ def manager(domain=None, url=None, urlsfile=None, attackflag=False, date="2022-0
                         if progress_record(date=date, target=target, subtarget=url, module="sensitiveinfo",
                                            finished=False) is False:
                             crawlergo(url, attackflag=attackflag)
-                            rad(url, attackflag=attackflag)
-                            hakrawler(url, attackflag=attackflag)
+                            # hakrawler(url, attackflag=attackflag)
                             gospider(url, attackflag=attackflag)
+                            # rad(url, attackflag=attackflag)
                             gau(url, attackflag=attackflag)
-                            URLFinder(url, attackflag=attackflag)
+                            # URLFinder(url, attackflag=attackflag)
                             # urlcollector('未完成')
                             links_set.clear()
                             # dirsearch(url.strip())
-                            progress_record(date=date, target=target, subtarget=url, module="sensitiveinfo", finished=True)
+                            progress_record(date=date, target=target, subtarget=url, module="sensitiveinfo",
+                                            finished=True)
             else:
                 logger.error(f"[+] {input_file} size is 0, Skip sensitiveinfo module!")
         else:

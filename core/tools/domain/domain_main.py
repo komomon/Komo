@@ -34,7 +34,7 @@ def checkPanAnalysis(domain):
     logger.info('-' * 10 + f'start {sys._getframe().f_code.co_name}' + '-' * 10)
     panDomain = 'sadfsadnxzjlkcxjvlkasdfasdf.{}'.format(domain)
     try:
-        dns_A_ips = [j for i in dns.resolver.query(panDomain, 'A').response.answer for j in i.items]
+        dns_A_ips = [j for i in dns.resolver.resolve(panDomain, 'A').response.answer for j in i.items]
         print(dns_A_ips)
         logger.error('[PanAnalysis] {} -> {}'.format(panDomain, dns_A_ips))
         return True
@@ -642,7 +642,8 @@ def run(domain=None, domains=None, date=None):
 
 
 if __name__ == '__main__':
-    fire.Fire(run)
+    # fire.Fire(run)
+    checkPanAnalysis('sf.cn')
     # manager("tiqianle.com",date="2022-09-02-00-01-39")
     # manager("tiqianle.com",date="test")
     # progress_init(date="2022-09-02-00-01-39")

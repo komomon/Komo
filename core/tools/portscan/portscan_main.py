@@ -118,8 +118,8 @@ def manager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
     # 三种模式
     if domain and ip is None and ipfile is None:
         # ipfile = f'result/{date}/{domain}.subdomains.ips.txt'
-        # ipfile = f"result/{date}/{domain}.nocdn.ips.txt"
-        ipfile = f"result/{date}/{domain}.final.subdomains.txt"
+        ipfile = f"result/{date}/{domain}.nocdn.subdomains.txt"
+        # ipfile = f"result/{date}/{domain}.final.subdomains.txt"
         output_filename_prefix = domain
     elif ipfile and domain is None and ip is None:
         ipfile = ipfile

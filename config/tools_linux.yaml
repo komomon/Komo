@@ -206,7 +206,7 @@ download:
     crawlergo:
       toolname: crawlergo
       whetherdownload: True
-      link: https://github.com/Qianlitp/crawlergo/releases/download/v0.4.4/crawlergo_linux_amd64
+      link: https://github.com/Qianlitp/crawlergo/releases/download/v0.4.3/crawlergo_linux_amd64
       downloadfile: crawlergo
       source_name: crawlergo
       final_name: crawlergo

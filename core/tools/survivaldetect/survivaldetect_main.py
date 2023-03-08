@@ -147,8 +147,20 @@ class manager():
         self.output_filename_prefix = ""
         # print(domain, subdomain, subdomains)
         if self.domain and self.subdomain is None and self.subdomains is None:
+            ipport_and_domain_list = []  # 暂存ipport 和有cdn的域名合并起来来探活
             # input_file = f'result/{self.date}/{domain}.final.subdomains.txt'
-            self.input_file = f"result/{self.date}/{self.domain}.ports.txt"
+            self.input_file = f"result/temp/{self.domain}.ipport_and_domain.txt"
+            input_file1 = f"result/{self.date}/{self.domain}.ports.txt"
+            input_file2 = f"result/{self.date}/{self.domain}.cdn.subdomains.txt"
+            input_file3 = f"result/{self.date}/{self.domain}.errorcdn.subdomains.txt"
+            input_file_list = [input_file1, input_file2, input_file3]
+            for file in input_file_list:
+                with open(file, 'r', encoding="utf-8") as f:
+                    for line in f.readlines():
+                        ipport_and_domain_list.append(line)
+            with open(self.input_file, "w", encoding="utf-8") as g:
+                for i in ipport_and_domain_list:
+                    f.write(i)
             self.output_filename_prefix = domain
             if os.path.exists(self.input_file) is False or os.path.getsize(self.input_file) is False:
                 logger.info(f"[+] {self.input_file} not found, exit!")

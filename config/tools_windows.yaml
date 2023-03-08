@@ -206,7 +206,7 @@ download:
     crawlergo:
       toolname: crawlergo
       whetherdownload: True
-      link: https://github.com/Qianlitp/crawlergo/releases/download/v0.4.4/crawlergo_win_amd64.exe
+      link: https://github.com/Qianlitp/crawlergo/releases/download/v0.4.3/crawlergo_windows_amd64.exe
       downloadfile: crawlergo.exe
       source_name: crawlergo.exe
       final_name: crawlergo.exe
@@ -287,7 +287,7 @@ download:
     URLFinder:
       toolname: URLFinder
       whetherdownload: True
-      link: hhttps://github.com/pingc0y/URLFinder/releases/download/2023.2.21/URLFinder-windows-amd64.zip
+      link: https://github.com/pingc0y/URLFinder/releases/download/2023.2.21/URLFinder-windows-amd64.zip
       downloadfile: URLFinder.zip
       source_name: URLFinder-windows-amd64.exe
       final_name: URLFinder.exe
