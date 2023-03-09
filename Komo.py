@@ -134,7 +134,6 @@ class Komo(object):
         --ips       an ips file
     attack      run webattack and hostattack: crawl url to xray, pocscan, Weak password scanning
 
-
     Example:
         python3 Komo.py install
         python3 Komo.py --domain example.com all
