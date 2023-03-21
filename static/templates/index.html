@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Komo - Get Information</title>
+    <style>
+        body {
+            font-family: Arial;
+        }
+        form {
+            margin: 50px auto;
+            width: 50%;
+            padding: 20px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px #ddd;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+        }
+        input[type="submit"] {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+        }
+        input[type="submit"]:hover {
+            background-color: #3E8E41;
+        }
+        select {
+            padding: 10px;
+            width: 100%;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+        }
+        input[type="text"] {
+            padding: 10px;
+            width: calc(30% - 6.66px);  /* 计算每个 input 的宽度 */
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <form id="myForm">
+        <label for="params">Params</label>
+        <div id="paramsContainer"></div>
+        <label for="functions">Functions</label>
+        <select id="functions" name="functions">
+            <option value="" selected disabled>-- Select Function --</option>
+        </select>
+        <br><br>
+        <input type="submit" value="Submit">
+    </form>
+    <script>
+        function createInput(elemId, name) {
+            const container = document.getElementById(elemId);
+            const input = document.createElement("input");
+            input.type = "text";
+            input.name = name;
+            input.placeholder = name;
+            container.appendChild(input);
+        }
+
+        function onSubmit(e) {
+            e.preventDefault();
+            const paramsContainer = document.getElementById("paramsContainer");
+            const inputs = paramsContainer.getElementsByTagName("input");
+            const params = Array.from(inputs)
+                .filter(input => input.value.trim())
+                .map(input => `${input.name}=${input.value.trim()}`)
+                .join("&");
+            const functionsSelect = document.getElementById("functions");
+            const selectedFunction = functionsSelect.value;
+
+            const xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+              if (this.readyState == 4 && this.status == 200) {
+                const responseObj = JSON.parse(this.responseText);
+                console.log(responseObj)
+                alert(`status: ${responseObj.status}`);
+              }
+            };
+            xhttp.open("POST", "/start", true);
+            xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            xhttp.send(`${params}&functions=${selectedFunction}`);
+        }
+
+        const xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+          if (this.readyState == 4 && this.status == 200) {
+            const data = JSON.parse(this.responseText);
+            const params = data.params;
+            const functions = data.functions;
+            const paramsContainer = document.getElementById("paramsContainer");
+            const functionsSelect = document.getElementById("functions");
+            params.forEach(param => {
+                createInput("paramsContainer", param);
+            });
+            functions.forEach(func => {
+                const option = document.createElement("option");
+                option.value = func;
+                option.text = func;
+                functionsSelect.add(option);
+            });
+          }
+        };
+        xhttp.open("GET", "/getinfo", true);
+        xhttp.send();
+
+        const form = document.getElementById("myForm");
+        form.addEventListener("submit", onSubmit);
+    </script>
+</body>
+</html>
