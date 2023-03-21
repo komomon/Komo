@@ -5,7 +5,8 @@ import os
 import random
 import shutil
 import string
-
+import threading
+import queue
 import fire
 import datetime
 from loguru import logger
@@ -20,6 +21,9 @@ from core.download import download_tools
 
 # from common.getconfig import *
 # import common
+
+# from test3 import webhook,Req_Data
+
 
 
 yellow = '\033[01;33m'
@@ -134,6 +138,7 @@ class Komo(object):
         --ips       an ips file
     attack      run webattack and hostattack: crawl url to xray, pocscan, Weak password scanning
 
+
     Example:
         python3 Komo.py install
         python3 Komo.py --domain example.com all
@@ -178,20 +183,48 @@ class Komo(object):
     '''
 
     def __init__(self, domain=None, domains=None, subdomain=None, subdomains=None, url=None, urls=None, ip=None,
-                 ips=None, attackflag=False, date=None, proxy=None):
-
+                 ips=None, attackflag=False, date=None, proxy=None,json_data={}):
+        # 增加通过json方式传递，
         date1 = str(datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S"))
-        self.domain = domain
-        self.domains = domains  # domainsfile
-        self.subdomain = subdomain
-        self.subdomains = subdomains
-        self.url = url
-        self.urlsfile = urls
-        self.ip = ip
-        self.ips = ips
-        self.attackflag = attackflag
-        self.date = date if date else date1
+        json_keys = json_data.keys()
+        self.domain = json_data['domain'] if 'domain' in json_keys else domain
+        self.domains = json_data['domains'] if 'domains' in json_keys else domains  # domainsfile
+        self.subdomain = json_data['subdomain'] if 'subdomain' in json_keys else subdomain
+        self.subdomains = json_data['subdomains'] if 'subdomains' in json_keys else subdomains
+        self.url = json_data['url'] if 'url' in json_keys else url
+        self.urlsfile = json_data['urlsfile'] if 'urlsfile' in json_keys else urls
+        self.ip = json_data['ip'] if 'ip' in json_keys else ip
+        self.ips = json_data['ips'] if 'ips' in json_keys else ips
+        self.attackflag = json_data['attackflag'] if 'attackflag' in json_keys else attackflag
+        ddate = json_data['date'] if 'date' in json_keys else date
+        self.date = ddate if ddate else date1
         self.proxy = proxy
+        # print(self.date)
+        # if json_data:
+        #     json_keys = json_data.keys()
+        #     self.domain = json_data['domain'] if 'domain' in json_keys else None
+        #     self.domains = json_data['domains'] if 'domains' in json_keys else None   # domainsfile
+        #     self.subdomain = json_data['subdomain'] if 'subdomain' in json_keys else None
+        #     self.subdomains = json_data['subdomains'] if 'subdomains' in json_keys else None
+        #     self.url = json_data['url'] if 'url' in json_keys else None
+        #     self.urlsfile = json_data['urlsfile'] if 'urlsfile' in json_keys else None
+        #     self.ip = json_data['ip'] if 'ip' in json_keys else None
+        #     self.ips = json_data['ips'] if 'ips' in json_keys else None
+        #     self.attackflag = json_data['attackflag'] if 'attackflag' in json_keys else None
+        #     self.date = json_data['date'] if 'date' in json_keys else date1
+        #     self.proxy = proxy
+        # else:
+        #     self.domain = domain
+        #     self.domains = domains  # domainsfile
+        #     self.subdomain = subdomain
+        #     self.subdomains = subdomains
+        #     self.url = url
+        #     self.urlsfile = urls
+        #     self.ip = ip
+        #     self.ips = ips
+        #     self.attackflag = attackflag
+        #     self.date = date if date else date1
+        #     self.proxy = proxy
         self.domains_list = []
         # self.command = "python3 Komo.py"
         self.params = {
@@ -209,51 +242,58 @@ class Komo(object):
         # for i in [self.domain,self.domains,self.subdomain,self.subdomains,self.url,self.urlsfile,self.ip,self.ips,self.date]:
         #     if i is not None:
         #         self.command += "--{}".format(i)
-        create_logfile()
-        print(banner)
-        self.randomstr = hashlib.md5(bytes(self.date, encoding='utf-8')).hexdigest()
-        # 创建结果文件夹
-        self.result_folder = f"result/{self.date}"
-        if os.path.exists(self.result_folder) is False:
-            os.makedirs(self.result_folder)
+        # self.q = queue.Queue()  # 创建一个空队列
+        # 用于下载工具的时候能打印banner和创建log文件
+        if self.proxy:
+            create_logfile()
+            print(banner)
+        if any((self.domain, self.domains, self.subdomain, self.subdomains, self.url, self.urlsfile, self.ip, self.ips)):
+            print(banner)
+            self.randomstr = hashlib.md5(bytes(self.date, encoding='utf-8')).hexdigest()
+            # 创建结果文件夹
+            self.result_folder = f"result/{self.date}"
+            if os.path.exists(self.result_folder) is False:
+                os.makedirs(self.result_folder)
 
-        if self.domain and self.domains is None:
-            self.domains_list.append(self.domain)
-        elif self.domains and self.domain is None:
-            with open(self.domains, 'r', encoding='utf-8') as f:
-                for line in f.readlines():
-                    line = line.strip()
-                    self.domains_list.append(line)
-            self.domains_list = list(set(self.domains_list))
-        elif self.subdomain and self.subdomains is None:
-            with open(f"result/{self.date}/{self.randomstr}.final.subdomains.txt", "w", encoding="utf-8") as f:
-                f.write(str(self.subdomain))
-        elif self.subdomains and self.subdomain is None:
-            if os.path.exists(self.subdomains):
-                shutil.copy(self.subdomains, f"result/{self.date}/{self.randomstr}.final.subdomains.txt")
-            else:
-                logger.error(f"[-] {self.subdomains} Not found and exit!")
-                exit(1)
+            if self.domain and self.domains is None:
+                self.domains_list.append(self.domain)
+            elif self.domains and self.domain is None:
+                with open(self.domains, 'r', encoding='utf-8') as f:
+                    for line in f.readlines():
+                        line = line.strip()
+                        self.domains_list.append(line)
+                self.domains_list = list(set(self.domains_list))
+            elif self.subdomain and self.subdomains is None:
+                with open(f"result/{self.date}/{self.randomstr}.final.subdomains.txt", "w", encoding="utf-8") as f:
+                    f.write(str(self.subdomain))
+            elif self.subdomains and self.subdomain is None:
+                if os.path.exists(self.subdomains):
+                    shutil.copy(self.subdomains, f"result/{self.date}/{self.randomstr}.final.subdomains.txt")
+                else:
+                    logger.error(f"[-] {self.subdomains} Not found and exit!")
+                    exit(1)
 
-        # 变成绝对路径
-        if self.domains is not None:
-            if os.path.isabs(self.domains) is False:
-                newpath = os.path.realpath(os.getcwd() + '/' + self.domains)
-                if os.path.exists(newpath):
-                    self.domains = newpath
-        if self.urlsfile is not None:
-            if os.path.isabs(self.urlsfile) is False:
-                newpath = os.path.realpath(os.getcwd() + '/' + self.urlsfile)
-                if os.path.exists(newpath):
-                    self.urlsfile = newpath
-        if self.ips is not None:
-            if os.path.isabs(self.ips) is False:
-                newpath = os.path.realpath(os.getcwd() + '/' + self.ips)
-                if os.path.exists(newpath):
-                    self.ips = newpath
+            # 变成绝对路径
+            if self.domains is not None:
+                if os.path.isabs(self.domains) is False:
+                    newpath = os.path.realpath(os.getcwd() + '/' + self.domains)
+                    if os.path.exists(newpath):
+                        self.domains = newpath
+            if self.urlsfile is not None:
+                if os.path.isabs(self.urlsfile) is False:
+                    newpath = os.path.realpath(os.getcwd() + '/' + self.urlsfile)
+                    if os.path.exists(newpath):
+                        self.urlsfile = newpath
+            if self.ips is not None:
+                if os.path.isabs(self.ips) is False:
+                    newpath = os.path.realpath(os.getcwd() + '/' + self.ips)
+                    if os.path.exists(newpath):
+                        self.ips = newpath
 
-        progress_record(self.date, "date", self.date)
-        progress_record(self.date, "params", self.params)
+            progress_record(self.date, "date", self.date)
+            progress_record(self.date, "params", self.params)
+        # else:
+        #     logger.error(f'[-] Please check params')
 
     def install(self):
         # download tools
@@ -263,6 +303,22 @@ class Komo(object):
     # @staticmethod
     # def end():
     #     logger.info(f"[+] All scan finished,the result folder: result/{date}\n")
+
+    # def webhook(self):
+    #     web = threading.Thread(target=webhook,args=('127.0.0.1', 8001,))
+    #     # web.setDaemon(True)
+    #     web.setDaemon(True)  # 将子线程设置为守护线程
+    #     web.start()
+    #     req_data = Req_Data         # {'ips': 'aaaa', 'randomstr': 'aaa', 'functions': 'attack'}
+    #     logger.info(f"[+] req_data:{req_data}")
+    #     # self.__init__(json_data=req_data)
+    #     self.test()
+    #
+    def test(self):
+        import time
+        time.sleep(10)
+        os.system('ping 127.0.0.1 -n 10')
+
 
     # 只进行子域扫描
     def sub(self):  # subdomain
@@ -486,6 +542,53 @@ class Komo(object):
                                        date=self.date)
         else:
             logger.error("[-] Please check --subdomain or --subdomains")
+
+    # 扫描+攻击 提供子域名列表,不扫描子域
+    def all4(self):
+        '''
+        python main.py --subdomain aaa.tiqianle.com all2
+        python main.py --subdomains tiqianle.com.txt all2
+        :return:
+        '''
+        self.attackflag = True
+        if self.subdomain or self.subdomains:
+            # for domain in self.domains_list:
+            # domain_main.manager(domain=domain, date=self.date)
+            # emailcollect_main.manager(domain=ddomain, date=self.date).run()
+            portscan_main.manager(domain=self.randomstr, ip=None, ipfile=None, date=self.date)
+            survivaldetect_main.manager(domain=self.randomstr, subdomain=None, subdomains=None,
+                                        date=self.date).run()
+            finger_main.manager(domain=self.randomstr, urlsfile=None, date=self.date)
+            sensitiveinfo_main.manager(domain=self.randomstr, url=None, urlsfile=None, attackflag=self.attackflag,
+                                       date=self.date)
+            vulscan_main.webmanager(domain=self.randomstr, url=None, urlsfile=None, date=self.date)
+            # vulscan_main.hostmanager(domain=self.randomstr, ip=None, ipfile=None, date=self.date)
+
+        else:
+            logger.error("[-] Please check --subdomain or --subdomains")
+
+    def all5(self):
+        '''
+        python main.py --domain tiqianle.com all
+        python main.py --domains tiqianle.com all
+        :return:
+        '''
+        self.attackflag = True
+        if self.domains_list:
+            for ddomain in self.domains_list:
+                domain_main.manager(domain=ddomain, date=self.date)
+                emailcollect_main.manager(domain=ddomain, date=self.date).run()
+                portscan_main.manager(domain=ddomain, ip=None, ipfile=None, date=self.date)
+                survivaldetect_main.manager(domain=ddomain, subdomain=None, subdomains=None,
+                                            date=self.date).run()
+                finger_main.manager(domain=ddomain, urlsfile=None, date=self.date)
+                sensitiveinfo_main.manager(domain=ddomain, url=None, urlsfile=None, attackflag=self.attackflag,
+                                           date=self.date)
+                vulscan_main.webmanager(domain=ddomain, url=None, urlsfile=None, date=self.date)
+                # vulscan_main.hostmanager(domain=ddomain, ip=None, ipfile=None, date=self.date)
+
+        else:
+            logger.error("[-] Please check --domain or --domains")
 
 
 if __name__ == '__main__':
