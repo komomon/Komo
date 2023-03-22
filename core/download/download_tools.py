@@ -114,24 +114,31 @@ class Download:
         if os.path.exists(target_filename) is False:
             try:
                 headers = {
-                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36"}
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36"
+                }
                 proxies = {
                     'http': self.proxy,
                     'https': self.proxy
                 }
-                try:
-                    status_code = requests.get(url, headers=headers).status_code
-                    if status_code == 200:
-                        url = f"https://ghproxy.com/{url}"
-                except:
-                    pass
-                response = requests.get(url, headers=headers, proxies=proxies, stream=True)
-                # response = requests.get(url, headers=headers, stream=True)
-                handle = open(target_filename, "wb")
-                for chunk in response.iter_content(chunk_size=512):
-                    if chunk:  # filter out keep-alive new chunks
-                        handle.write(chunk)
-                handle.close()
+                # try:
+                #     status_code = requests.get(url, headers=headers).status_code
+                #     if status_code == 200:
+                #         url = f"https://ghproxy.com/{url}"
+                # except:
+                #     pass
+                # print("url:",url)
+                if self.proxy:# timeout=(3, 5) ,verify=False
+                    response = requests.get(url, headers=headers, proxies=proxies, stream=True)
+                else:
+                    response = requests.get(url, headers=headers, stream=True)
+                # print(url)
+                # print(response.headers.get('content-length'))
+                with open(target_filename, 'wb') as handle:
+                # handle = open(target_filename, "wb")
+                    for chunk in response.iter_content(chunk_size=1024):
+                        if chunk:  # filter out keep-alive new chunks
+                            handle.write(chunk)
+                # handle.close()
                 logger.info(f"[+] Download {dst_file} success.")
                 # self.unzipfile(target_filename,dst_path)
                 return target_filename
@@ -219,9 +226,10 @@ class Download:
                     logger.info(f"[+] {self.rootpath}/core/tools/vulscan/vulmap/vulmap.py initialization is complete")
                 else:
                     logger.error(f"[-] config/supplementary_files/vulmap/licenses.txt not exist,initialization is failed")
-        if os.path.exists(f"core/tools/vulscan/goon/goon{self.suffix}"):
-            os.system(os.path.realpath(f"{self.rootpath}/core/tools/vulscan/goon/goon{self.suffix}"))
-            logger.info(f"[+] {self.rootpath}/core/tools/vulscan/goon/goon{self.suffix} initialization is complete")
+        if os.path.exists(f"core/tools/vulscan/goon/conf.yml"):
+            if os.path.exists(f"core/tools/vulscan/goon/goon{self.suffix}"):
+                os.system(os.path.realpath(f"{self.rootpath}/core/tools/vulscan/goon/goon{self.suffix}"))
+                logger.info(f"[+] {self.rootpath}/core/tools/vulscan/goon/goon{self.suffix} initialization is complete")
         if os.path.exists(f"core/tools/vulscan/afrog/afrog{self.suffix}"):
             os.system(f"{self.rootpath}/core/tools/vulscan/afrog/afrog{self.suffix}")
             logger.info(f"[+] {self.rootpath}/core/tools/vulscan/afrog/afrog{self.suffix} initialization is complete")
@@ -254,8 +262,27 @@ class Download:
         # 部分工具初始化
         self.tools_init()
 
-    # pass，找的c+c终止的方法，不太好用https://www.jianshu.com/p/45e526c792c3
+    # 单线程版本
     def run1(self):
+        flag = 0
+        for toolinfo in self.tools_dict.values():
+            self.handle(toolinfo=toolinfo)
+        # time.sleep(5)
+        # 检查是否所有tools安装好了，否则退出
+        for k, v in self.tools_installed.items():
+            if v is False:
+                logger.error(f"[-] {k} install failed")
+                flag += 1
+        if flag != 0:
+            logger.error(f"[-] Please install tools that are not installed before using Komo")
+            exit()
+        else:
+            logger.info(f"\n[+] All tools are installed\n")
+        # 部分工具初始化
+        self.tools_init()
+
+    # pass，找的c+c终止的方法，不太好用https://www.jianshu.com/p/45e526c792c3
+    def run2(self):
         flag = 0
         all_task = [self.executor.submit(self.handle, tinfo) for tinfo in self.tools_dict.values()]
         try:
@@ -280,7 +307,7 @@ class Download:
         else:
             logger.info(f"\n[+] All tools are installed\n")
 
-    def run2(self):
+    def run3(self):
         flag = 0
         for tinfo in self.tools_dict.values():
             self.handle(tinfo)

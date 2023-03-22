@@ -321,7 +321,7 @@ download:
     nuclei:
       toolname: nuclei
       whetherdownload: True
-      link: https://github.com/projectdiscovery/nuclei/releases/download/v2.8.3/nuclei_2.8.3_linux_amd64.zip
+      link: https://github.com/projectdiscovery/nuclei/releases/download/v2.9.0/nuclei_2.9.0_linux_amd64.zip
       downloadfile: nuclei.zip
       source_name: nuclei
       final_name: nuclei
