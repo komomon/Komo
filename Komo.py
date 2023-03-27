@@ -262,7 +262,7 @@ class Komo(object):
                     for line in f.readlines():
                         line = line.strip()
                         self.domains_list.append(line)
-                self.domains_list = list(set(self.domains_list))
+                self.domains_list = sorted(list(set(self.domains_list)))
             elif self.subdomain and self.subdomains is None:
                 with open(f"result/{self.date}/{self.randomstr}.final.subdomains.txt", "w", encoding="utf-8") as f:
                     f.write(str(self.subdomain))
