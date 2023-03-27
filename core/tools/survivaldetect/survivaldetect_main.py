@@ -155,11 +155,12 @@ class manager():
             input_file3 = f"result/{self.date}/{self.domain}.errorcdn.subdomains.txt"
             input_file_list = [input_file1, input_file2, input_file3]
             for file in input_file_list:
-                with open(file, 'r', encoding="utf-8") as f:
-                    for line in f.readlines():
-                        line = line.strip()
-                        if line:
-                            ipport_and_domain_list.append(line)
+                if os.path.exists(file):
+                    with open(file, 'r', encoding="utf-8") as f:
+                        for line in f.readlines():
+                            line = line.strip()
+                            if line:
+                                ipport_and_domain_list.append(line)
             with open(self.input_file, "w", encoding="utf-8") as g:
                 for i in ipport_and_domain_list:
                     g.write(i+"\n")

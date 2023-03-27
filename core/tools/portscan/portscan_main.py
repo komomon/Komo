@@ -167,14 +167,15 @@ def manager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
         os.system(cmdstr)
         logger.info(f'[+] {sys._getframe().f_code.co_name} finished,outputfile:{output_filename}.csv')
         if os.path.exists(f"{output_filename}.csv"):
-            with open(f"{output_filename}.csv", "r") as f1:
-                reader = csv.reader(f1)
-                head = next(reader)
-                with open(f"result/{date}/{output_filename_prefix}.ports.txt", "w") as f2:
-                    for row in reader:
-                        # baidu.com:8080  192.168.1.1:53
-                        lline = f"{row[0]}:{row[2]}" if row[0] else f"{row[1]}:{row[2]}"
-                        f2.write(lline + '\n')
+            if os.path.getsize(f"{output_filename}.csv"):
+                with open(f"{output_filename}.csv", "r") as f1:
+                    reader = csv.reader(f1)
+                    head = next(reader)
+                    with open(f"result/{date}/{output_filename_prefix}.ports.txt", "w") as f2:
+                        for row in reader:
+                            # baidu.com:8080  192.168.1.1:53
+                            lline = f"{row[0]}:{row[2]}" if row[0] else f"{row[1]}:{row[2]}"
+                            f2.write(lline + '\n')
             logger.info(f'[+] [+] IP and port outputfile: result/{date}/{output_filename_prefix}.ports.txt')
         progress_file_record(date=date, filename="port_file",
                                  value=f"result/{date}/{output_filename_prefix}.ports.txt")
