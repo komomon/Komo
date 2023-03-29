@@ -114,12 +114,19 @@ def manager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
     portscan_log_folder = f"result/{date}/portscan_log"
     if os.path.exists(portscan_log_folder) is False:
         os.makedirs(portscan_log_folder)
-
+        logger.info(f"[+] Create portscan_log_folder success:{portscan_log_folder}")
     # 三种模式
     if domain and ip is None and ipfile is None:
         # ipfile = f'result/{date}/{domain}.subdomains.ips.txt'
         ipfile = f"result/{date}/{domain}.nocdn.subdomains.txt"
         # ipfile = f"result/{date}/{domain}.final.subdomains.txt"
+        for i in [f"{root}/result/{date}/{domain}.nocdn.subdomains.txt",f"{root}/result/{date}/{domain}.final.subdomains.txt"]:
+            # print(i)
+            if os.path.exists(i):
+                ipfile = i
+                # print(f"++++:{ipfile}")
+                break
+        # print("ipfile:",ipfile)
         output_filename_prefix = domain
     elif ipfile and domain is None and ip is None:
         ipfile = ipfile

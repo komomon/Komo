@@ -247,10 +247,14 @@ class Komo(object):
         if self.proxy:
             create_logfile()
             print(banner)
-        if any((self.domain, self.domains, self.subdomain, self.subdomains, self.url, self.urlsfile, self.ip, self.ips)):
+        if any((self.domain, self.domains, self.subdomain, self.subdomains, self.url, self.urlsfile, self.ip, self.ips)): #or json_data["functions"]
             print(banner)
+            create_logfile()
+            # print(self.domain, self.domains, self.subdomain, self.subdomains, self.url, self.urlsfile, self.ip, self.ips)
             self.randomstr = hashlib.md5(bytes(self.date, encoding='utf-8')).hexdigest()
             # 创建结果文件夹
+            if os.path.exists(f"result/temp/") is False:
+                os.makedirs(f"result/temp/")
             self.result_folder = f"result/{self.date}"
             if os.path.exists(self.result_folder) is False:
                 os.makedirs(self.result_folder)
@@ -536,10 +540,10 @@ class Komo(object):
             survivaldetect_main.manager(domain=self.randomstr, subdomain=None, subdomains=None,
                                         date=self.date).run()
             finger_main.manager(domain=self.randomstr, urlsfile=None, date=self.date)
-            # vulscan_main.webmanager(domain=self.randomstr, url=None, urlsfile=None, date=self.date)
-            # vulscan_main.hostmanager(domain=self.randomstr, ip=None, ipfile=None, date=self.date)
             sensitiveinfo_main.manager(domain=self.randomstr, url=None, urlsfile=None, attackflag=self.attackflag,
                                        date=self.date)
+            vulscan_main.webmanager(domain=self.randomstr, url=None, urlsfile=None, date=self.date)
+            # vulscan_main.hostmanager(domain=self.randomstr, ip=None, ipfile=None, date=self.date)
         else:
             logger.error("[-] Please check --subdomain or --subdomains")
 
@@ -555,7 +559,7 @@ class Komo(object):
             # for domain in self.domains_list:
             # domain_main.manager(domain=domain, date=self.date)
             # emailcollect_main.manager(domain=ddomain, date=self.date).run()
-            portscan_main.manager(domain=self.randomstr, ip=None, ipfile=None, date=self.date)
+            # portscan_main.manager(domain=self.randomstr, ip=None, ipfile=None, date=self.date)
             survivaldetect_main.manager(domain=self.randomstr, subdomain=None, subdomains=None,
                                         date=self.date).run()
             finger_main.manager(domain=self.randomstr, urlsfile=None, date=self.date)
@@ -578,9 +582,9 @@ class Komo(object):
             for ddomain in self.domains_list:
                 domain_main.manager(domain=ddomain, date=self.date)
                 emailcollect_main.manager(domain=ddomain, date=self.date).run()
-                portscan_main.manager(domain=ddomain, ip=None, ipfile=None, date=self.date)
                 survivaldetect_main.manager(domain=ddomain, subdomain=None, subdomains=None,
                                             date=self.date).run()
+                portscan_main.manager(domain=ddomain, ip=None, ipfile=None, date=self.date)
                 finger_main.manager(domain=ddomain, urlsfile=None, date=self.date)
                 sensitiveinfo_main.manager(domain=ddomain, url=None, urlsfile=None, attackflag=self.attackflag,
                                            date=self.date)

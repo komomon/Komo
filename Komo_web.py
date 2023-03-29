@@ -59,10 +59,15 @@ def request_parse(req_data):
     data = {}
     try:
         if req_data.method == 'POST':
+            logger.info(f"\n--------------请求数据request--------------\n"
+                        f"req_url:{req_data.url}\n"
+                        f"req_headers:{req_data.headers}\n"
+                        f"req_body:{req_data.data}\n"
+                        f"-----------------------------------------------")
             # data = req_data.json
             if req_data.headers['Content-Type'] == 'application/json':
                 # 请求参数是 JSON 数据
-                data = json.loads(req_data.json)
+                data = req_data.json
                 # TODO: 处理 JSON 数据
             elif req_data.headers['Content-Type'] in (
                     'application/x-www-form-urlencoded', 'application/x-www-form-urlencoded;charset=UTF-8',
@@ -200,28 +205,35 @@ def start():
     # return jsonify(data)
     # req_data_keys = Req_Data.keys()
     # 如果有则先读
-    if req_data['functions']:
-        t = threading.Thread(target=handle_task, args=(req_data, Komo_Params, Komo_Functions))  #
-        t.start()
-        # t = threading.Thread(target=execute_task, args=(params,))
-        # fire.Fire(getattr(test4, "AA"))
-        return jsonify({"status": "success"})
+    if type(req_data) == dict:
+        if req_data['functions']:
+            t = threading.Thread(target=handle_task, args=(req_data, Komo_Params, Komo_Functions))  #
+            t.start()
+            # t = threading.Thread(target=execute_task, args=(params,))
+            # fire.Fire(getattr(test4, "AA"))
+            return jsonify({"status": "success"})
+        else:
+            # Req_Data = {}
+            return jsonify({"status": "failed,没有指定functions!"})
     else:
-        # Req_Data = {}
-        return jsonify({"status": "failed,没有指定functions!"})
+        logger.error(f"type req_data is not a dict!")
+        return jsonify({"status": "failed,req_data is not a dict!"})
 
 # 测试用
-# @app.route('/test3')
-# def test3():
-#     # return 'Hello World!'
-#     # data = get_user_defined_attrs_and_methods(Komo.Komo())
-#     #
-#     # data = {
-#     #     "a": ['a', 'b'],
-#     #     "b": ['aaa', 'bbb']
-#     # }
-#     # return render_template('test2.html', data=data)
-#     return render_template('test3.html')
+@app.route('/test',methods=['GET', 'POST'])
+def test():
+    # return 'Hello World!'
+    # data = get_user_defined_attrs_and_methods(Komo.Komo())
+    #
+    # data = {
+    #     "a": ['a', 'b'],
+    #     "b": ['aaa', 'bbb']
+    # }
+    # return render_template('test2.html', data=data)
+    # return render_template('test3.html')
+    req_data = request_parse(request)
+    logger.info(f"[+] request data:{req_data}")  # {'subdomain': 'aaa', 'urlsfile': 'aaa', 'functions': 'test'}
+    return jsonify({"status": "success"})
 
 
 # @app.route('/<function_name>', methods=['GET', 'POST'])

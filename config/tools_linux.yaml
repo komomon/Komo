@@ -183,7 +183,7 @@ download:
     naabu:
       toolname: naabu
       whetherdownload: True
-      link: https://github.com/projectdiscovery/naabu/releases/download/v2.1.2/naabu_2.1.2_linux_amd64.zip
+      link: https://github.com/projectdiscovery/naabu/releases/download/v2.1.1/naabu_2.1.1_linux_amd64.zip
       downloadfile: naabu.zip
       source_name: naabu
       final_name: naabu

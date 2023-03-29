@@ -10,6 +10,8 @@ import zipfile
 import py7zr
 from pathlib import Path
 import platform
+
+import tldextract
 import yaml
 import requests
 from loguru import logger
@@ -120,12 +122,16 @@ class Download:
                     'http': self.proxy,
                     'https': self.proxy
                 }
-                # try:
-                #     status_code = requests.get(url, headers=headers).status_code
-                #     if status_code == 200:
-                #         url = f"https://ghproxy.com/{url}"
-                # except:
-                #     pass
+                try:
+                    domain_suffix = tldextract.extract(url)  # 通过域名后缀是否为空判断给的domain是domain 还是randomstr
+                    # ExtractResult(subdomain='', domain='sdadadadawdawd', suffix='')
+                    # print(domain_suffix)
+                    if f"{domain_suffix.domain}.{domain_suffix.suffix}" in ["github.com"]:
+                        status_code = requests.get("https://ghproxy.com/", headers=headers).status_code
+                        if status_code == 200:
+                            url = f"https://ghproxy.com/{url}"
+                except Exception as e:
+                    logger.exception(e)
                 # print("url:",url)
                 if self.proxy:# timeout=(3, 5) ,verify=False
                     response = requests.get(url, headers=headers, proxies=proxies, stream=True)

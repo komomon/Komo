@@ -143,7 +143,7 @@ def subprocess111(cmd, timeout=None, path=None):
 
 
 @logger.catch
-class manager():
+class manager:
     '''
     :param domain:
     :param date:
