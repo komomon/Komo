@@ -6,7 +6,7 @@ import subprocess
 import sys
 import tempfile
 import traceback
-from tkinter import N
+
 
 import fire
 from termcolor import cprint
