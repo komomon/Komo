@@ -437,7 +437,7 @@ def manager(domain=None, date="2022-09-02-00-01-39"):
         # print(f"[+] command:{cmd}")
         logger.info(f"[+] command:{cmdstr}")
         # os.system(cmdstr)
-        __subprocess1(cmdstr, timeout=None, path=f"{pwd}/{sys._getframe().f_code.co_name}")
+        # __subprocess1(cmdstr, timeout=None, path=f"{pwd}/{sys._getframe().f_code.co_name}")
         __subprocess1(cmdstr, timeout=None, path=f"{pwd}/Oneforall")
         # cmd = cmdstr.split(' ')
         # subprocess.Popen(cmd=cmd)
