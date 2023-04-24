@@ -9,7 +9,6 @@ import requests
 import platform
 import shlex
 import yaml
-from fake_useragent import UserAgent
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)

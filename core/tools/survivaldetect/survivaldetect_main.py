@@ -104,8 +104,10 @@ def getips(ipstr_list):
     for i in ipstr_list:
         if i:
             try:
-                ip = re.findall(regx, i)[0]
-                ips_set.add(ip)
+                result = re.findall(regx, i)
+                if result:
+                    ip = result[0]
+                    ips_set.add(ip)
             except Exception as e:
                 logger.error(f'wentidata:{i}')
                 logger.exception(str(e))
@@ -169,6 +171,7 @@ class manager:
                     for i in ipport_and_domain_list:
                         g.write(i+"\n")
             # if os.path.getsize(self.input_file) == 0:
+            # 如何ipport_and_domain_list为空 可能是在survivaldetect之前没有使用portscan
             if ipport_and_domain_list == []:
                 self.input_file = f'result/{self.date}/{domain}.final.subdomains.txt'
 

@@ -10,7 +10,6 @@ import requests
 import platform
 import shlex
 import yaml
-from fake_useragent import UserAgent
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
@@ -294,7 +293,7 @@ def kill_process(processname):
     elif 'linux' == sys.platform:
         cmd = f"ps aux | grep '{processname}'|grep -v 'color' | awk '{{print $2}}'"
         process = os.popen(cmd).read()
-        print(process)
+        # print(process)
         if process:
             os.popen('nohup kill -9 {} 2>&1 &'.format(process.replace('\n', ' ')))
             logger.info(f"[+] kill {processname}, {process}")

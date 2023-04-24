@@ -77,7 +77,7 @@ download:
     ip2location:
       toolname: ip2location
       whetherdownload: True
-      link: https://github.com/shmilylty/OneForAll/blob/master/data/ip2location.zip?raw=true
+      link: https://raw.githubusercontent.com/shmilylty/OneForAll/master/data/ip2location.zip
       downloadfile: ip2location.zip
       source_name: ip2location.db
       final_name: ip2location.db
@@ -242,7 +242,7 @@ download:
       # 修改了加了-f参数
       toolname: hakrawler
       whetherdownload: True
-      link: https://github.com/komomon/hakrawler_plus/blob/main/hakrawler.exe?raw=true
+      link: https://raw.githubusercontent.com/komomon/hakrawler_plus/main/hakrawler.exe
       downloadfile: hakrawler.exe
       source_name: hakrawler.exe
       final_name: hakrawler.exe

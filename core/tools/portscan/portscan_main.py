@@ -120,6 +120,7 @@ def manager(domain=None, ip=None, ipfile=None, date="2022-09-02-00-01-39"):
         # ipfile = f'result/{date}/{domain}.subdomains.ips.txt'
         ipfile = f"result/{date}/{domain}.nocdn.subdomains.txt"
         # ipfile = f"result/{date}/{domain}.final.subdomains.txt"
+        # 如果没有nocdn.subdomains.txt 说明没有使用domain模块
         for i in [f"{root}/result/{date}/{domain}.nocdn.subdomains.txt",f"{root}/result/{date}/{domain}.final.subdomains.txt"]:
             # print(i)
             if os.path.exists(i):
