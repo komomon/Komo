@@ -532,7 +532,7 @@ def webmanager(domain=None, url=None, urlsfile=None, date="2022-09-02-00-01-39")
                     # {domain}.subdomain_with_http.txt
                     nuclei(urlsfile=input_file)
                     afrog(urlsfile=input_file)
-                    vulmap(urlsfile=input_file)
+                    # vulmap(urlsfile=input_file)
                     # to_xray()
                     # 扫描敏感目录和弱口令爆破
                     vscan(urlsfile=input_file)

@@ -481,7 +481,7 @@ target 为domain或date或randomstr
 > {target}.many.tools.subdomains.txt 除oneforall之外的其他子域名收集工具收集到的域名
 >
 > {target}.ports.txt 端口扫描结果,端口指纹的请到result/{date}/portscan_log/{target}.TxPortMap.txt查看
-    
+
 > {domain}.nocdn.subdomains.txt 无cdn子域名文件
 >
 > {domain}.nocdn.ips.txt 无cdn子域名对应ip文件
@@ -524,7 +524,7 @@ target 为domain或date或randomstr
 
 ![图片](images/640-16476797749984.jpeg)
 
-
+![Z2Oqq二维码4-16814031792311](images/Z2Oqq二维码4-16814031792311.jpg)
 
 欢迎Star :star: :star:
 
