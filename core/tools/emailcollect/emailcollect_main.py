@@ -141,7 +141,7 @@ def subprocess111(cmd, timeout=None, path=None):
         logger.info(f'{f_name} finished.')
 
 
-@logger.catch
+#@logger.catch
 class manager:
     '''
     :param domain:
