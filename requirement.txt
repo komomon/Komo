@@ -30,7 +30,7 @@ PyYAML==6.0
 simplejson==3.17.6
 fake-useragent
 lxml
-tldextract
+tldextract==3.4.0
 brotlicffi
 
 
