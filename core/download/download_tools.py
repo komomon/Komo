@@ -127,9 +127,9 @@ class Download:
                     # ExtractResult(subdomain='', domain='sdadadadawdawd', suffix='')
                     # print(domain_suffix)
                     if f"{domain_suffix.domain}.{domain_suffix.suffix}" in ["github.com"]:
-                        status_code = requests.get("https://ghproxy.com/", headers=headers).status_code
+                        status_code = requests.get("https://mirror.ghproxy.com/", headers=headers).status_code
                         if status_code == 200:
-                            url = f"https://ghproxy.com/{url}"
+                            url = f"https://mirror.ghproxy.com/{url}"
                 except Exception as e:
                     logger.exception(e)
                 # print("url:",url)
